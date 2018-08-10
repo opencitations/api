@@ -1,0 +1,61 @@
+#url /api/v1
+#type api
+#base https://w3id.org/oc/corpus
+#title REST API for the OpenCitations Corpus
+#description TODO
+#version 1.0.0
+#license [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/legalcode)
+#contact_email [OpenCitations](contact@opencitations.net)
+#endpoint https://w3id.org/oc/sparql
+#addon occapi
+
+#url /coauthorship/{dois}
+#type operation
+#dois str(\"?10\..+[^/\"]((///|\" \")10\..+[^/])*\"?)
+#preprocess lower(dois) --> split_dois(dois)
+#postprocess remove_duplicates()
+#method get
+#description This operation allows one to get co-authorship of all the authors of the papers specified in input by means of their DOIs. In case of multiple DOIs, these should be separated with a triple bar ("///").
+#call /coauthorship/10.1108/jd-12-2013-0166///10.1016/j.websem.2012.08.001
+#field_type str(author1) str(author2) int(coauthorship_count)
+#output_json [
+    {
+        "author1": "John Doe",
+        "author2": "Jane Doe",
+        "coauthorship_count": "2"
+    }
+]
+#sparql PREFIX fabio: <http://purl.org/spar/fabio/>
+PREFIX datacite: <http://purl.org/spar/datacite/>
+PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
+PREFIX pro: <http://purl.org/spar/pro/>
+PREFIX oco: <https://w3id.org/oc/ontology/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?author1 ?author2 (count(?author1) as ?coauthorship_count) WHERE {
+	VALUES ?doi { [[dois]] }
+
+	?article a fabio:Expression ;
+		datacite:hasIdentifier [
+			datacite:usesIdentifierScheme datacite:doi ;
+			literal:hasLiteralValue ?doi
+		] ;
+
+		pro:isDocumentContextFor ?auth1 , ?auth2 .
+
+		?auth1 oco:hasNext+ ?auth2 .
+
+		?auth1 pro:isHeldBy [
+			foaf:givenName ?gn1 ;
+			foaf:familyName ?fn1
+		] .
+		?auth2 pro:isHeldBy [
+			foaf:givenName ?gn2 ;
+			foaf:familyName ?fn2
+		] .
+
+	BIND (CONCAT(?fn1, ", ", SUBSTR(?gn1, 0, 1)) as ?author1) .
+	BIND (CONCAT(?fn2, ", ", SUBSTR(?gn2, 0, 1)) as ?author2) .
+}
+GROUP BY ?author1 ?author2
+LIMIT 10000
