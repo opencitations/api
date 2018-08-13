@@ -22,7 +22,7 @@ def lower(s):
 
 
 def split_dois(s):
-    return "\"%s\"" % "\" \"".join(s.split("///")),
+    return "\"%s\"" % "\" \"".join(s.split("__")),
 
 
 def remove_duplicates(res):
