@@ -5,7 +5,7 @@
 #description TODO
 #version 1.0.0
 #license [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/legalcode)
-#contact_email [OpenCitations](contact@opencitations.net)
+#contacts [OpenCitations](contact@opencitations.net)
 #endpoint https://w3id.org/oc/sparql
 #addon occapi
 
