@@ -1,6 +1,6 @@
 #url /api/v1
 #type api
-#base https://w3id.org/oc/corpus
+#base https://w3id.org/oc
 #title REST API for the OpenCitations Corpus
 #description TODO
 #version 1.0.0
