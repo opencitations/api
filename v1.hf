@@ -21,7 +21,30 @@ If you would like to suggest an additional operation to be included in this API,
 It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("__") – e.g. "10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001__...".
 #call /metadata/10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001
 #field_type str(author) datetime(year) str(title) str(source_title) str(volume) str(issue) str(page) str(doi) str(bib_ref) int(citation_count)
-#output_json XXX
+#output_json [
+    {
+        "author": "Peroni, S; Shotton, D",
+        "doi": "10.1016/j.websem.2012.08.001",
+        "year": "2012",
+        "page": "33-43",
+        "issue": "",
+        "title": "FaBiO and CiTO: Ontologies for describing bibliographic resources and citations",
+        "citation_count": "1",
+        "source_title": "Web Semantics: Science, Services and Agents on the World Wide Web",
+        "volume": "17"
+    },
+    {
+        "author": "Peroni, S; Dutton, A; Gray, T; Shotton, D",
+        "doi": "10.1108/jd-12-2013-0166",
+        "year": "2015",
+        "page": "253-277",
+        "issue": "2",
+        "title": "Setting our bibliographic references free: towards open citation data",
+        "citation_count": "1",
+        "source_title": "Journal of Documentation",
+        "volume": "71"
+    }
+]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX fabio: <http://purl.org/spar/fabio/>
