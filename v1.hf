@@ -2,12 +2,116 @@
 #type api
 #base https://w3id.org/oc
 #title REST API for the OpenCitations Corpus
-#description TODO
+#description This document describe the REST API for accessing the data stored in the [OpenCitations Corpus](https://w3id.org/oc/corpus) hosted by [OpenCitations](http://opencitations.net). All the operations described in this document return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request.
+
+If you would like to suggest an additional operation to be included in this API, please use the [issue tracker](https://github.com/opencitations/api/issues) of the OpenCitations Corpus API available on GitHub.
 #version 1.0.0
-#license [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/legalcode)
-#contacts [OpenCitations](contact@opencitations.net)
+#license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
+#contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #endpoint https://w3id.org/oc/sparql
 #addon occapi
+
+#url /metadata/{dois}
+#type operation
+#dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
+#preprocess lower(dois) --> split_dois(dois)
+#method get
+#description This operation allows one to get the metadata of all the articles specified in input by means of their DOIs.
+
+It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("__") – e.g. "10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001__...".
+#call /metadata/10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001
+#field_type str(author) datetime(year) str(title) str(source_title) str(volume) str(issue) str(page) str(doi) str(bib_ref) int(citation_count)
+#output_json XXX
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+PREFIX frbr: <http://purl.org/vocab/frbr/core#>
+PREFIX datacite: <http://purl.org/spar/datacite/>
+PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
+PREFIX pro: <http://purl.org/spar/pro/>
+PREFIX oco: <https://w3id.org/oc/ontology/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX prism: <http://prismstandard.org/namespaces/basic/2.0/>
+
+SELECT DISTINCT ?author ?year ?title ?source_title ?volume ?issue ?page ?doi ?citation_count
+WHERE {
+	VALUES ?doi { [[dois]] }
+
+	?article a fabio:Expression ;
+		datacite:hasIdentifier [
+			datacite:usesIdentifierScheme datacite:doi ;
+			literal:hasLiteralValue ?doi
+		] .
+
+	{
+		SELECT ?article ?doi (count(?doi) as ?citation_count) {
+			VALUES ?doi { [[dois]] }
+
+			?article a fabio:Expression ;
+					datacite:hasIdentifier [
+						datacite:usesIdentifierScheme datacite:doi ;
+						literal:hasLiteralValue ?doi
+					] .
+
+			OPTIONAL { ?article ^cito:cites ?other }
+		} GROUP BY ?article ?doi
+	}
+
+	{
+		SELECT ?article ?doi (GROUP_CONCAT(?a; separator="; ") as ?author) {
+			VALUES ?doi { [[dois]] }
+
+			{
+			SELECT ?article ?doi ?a (count(?next) as ?tot) {
+				VALUES ?doi { [[dois]] }
+
+				?article a fabio:Expression ;
+					datacite:hasIdentifier [
+						datacite:usesIdentifierScheme datacite:doi ;
+						literal:hasLiteralValue ?doi
+					] .
+
+				OPTIONAL {
+					?article pro:isDocumentContextFor ?role .
+					?role pro:withRole pro:author ; pro:isHeldBy [
+						foaf:familyName ?f_name ;
+						foaf:givenName ?g_name
+					] .
+					OPTIONAL { ?role oco:hasNext* ?next }
+					BIND(CONCAT(?f_name, ", ", SUBSTR(?g_name, 0, 1)) as ?a)
+				}
+			} GROUP BY ?article ?doi ?a ORDER BY DESC(?tot)}
+		} GROUP BY ?article ?doi
+	}
+
+	OPTIONAL { ?article ^cito:cites ?other }
+	OPTIONAL { ?article dcterms:title ?title }
+	OPTIONAL { ?article fabio:hasPublicationYear ?year }
+	OPTIONAL {
+		?article frbr:partOf+ ?source .
+		FILTER NOT EXISTS {
+			?source frbr:partOf ?another_source
+		}
+		?source dcterms:title ?source_title
+	}
+	OPTIONAL {
+		?article frbr:partOf+ ?v .
+		?v a fabio:JournalVolume ;
+			fabio:hasSequenceIdentifier ?volume
+	}
+	OPTIONAL {
+		?article frbr:partOf+ ?i .
+		?i a fabio:JournalIssue ;
+			fabio:hasSequenceIdentifier ?issue
+	}
+	OPTIONAL {
+		?article frbr:embodiment ?man .
+		?man prism:startingPage ?start .
+		OPTIONAL { ?man prism:endingPage ?end }
+		BIND (CONCAT(?start, IF(bound(?end), CONCAT("-", ?end), "")) as ?page)
+	}
+}
+LIMIT 10000
 
 #url /coauthorship/{dois}
 #type operation
@@ -15,7 +119,9 @@
 #preprocess lower(dois) --> split_dois(dois)
 #postprocess remove_duplicates()
 #method get
-#description This operation allows one to get co-authorship of all the authors of the papers specified in input by means of their DOIs. In case of multiple DOIs, these should be separated with a double underscore ("__").
+#description This operation allows one to get co-authorship matrix of all the articles specified in input by means of their DOIs.
+
+It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("__") – e.g. "10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001__...".
 #call /coauthorship/10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001
 #field_type str(author1) str(author2) int(coauthorship_count)
 #output_json [
