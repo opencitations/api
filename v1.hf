@@ -56,7 +56,7 @@ PREFIX oco: <https://w3id.org/oc/ontology/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX prism: <http://prismstandard.org/namespaces/basic/2.0/>
 
-SELECT DISTINCT ?author ?year ?title ?source_title ?volume ?issue ?page ?doi ?citation_count
+SELECT DISTINCT ?occ_id ?author ?year ?title ?source_title ?volume ?issue ?page ?doi ?occ_reference ?doi_reference ?citation_count
 WHERE {
 	VALUES ?doi { [[dois]] }
 
@@ -66,15 +66,42 @@ WHERE {
 			literal:hasLiteralValue ?doi
 		] .
 
+	BIND (STRAFTER(str(?article), "https://w3id.org/oc/corpus/") as ?occ_id)
+
+    {
+        SELECT DISTINCT (GROUP_CONCAT(?cited_occ_id; separator="; ") as ?occ_reference) (GROUP_CONCAT(?cited_doi; separator="; ") as ?doi_reference) {
+            VALUES ?doi { "10.1097/igc.0000000000000609" }
+
+            ?article a fabio:Expression ;
+                datacite:hasIdentifier [
+                    datacite:usesIdentifierScheme datacite:doi ;
+                    literal:hasLiteralValue ?doi
+                ] .
+
+            OPTIONAL {
+                ?article cito:cites ?cited .
+                BIND(STRAFTER(str(?cited), "https://w3id.org/oc/corpus/") as ?cited_occ_id)
+
+                OPTIONAL {
+                    ?cited datacite:hasIdentifier [
+                        datacite:usesIdentifierScheme datacite:doi ;
+                        literal:hasLiteralValue ?cited_doi
+                    ] .
+                    FILTER(!STRSTARTS(?cited_doi, "http") && !STRENDS(?cited_doi, ".") && !STRENDS(?cited_doi, "("))
+                }
+            }
+        }
+    }
+
 	{
 		SELECT ?article ?doi (count(?doi) as ?citation_count) {
 			VALUES ?doi { [[dois]] }
 
 			?article a fabio:Expression ;
-					datacite:hasIdentifier [
-						datacite:usesIdentifierScheme datacite:doi ;
-						literal:hasLiteralValue ?doi
-					] .
+                datacite:hasIdentifier [
+                    datacite:usesIdentifierScheme datacite:doi ;
+                    literal:hasLiteralValue ?doi
+                ] .
 
 			OPTIONAL { ?article ^cito:cites ?other }
 		} GROUP BY ?article ?doi
@@ -101,7 +128,7 @@ WHERE {
 						foaf:givenName ?g_name
 					] .
 					OPTIONAL { ?role oco:hasNext* ?next }
-					BIND(CONCAT(?f_name, ", ", SUBSTR(?g_name, 0, 1)) as ?a)
+					BIND(CONCAT(?f_name, ", ",?g_name) as ?a)
 				}
 			} GROUP BY ?article ?doi ?a ORDER BY DESC(?tot)}
 		} GROUP BY ?article ?doi
@@ -208,8 +235,8 @@ SELECT ?author1 ?author2 (count(?author1) as ?coauthorship_count) WHERE {
 			foaf:familyName ?fn2
 		] .
 
-	BIND (CONCAT(?fn1, ", ", SUBSTR(?gn1, 0, 1)) as ?author1) .
-	BIND (CONCAT(?fn2, ", ", SUBSTR(?gn2, 0, 1)) as ?author2) .
+	BIND (CONCAT(?fn1, ", ", ?gn1) as ?author1) .
+	BIND (CONCAT(?fn2, ", ", ?gn2) as ?author2) .
 }
 GROUP BY ?author1 ?author2
 LIMIT 10000
