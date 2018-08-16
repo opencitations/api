@@ -70,7 +70,7 @@ WHERE {
 
     {
         SELECT DISTINCT (GROUP_CONCAT(?cited_occ_id; separator="; ") as ?occ_reference) (GROUP_CONCAT(?cited_doi; separator="; ") as ?doi_reference) {
-            VALUES ?doi { "10.1097/igc.0000000000000609" }
+            VALUES ?doi { [[dois]] }
 
             ?article a fabio:Expression ;
                 datacite:hasIdentifier [
