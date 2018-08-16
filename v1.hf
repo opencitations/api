@@ -69,7 +69,7 @@ WHERE {
 	BIND (STRAFTER(str(?article), "https://w3id.org/oc/corpus/") as ?occ_id)
 
     {
-        SELECT DISTINCT (GROUP_CONCAT(?cited_occ_id; separator="; ") as ?occ_reference) (GROUP_CONCAT(?cited_doi; separator="; ") as ?doi_reference) {
+        SELECT DISTINCT ?article (GROUP_CONCAT(?cited_occ_id; separator="; ") as ?occ_reference) (GROUP_CONCAT(?cited_doi; separator="; ") as ?doi_reference) {
             VALUES ?doi { [[dois]] }
 
             ?article a fabio:Expression ;
@@ -90,7 +90,7 @@ WHERE {
                     FILTER(!STRSTARTS(?cited_doi, "http") && !STRENDS(?cited_doi, ".") && !STRENDS(?cited_doi, "("))
                 }
             }
-        }
+        } GROUP BY ?article
     }
 
 	{
