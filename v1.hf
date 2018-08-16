@@ -20,7 +20,7 @@ If you would like to suggest an additional operation to be included in this API,
 
 It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...".
 #call /metadata/10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001
-#field_type str(author) datetime(year) str(title) str(source_title) str(volume) str(issue) str(page) str(doi) int(citation_count)
+#field_type str(occ_id) str(author) datetime(year) str(title) str(source_title) str(volume) str(issue) str(page) str(doi) str(occ_reference) str(doi_reference) int(citation_count)
 #output_json [
     {
         "author": "Peroni, S; Shotton, D",
