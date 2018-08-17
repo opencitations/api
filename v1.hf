@@ -23,26 +23,32 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 #field_type str(occ_id) str(author) datetime(year) str(title) str(source_title) str(volume) str(issue) str(page) str(doi) str(occ_reference) str(doi_reference) int(citation_count)
 #output_json [
     {
-        "author": "Peroni, S; Shotton, D",
-        "doi": "10.1016/j.websem.2012.08.001",
+        "doi_reference": "",
         "year": "2012",
-        "page": "33-43",
-        "issue": "",
-        "title": "FaBiO and CiTO: Ontologies for describing bibliographic resources and citations",
         "citation_count": "1",
+        "page": "33-43",
+        "occ_id": "br/2384552",
+        "title": "FaBiO and CiTO: Ontologies for describing bibliographic resources and citations",
         "source_title": "Web Semantics: Science, Services and Agents on the World Wide Web",
-        "volume": "17"
+        "issue": "",
+        "author": "Peroni, Silvio; Shotton, David",
+        "occ_reference": "",
+        "volume": "17",
+        "doi": "10.1016/j.websem.2012.08.001"
     },
     {
-        "author": "Peroni, S; Dutton, A; Gray, T; Shotton, D",
-        "doi": "10.1108/jd-12-2013-0166",
+        "doi_reference": "",
         "year": "2015",
-        "page": "253-277",
-        "issue": "2",
-        "title": "Setting our bibliographic references free: towards open citation data",
         "citation_count": "1",
+        "page": "253-277",
+        "occ_id": "br/7295288",
+        "title": "Setting our bibliographic references free: towards open citation data",
         "source_title": "Journal of Documentation",
-        "volume": "71"
+        "issue": "2",
+        "author": "Peroni, Silvio; Dutton, Alexander; Gray, Tanya; Shotton, David",
+        "occ_reference": "",
+        "volume": "71",
+        "doi": "10.1108/jd-12-2013-0166"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -176,33 +182,33 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 #field_type str(author1) str(author2) int(coauthorship_count)
 #output_json [
     {
-        "author1": "Dutton, A",
-        "author2": "Gray, T",
+        "author2": "Gray, Tanya",
+        "author1": "Dutton, Alexander",
         "coauthorship_count": "1"
     },
     {
-        "author1": "Dutton, A",
-        "author2": "Peroni, S",
+        "author2": "Peroni, Silvio",
+        "author1": "Dutton, Alexander",
         "coauthorship_count": "1"
     },
     {
-        "author1": "Dutton, A",
-        "author2": "Shotton, D",
+        "author2": "Shotton, David",
+        "author1": "Dutton, Alexander",
         "coauthorship_count": "1"
     },
     {
-        "author1": "Gray, T",
-        "author2": "Peroni, S",
+        "author2": "Peroni, Silvio",
+        "author1": "Gray, Tanya",
         "coauthorship_count": "1"
     },
     {
-        "author1": "Gray, T",
-        "author2": "Shotton, D",
+        "author2": "Shotton, David",
+        "author1": "Gray, Tanya",
         "coauthorship_count": "1"
     },
     {
-        "author1": "Peroni, S",
-        "author2": "Shotton, D",
+        "author2": "Shotton, David",
+        "author1": "Peroni, Silvio",
         "coauthorship_count": "2"
     }
 ]
