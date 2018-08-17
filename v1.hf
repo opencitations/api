@@ -18,7 +18,20 @@ If you would like to suggest an additional operation to be included in this API,
 #method get
 #description This operation allows one to get the metadata of all the articles specified in input by means of their DOIs.
 
-It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...".
+It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...". The fields returned by this operation are:
+
+* *occ_id*: the OpenCitations Corpus local identifier of the citing bibliographic resource (e.g. "br/2384552");
+* *author*: the semicolon-separated list of authors of the citing bibliographic resource;
+* *year*: the year of publication of the citing bibliographic resource;
+* *title*: the title of the citing bibliographic resource;
+* *source_title*: the title of the venue where the citing bibliographic resource has been published;
+* *volume*: the number of the volume in which the citing bibliographic resource has been published;
+* *issue*: the number of the issue in which the citing bibliographic resource has been published;
+* *page*: the starting and ending pages of the citing bibliographic resource in the context of the venue where it has been published;
+* *doi*: the DOI of the citing bibliographic resource;
+* *occ_reference*: the semicolon-separated OpenCitations Corpus local identifiers of all the bibliograhic resources cited by the citing bibliographic resource in consideration;
+* *doi_reference*: the semicolon-separated DOIs of all the cited bibliograhic resources that have such identifier associated;
+* *citation_count*: the number of citations received by the citing bibliographic resource.
 #call /metadata/10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001
 #field_type str(occ_id) str(author) datetime(year) str(title) str(source_title) str(volume) str(issue) str(page) str(doi) str(occ_reference) str(doi_reference) int(citation_count)
 #output_json [
@@ -177,7 +190,11 @@ LIMIT 10000
 #method get
 #description This operation allows one to get co-authorship matrix of all the articles specified in input by means of their DOIs.
 
-It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...".
+It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...". The fields returned by this operation are:
+
+* *author1*: an author of the articles specified as input by means of their DOIs;
+* *author2*: another author of the articles specified as input by means of their DOIs;
+* *coauthorship_count*: the number of articles (among the specified ones) that the aforementioned authors have been written together.
 #call /coauthorship/10.1108/jd-12-2013-0166__10.1016/j.websem.2012.08.001
 #field_type str(author1) str(author2) int(coauthorship_count)
 #output_json [
