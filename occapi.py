@@ -45,4 +45,4 @@ def remove_duplicates(res):
         a2 = k[1]
         final_res.append([(a1, a1), (a2, a2), (v, str(v))])
 
-    return [res[0]] + sorted(final_res)
+    return [res[0]] + sorted(final_res), True

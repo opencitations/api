@@ -42,4 +42,4 @@ def distinct(res):
             dois.add(cur_doi)
             result.append(row)
 
-    return result
+    return result, True
