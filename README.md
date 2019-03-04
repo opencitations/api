@@ -1,2 +1,2 @@
 # api
-Software for creating REST API
+REST API specification for all the OpenCitations datasets
