@@ -296,24 +296,26 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT DISTINCT ?doi ?citation_count ?citation (GROUP_CONCAT(?cited_doi; separator="; ") as ?reference)
 WHERE {
-	VALUES ?doi { [[dois]] }
-	BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
+    GRAPH <https://w3id.org/oc/index/coci/> {
+        VALUES ?doi { [[dois]] }
+        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
 
-    OPTIONAL {
-	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
-	    BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
-	}
+        OPTIONAL {
+            ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
+            BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
+        }
 
-	OPTIONAL {
-	    SELECT ?citing (count(?c) as ?c_count) (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
-	        VALUES ?doi { [[dois]] }
-	        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
-	        ?citing ^cito:hasCitedEntity ?c .
-      		?c cito:hasCitingEntity ?source .
-      		BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
-	    } GROUP BY ?citing
-	}
-	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
+        OPTIONAL {
+            SELECT ?citing (count(?c) as ?c_count) (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
+                VALUES ?doi { [[dois]] }
+                BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
+                ?citing ^cito:hasCitedEntity ?c .
+                ?c cito:hasCitingEntity ?source .
+                BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
+            } GROUP BY ?citing
+        }
+        BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
+    }
 
 } GROUP BY ?doi ?citation_count ?citation
 LIMIT 10000
