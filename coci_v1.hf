@@ -18,7 +18,7 @@ All the present operations return either a JSON document (default) or a CSV docu
 #preprocess lower(doi) --> encode(doi)
 #postprocess decode_doi(citing, cited)
 #method get
-#description This operation retrieves the citation data for all the references to other works appearing in the bibliographic entity identified by the input DOI.
+#description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input DOI.
 
 The fields returned by this operation are:
 
@@ -103,7 +103,7 @@ LIMIT 10000
 #preprocess lower(doi) --> encode(doi)
 #postprocess decode_doi(citing, cited)
 #method get
-#description This operation retrieves the citation data for all the references appearing in other works to the bibliographic entity identified by the input DOI.
+#description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
 
 The fields returned by this operation are:
 
@@ -178,7 +178,7 @@ LIMIT 10000
 #oci str([0-9]+-[0-9]+)
 #method get
 #postprocess decode_doi(citing, cited)
-#description This operation retrieves the citation data for the citation identified by the input Open Citation Identifier (OCI).
+#description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI).
 
 The Open Citation Identifier is a globally unique persistent identifier for bibliographic citations, which has a simple structure: the lower-case letters "oci" followed by a colon, followed by two numbers separated by a dash. For example, `oci:1-18` is a valid OCI.
 
@@ -240,7 +240,7 @@ LIMIT 10000
 #preprocess lower(dois) --> encode(dois) --> split_dois(dois)
 #postprocess metadata() --> oalink() --> decode_doi(doi, reference, citation)
 #method get
-#description This operation retrieves the metadata for all the articles identified by the input DOIs.
+#description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 
 It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...". The fields returned by this operation are:
 
@@ -319,3 +319,29 @@ WHERE {
 
 } GROUP BY ?doi ?citation_count ?citation
 LIMIT 10000
+
+#url /citation-count/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> encode(doi)
+#method get
+#description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
+
+The field returned by this operation is:
+
+* *count*: the number of incoming citations to the input bibliographic entity.
+#call /citation-count/10.1002/adfm.201505328
+#field_type int(count)
+#output_json [
+    {
+        "count": "124"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?c) as ?count)
+WHERE {
+    GRAPH <https://w3id.org/oc/index/coci/> {
+        BIND(<http://dx.doi.org/[[doi]]> as ?cited) .
+		?cited ^cito:hasCitedEntity ?c
+    }
+}
