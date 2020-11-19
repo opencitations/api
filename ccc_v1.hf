@@ -388,7 +388,7 @@ LIMIT 10000
 
 #url /citation/{oci}
 #type operation
-#oci str([0-9]+-[0-9]+[\/[0-9]+]?)
+#oci str([0-9]+[-[0-9]+]?[\/[0-9]+]?)
 #method get
 #description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI). OCI may appear in both of the forms above described, namely: `<citing_id>-<cited_id>` and `<citing_id>-<cited_id>/<nth-occurrence>`.
 
@@ -433,7 +433,7 @@ prefix bds: <http://www.bigdata.com/rdf/search#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT ?citing_doi ?cited_doi ?oci ?creation (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-      BIND(<httpsc://w3id.org/oc/ccc/ci/[[oci]]> as ?oci_iri) .
+      BIND(<https://w3id.org/oc/ccc/ci/[[oci]]> as ?oci_iri) .
   		BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci) .
         ?oci_iri
             cito:hasCitingEntity ?citing_article ;
