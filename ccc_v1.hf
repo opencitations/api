@@ -32,7 +32,7 @@ If you would like to suggest additional operations, please use the [CCC issue tr
 #version 1.0.0
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints*, which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
 #contacts [marilena.daquino@opencitations.net](mailto:marilena.daquino@opencitations.net)
-#endpoint http://opencitations.net/ccc/sparql
+#endpoint https://w3id.org/oc/ccc/sparql
 #method post
 #addon ccc_addon
 
@@ -271,11 +271,12 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci (GROUP_CONCAT(?intrepid; separator="
 
   	?citation cito:hasCitingEntity ?article ;
               cito:hasCitedEntity ?cited_br ;
-              ^oa:hasBody/^oco:hasAnnotation ?be .
+              ^oa:hasBody/^oco:hasAnnotation ?be ;
+              datacite:hasIdentifier [
+          			datacite:usesIdentifierScheme datacite:oci ;
+          			literal:hasLiteralValue ?oci ] .
 
     ?be biro:references ?cited_br ; c4o:hasContent ?reference .
-
-    BIND (STRAFTER(str(?citation), "https://w3id.org/oc/ccc/ci/") as ?oci)
 
     OPTIONAL {
       ?cited_br
@@ -356,7 +357,10 @@ WHERE {
          bds:matchExact "true" .
   ?doi literal:hasLiteralValue ?cited_doi ; datacite:usesIdentifierScheme datacite:doi .
   ?cited_article datacite:hasIdentifier ?doi ; ^cito:hasCitedEntity ?citation ;prism:publicationDate ?cited_creation .
-  ?citation cito:hasCitingEntity ?citing_article ; ^oa:hasBody/^oco:hasAnnotation/biro:references ?cited_br.
+  ?citation cito:hasCitingEntity ?citing_article ; ^oa:hasBody/^oco:hasAnnotation/biro:references ?cited_br;
+  datacite:hasIdentifier [
+    datacite:usesIdentifierScheme datacite:oci ;
+    literal:hasLiteralValue ?oci ] .
 
   OPTIONAL {
     ?citing_article datacite:hasIdentifier [
@@ -382,7 +386,6 @@ WHERE {
     BIND("yes" as ?asc)
   }
 
-  BIND (STRAFTER(str(?citation), "https://w3id.org/oc/ccc/ci/") as ?oci)
 }
 LIMIT 10000
 
@@ -414,7 +417,7 @@ The fields returned by this operation are:
         "author_sc": "yes"
     }
 ]
-#field_type str(citing_doi) str(cited_doi) str(oci) str(creation) str(?journal_sc) str(?author_sc)
+#field_type str(citing_doi) str(cited_doi) str(oci) datetime(creation) str(?journal_sc) str(?author_sc)
 #sparql PREFIX biro: <http://purl.org/spar/biro/>
 PREFIX cito: <http://purl.org/spar/cito/>
 PREFIX co: <http://purl.org/co/>
@@ -433,11 +436,11 @@ prefix bds: <http://www.bigdata.com/rdf/search#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT ?citing_doi ?cited_doi ?oci ?creation (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-      BIND(<https://w3id.org/oc/ccc/ci/[[oci]]> as ?oci_iri) .
-  		BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci) .
-        ?oci_iri
-            cito:hasCitingEntity ?citing_article ;
-            cito:hasCitedEntity ?cited_article .
+        ?oci_iri datacite:hasIdentifier [
+              datacite:usesIdentifierScheme datacite:oci ;
+              literal:hasLiteralValue ?oci ] ;
+              cito:hasCitingEntity ?citing_article ;
+              cito:hasCitedEntity ?cited_article .
 
             OPTIONAL{
               ?cited_article frbr:partOf+ ?journal . ?citing_article frbr:partOf+ ?journal .
@@ -548,7 +551,7 @@ The fields returned by this operation are the following:
         "xpath_container": "substring(string(/article/body/sec[4]/p[7]),608,668)"
     }
 ]
-#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) str(section_number) str(section_title) str(paragraph_number) str(footnote_number) str(caption_number) str(table_number) str(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
+#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) int(section_number) str(section_title) int(paragraph_number) int(footnote_number) int(caption_number) int(table_number) int(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
 
 #sparql PREFIX biro: <http://purl.org/spar/biro/>
 PREFIX cito: <http://purl.org/spar/cito/>
@@ -577,7 +580,10 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
       ^co:element/^c4o:isContextOf|^c4o:isContextOf ?sentence .
 
   ?citation cito:hasCitingEntity ?citing_article ;
-            cito:hasCitedEntity ?cited_article .
+            cito:hasCitedEntity ?cited_article ;
+            datacite:hasIdentifier [
+              datacite:usesIdentifierScheme datacite:oci ;
+              literal:hasLiteralValue ?oci ] .
 
   ?citing_article datacite:hasIdentifier [
 		datacite:usesIdentifierScheme datacite:doi ;
@@ -589,7 +595,6 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
       literal:hasLiteralValue ?cited_doi ] .
   }
 
-  BIND(STRAFTER(str(?citation), "/ci/") AS ?oci) .
 
   OPTIONAL {
   	?rp datacite:hasIdentifier [
@@ -709,7 +714,7 @@ For each in-text reference pointer, the fields returned by this operation are th
         "xpath_container": "substring(string(/article/body/sec[1]/p[1]),281,332)"
     }
 ]
-#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) str(section_number) str(section_title) str(paragraph_number) str(footnote_number) str(caption_number) str(table_number) str(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
+#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) int(section_number) str(section_title) int(paragraph_number) int(footnote_number) int(caption_number) int(table_number) int(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
 
 #sparql PREFIX biro: <http://purl.org/spar/biro/>
 PREFIX cito: <http://purl.org/spar/cito/>
@@ -736,7 +741,10 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
                 ^datacite:hasIdentifier ?cited_article .
 
   ?cited_article ^cito:hasCitedEntity ?citation .
-  ?citation cito:hasCitingEntity ?citing_article .
+  ?citation cito:hasCitingEntity ?citing_article ;
+  datacite:usesIdentifierScheme datacite:oci ;
+      literal:hasLiteralValue ?oci ] .
+
   ?rp oco:hasAnnotation / oa:hasBody ?citation ;
       ^co:element/^c4o:isContextOf|^c4o:isContextOf ?sentence .
 
@@ -746,7 +754,6 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
         literal:hasLiteralValue ?citing_doi ] .
   }
 
-  BIND(STRAFTER(str(?citation), "/ci/") AS ?oci) .
 
   OPTIONAL {
   	?rp datacite:hasIdentifier [
@@ -866,7 +873,7 @@ For each in-text reference pointer, the fields returned by this operation are th
         "xpath_container": "substring(string(/article/body/sec[1]/p[1]),281,332)"
     }
 ]
-#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) str(section_number) str(section_title) str(paragraph_number) str(footnote_number) str(caption_number) str(table_number) str(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
+#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) int(section_number) str(section_title) int(paragraph_number) int(footnote_number) int(caption_number) int(table_number) int(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
 
 #sparql PREFIX biro: <http://purl.org/spar/biro/>
 PREFIX cito: <http://purl.org/spar/cito/>
@@ -893,7 +900,9 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
                 ^datacite:hasIdentifier ?cited_article .
 
   ?cited_article ^cito:hasCitedEntity ?citation .
-  ?citation cito:hasCitingEntity ?citing_article .
+  ?citation cito:hasCitingEntity ?citing_article ;
+  datacite:usesIdentifierScheme datacite:oci ;
+      literal:hasLiteralValue ?oci ] .
   ?rp oco:hasAnnotation / oa:hasBody ?citation ;
       ^co:element/^c4o:isContextOf|^c4o:isContextOf ?sentence .
 
@@ -909,7 +918,6 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
         literal:hasLiteralValue ?cited_doi ] .
   }
 
-  BIND(STRAFTER(str(?citation), "/ci/") AS ?oci) .
 
   OPTIONAL {
   	?rp datacite:hasIdentifier [
@@ -1019,7 +1027,7 @@ For each in-text reference pointer, the fields returned by this operation are th
       "xpath_container": "substring(string(/article/body/sec[1]/p[1]),1,280)"
   }
 ]
-#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) str(section_number) str(section_title) str(paragraph_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
+#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) int(section_number) str(section_title) int(paragraph_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
 
 #sparql PREFIX biro: <http://purl.org/spar/biro/>
 PREFIX cito: <http://purl.org/spar/cito/>
@@ -1054,9 +1062,11 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
   ?rp (^co:element/^c4o:isContextOf)|^c4o:isContextOf ?sentence ;
       oco:hasAnnotation / oa:hasBody ?citation .
 
-  BIND(STRAFTER(str(?citation), "/ci/") AS ?oci) .
 
-  ?citation cito:hasCitedEntity ?cited_article .
+  ?citation cito:hasCitedEntity ?cited_article ;
+  datacite:hasIdentifier [
+    datacite:usesIdentifierScheme datacite:oci ;
+        literal:hasLiteralValue ?oci ] .
 
   OPTIONAL {
   ?cited_article datacite:hasIdentifier [
@@ -1373,7 +1383,7 @@ For each in-text reference pointer, the fields returned by this operation are th
         "xpath_container": "/article/body/sec[1]/p[1]"
     }
 ]
-#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) str(section_number) str(section_title) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
+#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) int(section_number) str(section_title) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
 
 #sparql PREFIX biro: <http://purl.org/spar/biro/>
 PREFIX cito: <http://purl.org/spar/cito/>
@@ -1408,9 +1418,11 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
   ?rp (^co:element / ^c4o:isContextOf/^frbr:part+)|(^c4o:isContextOf/^frbr:part+) ?paragraph ;
       oco:hasAnnotation / oa:hasBody ?citation .
 
-  BIND(STRAFTER(str(?citation), "/ci/") AS ?oci) .
 
-  ?citation cito:hasCitedEntity ?cited_article .
+  ?citation cito:hasCitedEntity ?cited_article ;
+  datacite:hasIdentifier [
+    datacite:usesIdentifierScheme datacite:oci ;
+        literal:hasLiteralValue ?oci ] .
 
   OPTIONAL {
   ?cited_article datacite:hasIdentifier [
@@ -2141,9 +2153,10 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
   ?rp (^co:element / ^c4o:isContextOf/^frbr:part+)|(^c4o:isContextOf/^frbr:part+) ?section ;
       oco:hasAnnotation / oa:hasBody ?citation .
 
-  BIND(STRAFTER(str(?citation), "/ci/") AS ?oci) .
-
-  ?citation cito:hasCitedEntity ?cited_article .
+  ?citation cito:hasCitedEntity ?cited_article ;
+  datacite:hasIdentifier [
+		datacite:usesIdentifierScheme datacite:oci ;
+        literal:hasLiteralValue ?oci ] .
 
   OPTIONAL {
   ?cited_article datacite:hasIdentifier [
@@ -4986,7 +4999,7 @@ For each in-text reference pointer, the fields returned by this operation are th
         "xpath_container": "substring(string(/article/body/sec[4]/p[11]),430,263)"
     }
 ]
-#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) str(section_number) str(section_title) str(paragraph_number) str(footnote_number) str(caption_number) str(table_number) str(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
+#field_type str(citing_doi) str(cited_doi) str(oci) str(intext_reference) int(section_number) str(section_title) int(paragraph_number) int(footnote_number) int(caption_number) int(table_number) int(sentence_number) str(source) str(in_list) str(xpath_intext_reference) str(xpath_container)
 
 #sparql PREFIX biro: <http://purl.org/spar/biro/>
 PREFIX cito: <http://purl.org/spar/cito/>
@@ -5013,7 +5026,10 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
                 ^datacite:hasIdentifier ?citing_article .
 
   ?citing_article ^cito:hasCitingEntity ?citation .
-  ?citation cito:hasCitedEntity ?cited_article .
+  ?citation cito:hasCitedEntity ?cited_article ;
+    datacite:hasIdentifier [
+		datacite:usesIdentifierScheme datacite:oci ;
+        literal:hasLiteralValue ?oci ] .
   ?rp oco:hasAnnotation / oa:hasBody ?citation ;
       (^co:element/^c4o:isContextOf)|^c4o:isContextOf ?sentence .
 
@@ -5022,8 +5038,6 @@ SELECT DISTINCT ?citing_doi ?cited_doi ?oci ?intext_reference ?section_number ?s
 		datacite:usesIdentifierScheme datacite:doi ;
         literal:hasLiteralValue ?cited_doi ] .
   }
-
-  BIND(STRAFTER(str(?citation), "/ci/") AS ?oci) .
 
   OPTIONAL {
   	?rp datacite:hasIdentifier [
