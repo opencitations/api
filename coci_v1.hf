@@ -345,3 +345,29 @@ WHERE {
 		?cited ^cito:hasCitedEntity ?c
     }
 }
+
+#url /reference-count/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> encode(doi)
+#method get
+#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
+
+The field returned by this operation is:
+
+* *count*: the number of outgoing citations from the input bibliographic entity.
+#call /reference-count/10.1002/adfm.201505328
+#field_type int(count)
+#output_json [
+    {
+        "count": "55"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?c) as ?count)
+WHERE {
+    GRAPH <https://w3id.org/oc/index/coci/> {
+        BIND(<http://dx.doi.org/[[doi]]> as ?citing) .
+		?citing ^cito:hasCitingEntity ?c
+    }
+}
