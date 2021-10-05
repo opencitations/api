@@ -98,7 +98,7 @@ WHERE {
         BIND(STRAFTER(str(?g), "/index/") AS ?source)
     }
 }
-LIMIT 10000
+LIMIT 50000
 
 #url /citations/{doi}
 #type operation
@@ -177,7 +177,7 @@ WHERE {
         BIND(STRAFTER(str(?g), "/index/") AS ?source)
     }
 }
-LIMIT 10000
+LIMIT 50000
 
 #url /citation/{oci}
 #type operation
@@ -241,7 +241,7 @@ WHERE {
         BIND(STRAFTER(str(?g), "/index/") AS ?source)
     }
 }
-LIMIT 10000
+LIMIT 50000
 
 #url /metadata/{dois}
 #type operation
@@ -325,7 +325,7 @@ WHERE {
 	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
 
 } GROUP BY ?doi ?citation_count ?citation
-LIMIT 10000
+LIMIT 50000
 
 #url /citation-count/{doi}
 #type operation

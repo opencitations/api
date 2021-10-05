@@ -95,7 +95,7 @@ WHERE {
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
     }
 }
-LIMIT 10000
+LIMIT 50000
 
 #url /citations/{doi}
 #type operation
@@ -171,7 +171,7 @@ WHERE {
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
     }
 }
-LIMIT 10000
+LIMIT 50000
 
 #url /citation/{oci}
 #type operation
@@ -232,7 +232,7 @@ WHERE {
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
     }
 }
-LIMIT 10000
+LIMIT 50000
 
 #url /metadata/{dois}
 #type operation
@@ -318,7 +318,7 @@ WHERE {
     }
 
 } GROUP BY ?doi ?citation_count ?citation
-LIMIT 10000
+LIMIT 50000
 
 #url /citation-count/{doi}
 #type operation
