@@ -18,7 +18,7 @@ __author__ = 'essepuntato'
 from urllib.parse import quote, unquote
 from requests import get
 from rdflib import Graph, URIRef
-from re import sub
+from re import sub, search
 from json import loads
 
 
@@ -83,31 +83,20 @@ def split_dois(s):
 
 
 def metadata(res, *args):
-    # doi, reference, citation_count
     header = res[0]
     doi_field = header.index("doi")
     additional_fields = ["author", "year", "title", "source_title", "volume", "issue", "page", "source_id"]
-
     header.extend(additional_fields)
-
     rows_to_remove = []
-
     for row in res[1:]:
         citing_doi = row[doi_field][1]
-
-        r = None
-        for p in (__crossref_parser, __datacite_parser):
-            if r is None:
-                r = p(citing_doi)
-
+        r = __meta_parser(citing_doi)
         if r is None or all([i in ("", None) for i in r]):
             rows_to_remove.append(row)
         else:
             row.extend(r)
-
     for row in rows_to_remove:
         res.remove(row)
-
     return res, True
 
 
@@ -158,16 +147,39 @@ def __normalise(o):
         s = str(o)
     return sub("\s+", " ", s).strip()
 
+def __meta_parser(doi):
+    api = "https://test.opencitations.net/meta/api/v1/metadata/doi:%s"
+    
+    try:
+        r = get(api % doi, timeout=30)
+        if r.status_code == 200:
+            json_res = loads(r.text)[0]
+            authors = json_res["author"]
+            year = json_res["date"]
+            title = json_res["title"]
+            venue = json_res["venue"]
+            venue_name_and_ids = search(f'\s*(.*?)\s*\[\s*((?:[^\s]+:[^\s]+)?(?:\s+[^\s]+:[^\s]+)*)\s*\]', venue)
+            source_title = ""
+            source_id = ""
+            if venue_name_and_ids:
+                source_title = venue_name_and_ids.group(1)
+                source_id = venue_name_and_ids.group(2)
+            volume = json_res["volume"]
+            issue = json_res["issue"]
+            page = json_res["page"]
+            return [authors, year, title, source_title, volume, issue, page, source_id]
+    except Exception as e:
+        pass  # do nothing
+
 
 def __crossref_parser(doi):
-    api = "https://api.crossref.org/works/%s"
+    api = "https://test.opencitations.net/%s"
 
     try:
-        r = get(api % doi,
-                headers={"User-Agent": "COCI REST API (via OpenCitations - "
-                                       "http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
+        r = get(api % doi, timeout=30)
         if r.status_code == 200:
             json_res = loads(r.text)
+
             if "message" in json_res:
                 body = json_res["message"]
 
@@ -218,7 +230,7 @@ def __crossref_parser(doi):
                 else:
                     source_id = __get_id(body, [__get_issn, __get_isbn])
 
-                return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
+            return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
 
     except Exception as e:
         pass  # do nothing

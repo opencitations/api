@@ -2,3 +2,4 @@
 __pycache__
 *.html
 query_leiden.txt
+.vscode
