@@ -41,7 +41,11 @@ def decode_doi(res, *args):
 
 def generate_id_search(ids:str):
     id_searches = list()
-    for identifier in ids.split('__'):
+    r = __meta_parser(ids)
+    ids_to_search = ids.split('__')
+    if r is not None and not all([i in ("", None) for i in r]):
+        ids_to_search = [identifier for identifier in r[0]['id'].split() if not identifier.startswith('meta:')]
+    for identifier in ids_to_search:
         scheme_literal_value = identifier.split(':')
         scheme = scheme_literal_value[0].lower()
         literal_value = quote(scheme_literal_value[1])
@@ -50,7 +54,7 @@ def generate_id_search(ids:str):
             id_searches.append(f'"http://dx.doi.org/{literal_value}"')
         elif scheme in {'pmid', 'pmcid'}:
             id_searches.append(f'"https://pubmed.ncbi.nlm.nih.gov/{literal_value}"')
-    ids_search = 'UNION'.join(id_searches)
+    ids_search = ' '.join(id_searches)
     return ids_search, 
 
 def merge(res, *args):
@@ -80,6 +84,9 @@ def merge(res, *args):
     for row in final_result:
         row.pop(prefix_idx)
     return final_result, False
+
+def find_all_ids(ids):
+    pass
 
 def metadata(res, *args):
     header = res[0]
