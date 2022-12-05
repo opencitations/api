@@ -357,8 +357,8 @@ LIMIT 50000
 
 #url /citation-count/{id}
 #type operation
-#id str(10\..+)
-#preprocess lower(id) --> encode(id)
+#id str((doi|pmid):(10\..+|\d+))
+#preprocess generate_id_search(id)
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
 
@@ -375,14 +375,14 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(DISTINCT ?citing) as ?count)
 WHERE {
-    BIND(<http://dx.doi.org/[[id]]> as ?cited) .
+    BIND(IRI([[id]]) as ?cited) .
     ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing
 }
 
 #url /reference-count/{id}
 #type operation
-#id str(10\..+)
-#preprocess lower(id) --> encode(id)
+#id str((doi|pmid):(10\..+|\d+))
+#preprocess generate_id_search(id)
 #method get
 #description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input identifier.
 
@@ -399,6 +399,6 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(DISTINCT ?cited) as ?count)
 WHERE {
-    BIND(<http://dx.doi.org/[[id]]> as ?citing) .
+    BIND(IRI([[id]]) as ?citing) .
     ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
 }

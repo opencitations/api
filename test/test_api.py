@@ -125,3 +125,37 @@ class test_API(unittest.TestCase):
         output = status, sorted(json.loads(results), key=lambda x: x['oci']), format
         expected_output = status_expected, sorted(result_expected, key=lambda x: x['oci']), format_expected
         self.assertEqual(output, expected_output)
+
+    def test_citation_count(self):
+        operation_url = 'citation-count'
+        request = 'doi:10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "count": "2"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, json.loads(results), format
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_reference_count(self):
+        operation_url = 'reference-count'
+        request = 'doi:10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "count": "3"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, json.loads(results), format
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
