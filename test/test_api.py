@@ -30,22 +30,66 @@ class test_API(unittest.TestCase):
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
-            {'id': 'doi:10.1016/j.compedu.2018.11.010; meta:br/06220662347', 
-            'citation_count': '3', 
-            'citation': 'meta:br/06150578417; meta:br/06150578486; meta:br/06150578485', 
-            'reference': 'meta:br/06150903011; meta:br/061701938723; meta:br/062403286732', 
-            'author': 'Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan', 
-            'editor': '', 
-            'pub_date': '2019-03', 
-            'title': 'Technology Integration Of Pre-Service Teachers Explained By Attitudes And Beliefs, Competency, Access, And Experience', 
-            'venue': 'Computers & Education [issn:0360-1315]', 
-            'volume': "130", 
-            'issue': '', 
-            'page': '81-93', 
-            'oa_link': ''}]
+            {
+                "id": "doi:10.1016/j.compedu.2018.11.010; meta:br/06220662347",
+                "citation_count": "2",
+                "citation": "meta:br/06150578485; meta:br/06150578417",
+                "reference": "meta:br/06901039881; meta:br/062403286732; meta:br/06150903011",
+                "author": "Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan",
+                "editor": "",
+                "pub_date": "2019-03",
+                "title": "Technology Integration Of Pre-Service Teachers Explained By Attitudes And Beliefs, Competency, Access, And Experience",
+                "venue": "Computers & Education [issn:0360-1315]",
+                "volume": "130",
+                "issue": "",
+                "page": "81-93",
+                "oa_link": ""
+            }
+        ]
         results = [{k: '; '.join(sorted(v.split('; ')))} if k in {'citation', 'author', 'reference', 'id'} else {k:v} for result in json.loads(results) for k, v in result.items()]
         result_expected = [{k: '; '.join(sorted(v.split('; ')))} if k in {'citation', 'author', 'reference', 'id'} else {k:v} for result in result_expected for k, v in result.items()]
         format_expected = 'application/json'
         output = status, results, format
         expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_references(self):
+        operation_url = 'references'
+        request = 'doi:10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "oci": "coci => 02001000808360107040263060509063601050101360136000102000202-0200101010136193701030605630207020937020000000308033733; doci => 02001000808360107040263060509063601050101360136000102000202-0200101010136193701030605630207020937020000000308033733",
+                "citing": "coci => doi:10.1016/j.compedu.2018.11.010; doci => doi:10.1016/j.compedu.2018.11.010",
+                "cited": "coci => doi:10.1111/j.1365-2729.2010.00383.x; doci => doi:10.1111/j.1365-2729.2010.00383.x",
+                "creation": "coci => 2020-03; doci => 2020-03",
+                "timespan": "coci => P9Y3M; doci => P9Y3M",
+                "journal_sc": "coci => no; doci => no",
+                "author_sc": "coci => no; doci => no"
+            },
+            {
+                "oci": "coci => 02001000808360107040263060509063601050101360136000102000209-02001000007362801010400096300000663060809036300",
+                "citing": "coci => doi:10.1016/j.compedu.2018.11.010",
+                "cited": "coci => doi:10.1007/s11409-006-6893-0",
+                "creation": "coci => 2020-03",
+                "timespan": "coci => P14Y0M",
+                "journal_sc": "coci => no",
+                "author_sc": "coci => no"
+            },
+            {
+                "oci": "doci => 02001000808360107040263060509063601050101360136000102000307-0200101010136193701030605630209020937020000053700020200053733",
+                "citing": "doci => doi:10.1016/j.compedu.2018.11.010",
+                "cited": "doci => doi:10.1111/j.1365-2929.2005.02205.x",
+                "creation": "doci => 2020-03",
+                "timespan": "doci => P14Y8M",
+                "journal_sc": "doci => no",
+                "author_sc": "doci => no"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, sorted(json.loads(results), key=lambda x: x['oci']), format
+        expected_output = status_expected, sorted(result_expected, key=lambda x: x['oci']), format_expected
         self.assertEqual(output, expected_output)
