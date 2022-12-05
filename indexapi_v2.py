@@ -96,6 +96,7 @@ def metadata(res, *args):
     additional_fields = ["author", "editor", "pub_date", "title", "venue", "volume", "issue", "page"]
     header.extend(additional_fields)
     rows_to_remove = []
+    processed_metaids = set()
     for row in res[1:]:
         starting_ids = [row[id_field][1]]
         citations = row[citation_field][1].split('; ')
@@ -105,23 +106,31 @@ def metadata(res, *args):
         if r is None or all([i in ("", None) for i in r]):
             rows_to_remove.append(row)
         else:
-            for field, sequence in {citation_field: citations, reference_field: references}.items():
-                new_sequence = set()
-                for real_id in sequence:
-                    for metadata in r:
-                        metadata_id = metadata['id'].split()
-                        if real_id in metadata_id:
-                            new_sequence.add([identifier for identifier in metadata_id if identifier.startswith('meta:')][0])
-                row[field] = ('; '.join(new_sequence), '; '.join(new_sequence))
-            for metadata in r:
+            index_by_id = dict()
+            for i, metadata in enumerate(r):
                 all_ids = metadata['id'].split()
-                if set(starting_ids).intersection(all_ids):
-                    row[id_field] = ('; '.join(all_ids), '; '.join(all_ids))
-                    row.extend([
-                        metadata["author"], metadata["editor"], 
-                        metadata["date"], metadata["title"], 
-                        metadata["venue"], metadata["volume"], 
-                        metadata["issue"], metadata["page"]])
+                metaid = [identifier for identifier in all_ids if identifier.startswith('meta:')][0]
+                for identifier in all_ids:
+                    index_by_id[identifier] = {'index': i, 'metaid': metaid}
+            relevant_index = index_by_id[starting_ids[0]]
+            metadata = r[relevant_index['index']]
+            all_ids = metadata['id'].split()
+            metaid = relevant_index['metaid']
+            if metaid in processed_metaids:
+                rows_to_remove.append(row)
+            else:
+                processed_metaids.add(metaid)
+                row[id_field] = ('; '.join(all_ids), '; '.join(all_ids))
+                row.extend([
+                    metadata["author"], metadata["editor"], 
+                    metadata["date"], metadata["title"], 
+                    metadata["venue"], metadata["volume"], 
+                    metadata["issue"], metadata["page"]])
+                for field, sequence in {citation_field: citations, reference_field: references}.items():
+                    new_sequence = set()
+                    for real_id in sequence:
+                        new_sequence.add(index_by_id[real_id]['metaid'])
+                    row[field] = ('; '.join(new_sequence), '; '.join(new_sequence))
     for row in rows_to_remove:
         res.remove(row)
     return res, True

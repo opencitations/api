@@ -47,6 +47,7 @@ jobs:
         curl -X POST  http://localhost:9999/blazegraph/namespace/kb/textIndex?force-index-create=true
     - name: Check the coverage
       run: |
+        ls -l
         coverage run --rcfile=test/coverage/.coveragerc
     - name: Generate the badge
       run: |
