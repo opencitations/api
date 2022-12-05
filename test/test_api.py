@@ -28,7 +28,6 @@ class test_API(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
-        print(status, results, format)
         status_expected = 200
         result_expected = [
             {'id': 'doi:10.1016/j.compedu.2018.11.010; meta:br/06220662347', 

@@ -41,13 +41,13 @@ jobs:
         pip3 install coverage-badge
     - name: Run Blazegraph
       run: |
-        wget https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/blazegraph.jar
+        cd test
         java -server -jar blazegraph.jar &
         python3 -c 'import time; time.sleep(10)'
         curl -X POST  http://localhost:9999/blazegraph/namespace/kb/textIndex?force-index-create=true
+        cd ..
     - name: Check the coverage
       run: |
-        ls -l
         coverage run --rcfile=test/coverage/.coveragerc
     - name: Generate the badge
       run: |
