@@ -16,6 +16,7 @@
 # SOFTWARE.
 
 __author__ = 'essepuntato'
+
 from urllib.parse import quote, unquote
 from requests import get
 from json import loads
@@ -28,7 +29,6 @@ def encode(s):
     return quote(s),
 
 def decode_doi(res, *args):
-    print(*args)
     header = res[0]
     field_idx = []
     for field in args:
@@ -38,6 +38,20 @@ def decode_doi(res, *args):
             t, v = row[idx]
             row[idx] = t, unquote(v)
     return res, True
+
+def generate_id_search(ids:str):
+    id_searches = list()
+    for identifier in ids.split('__'):
+        scheme_literal_value = identifier.split(':')
+        scheme = scheme_literal_value[0].lower()
+        literal_value = quote(scheme_literal_value[1])
+        literal_value = literal_value.lower() if scheme == 'doi' else literal_value
+        if scheme == 'doi':
+            id_searches.append(f'"http://dx.doi.org/{literal_value}"')
+        elif scheme in {'pmid', 'pmcid'}:
+            id_searches.append(f'"https://pubmed.ncbi.nlm.nih.gov/{literal_value}"')
+    ids_search = 'UNION'.join(id_searches)
+    return ids_search, 
 
 def merge(res, *args):
     final_result = []
@@ -67,53 +81,61 @@ def merge(res, *args):
         row.pop(prefix_idx)
     return final_result, False
 
-def split_ids(s):
-    return "\"%s\"" % "\" \"".join(s.split("__")),
-
 def metadata(res, *args):
     header = res[0]
-    doi_field = header.index("id")
-    additional_fields = ["author", "pub_date", "title", "venue", "volume", "issue", "page"]
+    id_field = header.index("id")
+    citation_field = header.index("citation")
+    reference_field = header.index("reference")
+    additional_fields = ["author", "editor", "pub_date", "title", "venue", "volume", "issue", "page"]
     header.extend(additional_fields)
     rows_to_remove = []
     for row in res[1:]:
-        citing_doi = row[doi_field][1]
-        r = __meta_parser(citing_doi)
+        starting_ids = [row[id_field][1]]
+        citations = row[citation_field][1].split('; ')
+        references = row[reference_field][1].split('; ')
+        to_be_search_by_meta = set(starting_ids + citations + references)
+        r = __meta_parser('__'.join(to_be_search_by_meta))
         if r is None or all([i in ("", None) for i in r]):
             rows_to_remove.append(row)
         else:
-            row.extend(r)
+            for field, sequence in {citation_field: citations, reference_field: references}.items():
+                new_sequence = set()
+                for real_id in sequence:
+                    for metadata in r:
+                        metadata_id = metadata['id'].split()
+                        if real_id in metadata_id:
+                            new_sequence.add([identifier for identifier in metadata_id if identifier.startswith('meta:')][0])
+                row[field] = ('; '.join(new_sequence), '; '.join(new_sequence))
+            for metadata in r:
+                all_ids = metadata['id'].split()
+                if set(starting_ids).intersection(all_ids):
+                    row[id_field] = ('; '.join(all_ids), '; '.join(all_ids))
+                    row.extend([
+                        metadata["author"], metadata["editor"], 
+                        metadata["date"], metadata["title"], 
+                        metadata["venue"], metadata["volume"], 
+                        metadata["issue"], metadata["page"]])
     for row in rows_to_remove:
         res.remove(row)
     return res, True
 
 def __meta_parser(doi):
-    api = "https://test.opencitations.net/meta/api/v1/metadata/doi:%s"
+    api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
     try:
         r = get(api % doi, timeout=30)
         if r.status_code == 200:
-            json_res = loads(r.text)[0]
-            authors = json_res["author"]
-            pub_date = json_res["date"]
-            title = json_res["title"]
-            venue = json_res["venue"]
-            volume = json_res["volume"]
-            issue = json_res["issue"]
-            page = json_res["page"]
-            return [authors, pub_date, title, venue, volume, issue, page]
+            return loads(r.text)
     except Exception as e:
         print(e)
         pass  # do nothing
-
     except Exception as e:
         pass  # do nothing
-
     except Exception as e:
         pass  # do nothing
 
 def oalink(res, *args):
     base_api_url = "https://api.unpaywall.org/v2/%s?email=contact@opencitations.net"
-    # doi, reference, citation_count
+    # id, reference, citation_count
     header = res[0]
     doi_field = header.index("id")
     additional_fields = ["oa_link"]

@@ -257,8 +257,8 @@ LIMIT 50000
 
 #url /metadata/{ids}
 #type operation
-#ids str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
-#preprocess lower(ids) --> encode(ids) --> split_ids(ids)
+#ids str((doi|issn|isbn|meta):[^__]+(__(doi|issn|isbn|meta):[^__]+)*)
+#preprocess generate_id_search(ids)
 #postprocess metadata() --> oalink() --> decode_doi(id, reference, citation)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input IDs.
@@ -279,7 +279,7 @@ It is possible to specify one or more IDs as input of this operation. In this ca
 * *oa_link*: the link to the Open Access version of the bibliographic entity, if available.
 
 #call /metadata/10.1108/jd-12-2013-0166__10.6084/m9.figshare.3443876
-#field_type str(author) datetime(pub_date) str(title) str(venue) str(volume) str(issue) str(page) str(id) str(reference) str(citation) int(citation_count) str(oa_link)
+#field_type str(author) str(editor) datetime(pub_date) str(title) str(venue) str(volume) str(issue) str(page) str(id) str(reference) str(citation) int(citation_count) str(oa_link)
 #output_json [
     {
         "citation": "10.1177/0961000615616450; 10.7554/elife.32822; 10.1145/3197026.3197050; 10.1093/bib/bbx057; 10.1007/978-3-319-68204-4_19; 10.3346/jkms.2015.30.11.1545; 10.1007/978-3-319-73165-0_24; 10.3233/sw-160224; 10.3233/sw-180307; 10.1007/978-3-319-90548-8_7; 10.1142/s021964921850034x; 10.1007/978-3-319-58694-6_23; 10.1057/s41275-017-0070-x",
@@ -313,25 +313,35 @@ It is possible to specify one or more IDs as input of this operation. In this ca
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT DISTINCT ?id ?citation_count ?citation (GROUP_CONCAT(distinct ?cited_doi; separator="; ") as ?reference)
 WHERE {
-	VALUES ?id { [[ids]] }
-	BIND(IRI(CONCAT("http://dx.doi.org/", ?id)) as ?citing)
-
+	VALUES ?citing_id { [[ids]] }
+	BIND(IRI(?citing_id) AS ?citing)
+    BIND(
+        REPLACE(REPLACE(STR(?citing_id), 
+            "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            "http://dx.doi.org/", "doi:") 
+        AS ?id)
     OPTIONAL {
 	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
-	    BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
+	    BIND(
+        	REPLACE(REPLACE(STR(?cited), 
+            	"https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            	"http://dx.doi.org/", "doi:") 
+        	AS ?cited_doi)
 	}
-
 	OPTIONAL {
 	    SELECT ?citing (count(distinct ?citing_source) as ?c_count) (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
-	        VALUES ?id { [[ids]] }
-	        BIND(IRI(CONCAT("http://dx.doi.org/", ?id)) as ?citing)
+	        VALUES ?citing_id { [[ids]] }
+	        BIND(IRI(?citing_id) AS ?citing)
 	        ?citing ^cito:hasCitedEntity ?c .
       		?c cito:hasCitingEntity ?source .
-      		BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
+			BIND(
+          		REPLACE(REPLACE(STR(?source), 
+            		"https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            		"http://dx.doi.org/", "doi:") 
+          		AS ?citing_source)
 	    } GROUP BY ?citing
 	}
 	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
-
 } GROUP BY ?id ?citation_count ?citation
 LIMIT 50000
 
