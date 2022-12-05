@@ -47,13 +47,13 @@ jobs:
         curl -X POST  http://localhost:9999/blazegraph/namespace/kb/textIndex?force-index-create=true
     - name: Check the coverage
       run: |
-        poetry run coverage run --rcfile=test/coverage/.coveragerc
+        coverage run --rcfile=test/coverage/.coveragerc
     - name: Generate the badge
       run: |
         mv .coverage test/coverage/
         cd test/coverage/
         rm coverage.svg
-        poetry run coverage-badge -o coverage.svg
+        coverage-badge -o coverage.svg
     - uses: actions/upload-artifact@v3.1.0
       with:
           name: coverage-artifact
