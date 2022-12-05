@@ -93,3 +93,35 @@ class test_API(unittest.TestCase):
         output = status, sorted(json.loads(results), key=lambda x: x['oci']), format
         expected_output = status_expected, sorted(result_expected, key=lambda x: x['oci']), format_expected
         self.assertEqual(output, expected_output)
+
+    def test_citations(self):
+        operation_url = 'citations'
+        request = 'doi:10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "oci": "coci => 02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100",
+                "citing": "coci => doi:10.1088/1742-6596/1511/1/012022",
+                "cited": "coci => doi:10.1016/j.compedu.2018.11.010",
+                "creation": "coci => 2020-03",
+                "timespan": "coci => P1Y0M",
+                "journal_sc": "coci => no",
+                "author_sc": "coci => no"
+            },
+            {
+                "oci": "doci => 02001000808360107040263060509063601050101360136000102000307-020010209070336181914281437020001033702010810",
+                "citing": "doci => doi:10.1088/1742-6596/1511/1/012037",
+                "cited": "doci => doi:10.1016/j.compedu.2018.11.010",
+                "creation": "doci => 2020-03",
+                "timespan": "doci => P6Y5M",
+                "journal_sc": "doci => no",
+                "author_sc": "doci => no"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, sorted(json.loads(results), key=lambda x: x['oci']), format
+        expected_output = status_expected, sorted(result_expected, key=lambda x: x['oci']), format_expected
+        self.assertEqual(output, expected_output)
