@@ -39,6 +39,9 @@ def decode_doi(res, *args):
             row[idx] = t, unquote(v)
     return res, True
 
+def split_dois(s):
+    return "\"%s\"" % "\" \"".join(s.split("__")),
+
 def generate_id_search(ids:str):
     id_searches = list()
     r = __meta_parser(ids)
