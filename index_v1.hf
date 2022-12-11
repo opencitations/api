@@ -86,7 +86,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    GRAPH ?g {
+    GRAPH <https://w3id.org/oc/index/coci/> {
         BIND(<http://dx.doi.org/[[doi]]> as ?citing_iri) .
         ?citing_iri ^cito:hasCitingEntity ?oci_iri .
         ?oci_iri
@@ -165,7 +165,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    GRAPH ?g {
+    GRAPH <https://w3id.org/oc/index/coci/> {
         BIND(<http://dx.doi.org/[[doi]]> as ?cited_iri) .
         ?cited_iri ^cito:hasCitedEntity ?oci_iri .
         ?oci_iri
