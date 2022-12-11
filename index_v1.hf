@@ -303,7 +303,7 @@ WHERE {
           BIND(STRAFTER(str(?citing_iri), ".org/") AS ?citing)
           BIND(STRAFTER(str(?cited_iri), ".org/") AS ?cited)
           BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER(str(?g), "/index/") AS ?source)
+          BIND(STRAFTER("https://w3id.org/oc/index/coci/", "/index/") AS ?source)
       }
     }UNION{
       GRAPH <https://w3id.org/oc/index/doci/> {
@@ -327,7 +327,7 @@ WHERE {
           BIND(STRAFTER(str(?citing_iri), ".org/") AS ?citing)
           BIND(STRAFTER(str(?cited_iri), ".org/") AS ?cited)
           BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER(str(?g), "/index/") AS ?source)
+          BIND(STRAFTER("https://w3id.org/oc/index/doci/", "/index/") AS ?source)
       }
     }
 }
