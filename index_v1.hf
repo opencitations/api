@@ -435,14 +435,16 @@ The field returned by this operation is:
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(DISTINCT ?citing) as ?count)
+SELECT (count(DISTINCT ?citing_id) as ?count)
 WHERE {
     {
-      BIND(<http://dx.doi.org/[[doi]]> as ?cited) .
-      ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing
+      BIND(<http://dx.doi.org/10.5281/zenodo.3773001> as ?cited) .
+      ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
+      BIND(STRAFTER(str(?citing), "http://dx.doi.org/") as ?citing_id)
     }UNION{
-      BIND(<https://doi.org/[[doi]]> as ?cited) .
-      ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing
+      BIND(<https://doi.org/10.5281/zenodo.3773001> as ?cited) .
+      ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
+      BIND(STRAFTER(str(?citing), "https://doi.org/") as ?citing_id)
     }
 }
 
@@ -464,13 +466,15 @@ The field returned by this operation is:
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(DISTINCT ?cited) as ?count)
+SELECT (count(DISTINCT ?cited_id) as ?count)
 WHERE {
     {
       BIND(<http://dx.doi.org/[[doi]]> as ?citing) .
-      ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
+      ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited .
+      BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_id)
     }UNION{
       BIND(<https://doi.org/[[doi]]> as ?citing) .
-      ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
+      ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited .
+      BIND(STRAFTER(str(?cited), "https://doi.org/") as ?cited_id)
     }
 }
