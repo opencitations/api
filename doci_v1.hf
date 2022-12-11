@@ -85,7 +85,7 @@ The fields returned by this operation are:
 SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/doci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?citing_iri) .
+        BIND(<https://doi.org/[[doi]]> as ?citing_iri) .
         ?citing_iri ^cito:hasCitingEntity ?oci_iri .
         ?oci_iri
             cito:hasCitedEntity ?cited_iri ;
@@ -102,8 +102,8 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
     }
 }
@@ -161,7 +161,7 @@ The fields returned by this operation are:
 SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/doci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?cited_iri) .
+        BIND(<https://doi.org/[[doi]]> as ?cited_iri) .
         ?cited_iri ^cito:hasCitedEntity ?oci_iri .
         ?oci_iri
             cito:hasCitingEntity ?citing_iri ;
@@ -178,8 +178,8 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
     }
 }
@@ -239,8 +239,8 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
     }
 }
@@ -267,7 +267,7 @@ The field returned by this operation is:
 SELECT (count(?c) as ?count)
 WHERE {
     GRAPH <https://w3id.org/oc/index/doci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?cited) .
+        BIND(<https://doi.org/[[doi]]> as ?cited) .
 		?cited ^cito:hasCitedEntity ?c
     }
 }
@@ -293,7 +293,7 @@ The field returned by this operation is:
 SELECT (count(?c) as ?count)
 WHERE {
     GRAPH <https://w3id.org/oc/index/doci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?citing) .
+        BIND(<https://doi.org/[[doi]]> as ?citing) .
 		?citing ^cito:hasCitingEntity ?c
     }
 }
