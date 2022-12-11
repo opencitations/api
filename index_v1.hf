@@ -470,7 +470,7 @@ WHERE {
       BIND(<http://dx.doi.org/[[doi]]> as ?citing) .
       ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
     }UNION{
-      BIND(<http://doi.org/[[doi]]> as ?citing) .
+      BIND(<https://doi.org/[[doi]]> as ?citing) .
       ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
     }
 }
