@@ -238,6 +238,7 @@ WHERE {
         BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
         BIND(STRAFTER("https://w3id.org/oc/index/doci/", "/index/") AS ?source)
+        }
     }
 }
 LIMIT 50000
