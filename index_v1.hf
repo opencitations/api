@@ -107,7 +107,7 @@ WHERE {
         BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
         BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-        BIND(STRAFTER(str(?g), "/index/") AS ?source)
+        BIND(STRAFTER("https://w3id.org/oc/index/coci/", "/index/") AS ?source)
     }
 }
 LIMIT 50000
@@ -186,7 +186,7 @@ WHERE {
         BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
         BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-        BIND("coci" AS ?source)
+        BIND(STRAFTER("https://w3id.org/oc/index/coci/", "/index/") AS ?source)
     }
 }
 LIMIT 50000
@@ -250,7 +250,7 @@ WHERE {
         BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
         BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-        BIND("coci" AS ?source)
+        BIND(STRAFTER(str(?g), "/index/") AS ?source)
     }
 }
 LIMIT 50000
