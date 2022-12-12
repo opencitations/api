@@ -41,7 +41,7 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /references/10.1186/1756-8722-6-59
+#call /references/10.5281/zenodo.3797060
 #output_json [
     {
         "oci": "02001010806360107050663080702026306630509-0200101080636102703040309",
@@ -126,7 +126,7 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citations/10.1002/adfm.201505328
+#call /citations/10.5281/zenodo.3773001
 #output_json [
     {
         "oci": "0200100030836231029271431221029283702000106370908-02001000002361013152237020001050005030208",
@@ -205,7 +205,7 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citation/02001010806360107050663080702026306630509-0200101080636102704000806
+#call /citation/08005020801363514232413243703070907000604-08005020801363514232413243703070703000001
 #output_json [
     {
         "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
@@ -256,7 +256,7 @@ LIMIT 50000
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/10.1002/adfm.201505328
+#call /citation-count/10.5281/zenodo.3773001
 #field_type int(count)
 #output_json [
     {
@@ -282,7 +282,7 @@ WHERE {
 The field returned by this operation is:
 
 * *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/10.1002/adfm.201505328
+#call /reference-count/10.5281/zenodo.3797060
 #field_type int(count)
 #output_json [
     {

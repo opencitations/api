@@ -334,7 +334,7 @@ WHERE {
 	VALUES ?doi { [[dois]] }
 	BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
 
-    OPTIONAL {
+  OPTIONAL {
 	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
 	    BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
 	}
