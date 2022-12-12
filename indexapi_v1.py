@@ -79,7 +79,7 @@ def merge(res, *args):
 
 
 def split_dois(s):
-    return "\"%s\"" % "\" \"".join(s.split("__")),
+    return "%s" % " ".join(s.split("__")),
 
 
 def metadata(res, *args):
