@@ -1,6 +1,6 @@
 #url /api/v1
 #type api
-#base https://test.opencitations.net
+#base https://test.opencitations.net/meta
 #title REST API for OC Meta
 #description This is the REST API for OC Meta, the OpenCitations Index containing bibliographic metadata associated with the documents involved in the citations stored in the OpenCitations infrastructure. All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. If you would like to suggest an additional operation to be included in this API, please use the [issue tracker](https://github.com/opencitations/api/issues) of the OpenCitations APIs available on GitHub.
 #version Version 1.0.0 (2020-06-10)
