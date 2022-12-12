@@ -92,7 +92,7 @@ WHERE {
             cito:hasCitationCreationDate ?creation .
 
         OPTIONAL {
-          cito:hasCitationTimeSpan ?timespan .
+          ?oci_iri cito:hasCitationTimeSpan ?timespan .
         }
 
         OPTIONAL {
@@ -171,7 +171,7 @@ WHERE {
             cito:hasCitationCreationDate ?creation .
 
         OPTIONAL {
-            cito:hasCitationTimeSpan ?timespan .
+            ?oci_iri cito:hasCitationTimeSpan ?timespan .
         }
 
         OPTIONAL {
@@ -235,7 +235,7 @@ WHERE {
             cito:hasCitationCreationDate ?creation .
 
         OPTIONAL {
-            cito:hasCitationTimeSpan ?timespan .
+            ?oci_iri cito:hasCitationTimeSpan ?timespan .
         }
 
         OPTIONAL {
