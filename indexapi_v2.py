@@ -138,6 +138,10 @@ def metadata(res, *args):
         res.remove(row)
     return res, True
 
+def deduplicate_based_on_metaids(res, *args):
+    r = __meta_parser('__'.join([row[0][0] for row in res[1:]]))
+    return [["count"], [(len(r), str(len(r)))]], True
+
 def __meta_parser(doi):
     api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
     try:

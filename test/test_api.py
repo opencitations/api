@@ -19,7 +19,7 @@ from ramose import APIManager
 
 CONFIG = 'index_v2.hf'
 api_manager = APIManager([CONFIG])
-api_base = 'http://127.0.0.1:8080/api/v1'
+api_base = 'http://127.0.0.1:8080/api/v2'
 
 class test_API(unittest.TestCase):
     def test_metadata(self):

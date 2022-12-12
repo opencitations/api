@@ -1,4 +1,4 @@
-#url /api/v1
+#url /api/v2
 #type api
 #base https://w3id.org/oc/index
 #title The unifying REST API for all the OpenCitations Indexes
@@ -43,7 +43,7 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /references/10.1186/1756-8722-6-59
+#call /references/doi:10.1186/1756-8722-6-59
 #output_json [
     {
         "oci": "coci => 02001010806360107050663080702026306630509-0200101080636102703040309",
@@ -136,7 +136,7 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citations/10.1002/adfm.201505328
+#call /citations/doi:10.1002/adfm.201505328
 #output_json [
     {
         "oci": "coci => 0200100030836231029271431221029283702000106370908-02001000002361013152237020001050005030208",
@@ -359,13 +359,14 @@ LIMIT 50000
 #type operation
 #id str((doi|pmid):(10\..+|\d+))
 #preprocess generate_id_search(id)
+#postprocess deduplicate_based_on_metaids()
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
 
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/10.1142/9789812701527_0009
+#call /citation-count/doi:10.1142/9789812701527_0009
 #field_type int(count)
 #output_json [
     {
@@ -373,23 +374,29 @@ The field returned by this operation is:
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(DISTINCT ?citing) as ?count)
+SELECT DISTINCT ?citing_source
 WHERE {
-    BIND(IRI([[id]]) as ?cited) .
-    ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing
+    BIND(IRI([[id]]) as ?cited)
+    ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing.
+    BIND(
+        REPLACE(REPLACE(STR(?citing), 
+            "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            "http://dx.doi.org/", "doi:") 
+        AS ?citing_source)
 }
 
 #url /reference-count/{id}
 #type operation
 #id str((doi|pmid):(10\..+|\d+))
 #preprocess generate_id_search(id)
+#postprocess deduplicate_based_on_metaids()
 #method get
 #description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input identifier.
 
 The field returned by this operation is:
 
 * *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/10.1016/j.websem.2012.08.001
+#call /reference-count/doi:10.1016/j.websem.2012.08.001
 #field_type int(count)
 #output_json [
     {
@@ -397,8 +404,13 @@ The field returned by this operation is:
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(DISTINCT ?cited) as ?count)
+SELECT DISTINCT ?cited_source
 WHERE {
     BIND(IRI([[id]]) as ?citing) .
     ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
+    BIND(
+        REPLACE(REPLACE(STR(?cited), 
+            "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            "http://dx.doi.org/", "doi:") 
+        AS ?cited_source)
 }
