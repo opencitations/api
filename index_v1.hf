@@ -86,9 +86,12 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    {
-      GRAPH <https://w3id.org/oc/index/coci/> {
-          BIND(<http://dx.doi.org/[[doi]]> as ?citing_iri) .
+      GRAPH ?g {
+    	  BIND (
+            IF(str(?g) = "https://w3id.org/oc/index/doci/", <https://doi.org/[[doi]]>,
+          	<http://dx.doi.org/[[doi]]>
+            )
+          AS ?citing_iri) .
           ?citing_iri ^cito:hasCitingEntity ?oci_iri .
           ?oci_iri
               cito:hasCitedEntity ?cited_iri ;
@@ -105,36 +108,11 @@ WHERE {
               BIND("yes" as ?asc)
           }
 
-          BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-          BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+          BIND(STRAFTER(str(?citing_iri), ".org/") AS ?citing)
+          BIND(STRAFTER(str(?cited_iri), ".org/") AS ?cited)
           BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER("https://w3id.org/oc/index/coci/", "/index/") AS ?source)
+          BIND(STRAFTER(str(?g), "/index/") AS ?source)
       }
-    }UNION{
-      GRAPH <https://w3id.org/oc/index/doci/> {
-          BIND(<https://doi.org/[[doi]]> as ?citing_iri) .
-          ?citing_iri ^cito:hasCitingEntity ?oci_iri .
-          ?oci_iri
-              cito:hasCitedEntity ?cited_iri ;
-              cito:hasCitationCreationDate ?creation ;
-              cito:hasCitationTimeSpan ?timespan .
-
-          OPTIONAL {
-              ?oci_iri a cito:JournalSelfCitation .
-              BIND("yes" as ?jsc)
-          }
-
-          OPTIONAL {
-              ?oci_iri a cito:AuthorSelfCitation .
-              BIND("yes" as ?asc)
-          }
-
-          BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
-          BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
-          BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER("https://w3id.org/oc/index/doci/", "/index/") AS ?source)
-      }
-    }
 }
 LIMIT 50000
 
@@ -191,9 +169,13 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    {
-      GRAPH <https://w3id.org/oc/index/coci/> {
-          BIND(<http://dx.doi.org/[[doi]]> as ?cited_iri) .
+      GRAPH ?g {
+          BIND (
+            IF(str(?g) = "https://w3id.org/oc/index/doci/", <https://doi.org/[[doi]]>,
+          	<http://dx.doi.org/[[doi]]>
+            )
+          AS ?cited_iri) .
+
           ?cited_iri ^cito:hasCitedEntity ?oci_iri .
           ?oci_iri
               cito:hasCitingEntity ?citing_iri ;
@@ -210,36 +192,11 @@ WHERE {
               BIND("yes" as ?asc)
           }
 
-          BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-          BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+          BIND(STRAFTER(str(?citing_iri), ".org/") AS ?citing)
+          BIND(STRAFTER(str(?cited_iri), ".org/") AS ?cited)
           BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER("https://w3id.org/oc/index/coci/", "/index/") AS ?source)
+          BIND(STRAFTER(str(?g), "/index/") AS ?source)
       }
-    }UNION{
-      GRAPH <https://w3id.org/oc/index/doci/> {
-        BIND(<https://doi.org/[[doi]]> as ?cited_iri) .
-        ?cited_iri ^cito:hasCitedEntity ?oci_iri .
-        ?oci_iri
-            cito:hasCitingEntity ?citing_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
-
-        OPTIONAL {
-            ?oci_iri a cito:JournalSelfCitation .
-            BIND("yes" as ?jsc)
-        }
-
-        OPTIONAL {
-            ?oci_iri a cito:AuthorSelfCitation .
-            BIND("yes" as ?asc)
-        }
-
-        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-        BIND(STRAFTER("https://w3id.org/oc/index/doci/", "/index/") AS ?source)
-        }
-    }
 }
 LIMIT 50000
 
@@ -281,9 +238,13 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    {
-      GRAPH <https://w3id.org/oc/index/coci/> {
-          BIND(<https://w3id.org/oc/index/coci/ci/[[oci]]> as ?oci_iri) .
+      GRAPH ?g {
+          BIND (
+            IF(str(?g) = "https://w3id.org/oc/index/doci/", <https://w3id.org/oc/index/doci/ci/[[oci]]>,
+            <https://w3id.org/oc/index/coci/ci/[[oci]]>
+            )
+          AS ?oci_iri) .
+
           ?oci_iri
               cito:hasCitingEntity ?citing_iri ;
               cito:hasCitedEntity ?cited_iri ;
@@ -303,33 +264,8 @@ WHERE {
           BIND(STRAFTER(str(?citing_iri), ".org/") AS ?citing)
           BIND(STRAFTER(str(?cited_iri), ".org/") AS ?cited)
           BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER("https://w3id.org/oc/index/coci/", "/index/") AS ?source)
+          BIND(STRAFTER(str(?g), "/index/") AS ?source)
       }
-    }UNION{
-      GRAPH <https://w3id.org/oc/index/doci/> {
-          BIND(<https://w3id.org/oc/index/doci/ci/[[oci]]> as ?oci_iri) .
-          ?oci_iri
-              cito:hasCitingEntity ?citing_iri ;
-              cito:hasCitedEntity ?cited_iri ;
-              cito:hasCitationCreationDate ?creation ;
-              cito:hasCitationTimeSpan ?timespan .
-
-          OPTIONAL {
-              ?oci_iri a cito:JournalSelfCitation .
-              BIND("yes" as ?jsc)
-          }
-
-          OPTIONAL {
-              ?oci_iri a cito:AuthorSelfCitation .
-              BIND("yes" as ?asc)
-          }
-
-          BIND(STRAFTER(str(?citing_iri), ".org/") AS ?citing)
-          BIND(STRAFTER(str(?cited_iri), ".org/") AS ?cited)
-          BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER("https://w3id.org/oc/index/doci/", "/index/") AS ?source)
-      }
-    }
 }
 LIMIT 50000
 
@@ -396,35 +332,20 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
 SELECT DISTINCT ?doi ?citation_count ?citation (GROUP_CONCAT(distinct ?cited_doi; separator="; ") as ?reference)
 WHERE {
 	VALUES ?doi { [[dois]] }
-  {
-    BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
+	BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
+
     OPTIONAL {
-        ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
-        BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
-    }
-  }UNION{
-    BIND(IRI(CONCAT("https://doi.org/", ?doi)) as ?citing)
-    OPTIONAL {
-        ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
-        BIND(STRAFTER(str(?cited), "https://doi.org/") as ?cited_doi)
-    }
-  }
+	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
+	    BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
+	}
 
 	OPTIONAL {
 	    SELECT ?citing (count(distinct ?citing_source) as ?c_count) (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
-          {
-            VALUES ?doi { [[dois]] }
-            BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
-            ?citing ^cito:hasCitedEntity ?c .
-            ?c cito:hasCitingEntity ?source .
-            BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
-          }UNION{
-            VALUES ?doi { [[dois]] }
-            BIND(IRI(CONCAT("https://doi.org/", ?doi)) as ?citing)
-            ?citing ^cito:hasCitedEntity ?c .
-            ?c cito:hasCitingEntity ?source .
-            BIND(STRAFTER(str(?source), "https://doi.org/") as ?citing_source)
-          }
+	        VALUES ?doi { [[dois]] }
+	        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
+	        ?citing ^cito:hasCitedEntity ?c .
+      		?c cito:hasCitingEntity ?source .
+      		BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
 	    } GROUP BY ?citing
 	}
 	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
@@ -453,11 +374,11 @@ The field returned by this operation is:
 SELECT (count(DISTINCT ?citing_id) as ?count)
 WHERE {
     {
-      BIND(<http://dx.doi.org/10.5281/zenodo.3773001> as ?cited) .
+      BIND(<http://dx.doi.org/[[doi]]> as ?cited) .
       ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
       BIND(STRAFTER(str(?citing), "http://dx.doi.org/") as ?citing_id)
     }UNION{
-      BIND(<https://doi.org/10.5281/zenodo.3773001> as ?cited) .
+      BIND(<https://doi.org/[[doi]]> as ?cited) .
       ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
       BIND(STRAFTER(str(?citing), "https://doi.org/") as ?citing_id)
     }
