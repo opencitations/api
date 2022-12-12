@@ -340,24 +340,24 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT DISTINCT ?doi ?citation_count ?citation (GROUP_CONCAT(distinct ?cited_doi; separator="; ") as ?reference)
 WHERE {
-  	VALUES ?citing_str { "http://dx.doi.org/10.5281/zenodo.3797060" "https://doi.org/10.5281/zenodo.3797060" }
+  	VALUES ?citing_str {"http://dx.doi.org/10.5281/zenodo.3797060" "https://doi.org/10.5281/zenodo.3797060"}
 	  BIND(IRI(?citing_str) as ?citing)
 
   	OPTIONAL {
 	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
 	    BIND(STRAFTER(str(?cited), ".org/") as ?cited_doi)
-	  }
+	}
 
-    OPTIONAL {
+	OPTIONAL {
 	    SELECT ?citing (count(distinct ?citing_source) as ?c_count) (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
-	        VALUES ?citing_str { "http://dx.doi.org/10.5281/zenodo.3797060" "https://doi.org/10.5281/zenodo.3797060" }
+	        VALUES ?citing_str {"http://dx.doi.org/10.5281/zenodo.3797060" "https://doi.org/10.5281/zenodo.3797060"}
       		BIND(IRI(?citing_str) as ?citing)
 	        ?citing ^cito:hasCitedEntity ?c .
       		?c cito:hasCitingEntity ?source .
       		BIND(STRAFTER(str(?source), ".org/") as ?citing_source)
 	    } GROUP BY ?citing
-	 }
-	 BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
+	}
+	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
 
 } GROUP BY ?doi ?citation_count ?citation
 LIMIT 50000
