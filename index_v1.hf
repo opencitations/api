@@ -281,7 +281,7 @@ LIMIT 50000
 #url /metadata/{dois}
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
-#preprocess lower(dois) --> encode(dois) --> split_dois(dois)
+#preprocess lower(dois) --> encode(dois) --> split_dois_with_url(dois)
 #postprocess metadata() --> oalink() --> decode_doi(doi, reference, citation)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
@@ -340,7 +340,7 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT DISTINCT ?doi ?citation_count ?citation (GROUP_CONCAT(distinct ?cited_doi; separator="; ") as ?reference)
 WHERE {
-  	VALUES ?citing_str {"http://dx.doi.org/[[doi]]" "https://doi.org/[[doi]]"}
+  	VALUES ?citing_str { [[dois]] }
 	  BIND(IRI(?citing_str) as ?citing)
 
   	OPTIONAL {
@@ -350,7 +350,7 @@ WHERE {
 
     OPTIONAL {
 	    SELECT ?citing (count(distinct ?citing_source) as ?c_count) (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
-	        VALUES ?citing_str {"http://dx.doi.org/[[doi]]" "https://doi.org/[[doi]]"}
+	        VALUES ?citing_str { [[dois]] }
       		BIND(IRI(?citing_str) as ?citing)
 	        ?citing ^cito:hasCitedEntity ?c .
       		?c cito:hasCitingEntity ?source .

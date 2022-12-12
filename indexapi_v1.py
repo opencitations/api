@@ -79,14 +79,23 @@ def merge(res, *args):
 
 
 def split_dois(s):
-    return "%s" % " ".join(s.split("__")),
+    return "\"%s\"" % "\" \"".join(s.split("__")),
+
+
+def split_dois_with_url(s):
+    dois_url = []
+    for doi in s.split("__"):
+        dois_url.append("http://dx.doi.org/"+doi)
+        dois_url.append("https://doi.org/"+doi)
+    return "\"%s\"" % "\" \"".join(dois_url.split("__")),
 
 
 def metadata(res, *args):
     # doi, reference, citation_count
     header = res[0]
     doi_field = header.index("doi")
-    additional_fields = ["author", "year", "title", "source_title", "volume", "issue", "page", "source_id"]
+    additional_fields = ["author", "year", "title",
+                         "source_title", "volume", "issue", "page", "source_id"]
 
     header.extend(additional_fields)
 
@@ -180,7 +189,9 @@ def __crossref_parser(doi):
                             if "given" in author:
                                 author_string += ", " + author["given"].title()
                                 if "ORCID" in author:
-                                    author_string += ", " + author["ORCID"].replace("http://orcid.org/", "")
+                                    author_string += ", " + \
+                                        author["ORCID"].replace(
+                                            "http://orcid.org/", "")
                         if author_string is not None:
                             authors.append(__normalise(author_string))
 
@@ -195,7 +206,8 @@ def __crossref_parser(doi):
 
                 source_title = ""
                 if "container-title" in body:
-                    source_title = __create_title_from_list(body["container-title"])
+                    source_title = __create_title_from_list(
+                        body["container-title"])
 
                 volume = ""
                 if "volume" in body:
@@ -245,7 +257,9 @@ def __datacite_parser(doi):
                             if "given" in author:
                                 author_string += ", " + author["given"].title()
                                 if "ORCID" in author:
-                                    author_string += ", " + author["ORCID"].replace("http://orcid.org/", "")
+                                    author_string += ", " + \
+                                        author["ORCID"].replace(
+                                            "http://orcid.org/", "")
                         if author_string is not None:
                             authors.append(__normalise(author_string))
 
