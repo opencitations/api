@@ -86,8 +86,9 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
+  	  VALUES ?citing_iri {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
       GRAPH ?g {
-    	    VALUES ?citing_iri {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
+
           ?citing_iri ^cito:hasCitingEntity ?oci_iri .
           ?oci_iri
               cito:hasCitedEntity ?cited_iri ;
@@ -110,7 +111,7 @@ WHERE {
           BIND(STRAFTER(str(?citing_iri), ".org/") AS ?citing)
           BIND(STRAFTER(str(?cited_iri), ".org/") AS ?cited)
           BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-          BIND(STRAFTER(str(?g), "/index/") AS ?source)
+    	    BIND(STRAFTER(str(?g), "/index/") AS ?source)
       }
 }
 LIMIT 50000
@@ -168,8 +169,8 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
+      VALUES ?cited_iri {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
       GRAPH ?g {
-          VALUES ?cited_iri {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
 
           ?cited_iri ^cito:hasCitedEntity ?oci_iri .
           ?oci_iri
@@ -236,12 +237,8 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
+      VALUES ?oci_iri {<https://w3id.org/oc/index/doci/ci/[[oci]]> <https://w3id.org/oc/index/coci/ci/[[oci]]>} .
       GRAPH ?g {
-          BIND (
-            IF(str(?g) = "https://w3id.org/oc/index/doci/", <https://w3id.org/oc/index/doci/ci/[[oci]]>,
-            <https://w3id.org/oc/index/coci/ci/[[oci]]>
-            )
-          AS ?oci_iri) .
 
           ?oci_iri
               cito:hasCitingEntity ?citing_iri ;
@@ -374,15 +371,9 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(DISTINCT ?citing_id) as ?count)
 WHERE {
-    {
-      BIND(<http://dx.doi.org/[[doi]]> as ?cited) .
-      ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
-      BIND(STRAFTER(str(?citing), "http://dx.doi.org/") as ?citing_id)
-    }UNION{
-      BIND(<https://doi.org/[[doi]]> as ?cited) .
-      ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
-      BIND(STRAFTER(str(?citing), "https://doi.org/") as ?citing_id)
-    }
+    VALUES ?cited {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
+    ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
+    BIND(STRAFTER(str(?citing), "http://dx.doi.org/") as ?citing_id)
 }
 
 #url /reference-count/{doi}
@@ -405,13 +396,7 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(DISTINCT ?cited_id) as ?count)
 WHERE {
-    {
-      BIND(<http://dx.doi.org/[[doi]]> as ?citing) .
-      ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited .
-      BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_id)
-    }UNION{
-      BIND(<https://doi.org/[[doi]]> as ?citing) .
-      ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited .
-      BIND(STRAFTER(str(?cited), "https://doi.org/") as ?cited_id)
-    }
+    VALUES ?citing {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
+    ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited .
+    BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_id)
 }
