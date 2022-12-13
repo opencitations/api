@@ -105,8 +105,10 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing_doi)
+        BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
+        BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
     }
 }
