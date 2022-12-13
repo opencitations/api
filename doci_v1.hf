@@ -109,7 +109,8 @@ WHERE {
         BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
         BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
         BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
+        BIND(CONCAT("oci:", str(?id_val)) as ?id)
     }
 }
 LIMIT 50000
@@ -190,7 +191,8 @@ WHERE {
         BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
         BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
         BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
+        BIND(CONCAT("oci:", str(?id_val)) as ?id)
     }
 }
 LIMIT 50000
@@ -256,7 +258,8 @@ WHERE {
         BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
         BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
         BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
+        BIND(CONCAT("oci:", str(?id_val)) as ?id)
     }
 }
 LIMIT 50000
