@@ -89,8 +89,11 @@ WHERE {
         ?citing_iri ^cito:hasCitingEntity ?oci_iri .
         ?oci_iri
             cito:hasCitedEntity ?cited_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
+            cito:hasCitationCreationDate ?creation .
+
+        OPTIONAL {
+          ?oci_iri cito:hasCitationTimeSpan ?timespan .
+        }
 
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
@@ -165,8 +168,11 @@ WHERE {
         ?cited_iri ^cito:hasCitedEntity ?oci_iri .
         ?oci_iri
             cito:hasCitingEntity ?citing_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
+            cito:hasCitationCreationDate ?creation .
+
+        OPTIONAL {
+          ?oci_iri cito:hasCitationTimeSpan ?timespan .
+        }
 
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
@@ -226,8 +232,11 @@ WHERE {
         ?oci_iri
             cito:hasCitingEntity ?citing_iri ;
             cito:hasCitedEntity ?cited_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
+            cito:hasCitationCreationDate ?creation .
+
+        OPTIONAL {
+          ?oci_iri cito:hasCitationTimeSpan ?timespan .
+        }
 
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
