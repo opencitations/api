@@ -87,11 +87,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
       GRAPH ?g {
-    	  BIND (
-            IF(str(?g) = "https://w3id.org/oc/index/doci/", <https://doi.org/[[doi]]>,
-          	<http://dx.doi.org/[[doi]]>
-            )
-          AS ?citing_iri) .
+    	    VALUES ?citing_iri {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
           ?citing_iri ^cito:hasCitingEntity ?oci_iri .
           ?oci_iri
               cito:hasCitedEntity ?cited_iri ;
@@ -173,11 +169,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
       GRAPH ?g {
-          BIND (
-            IF(str(?g) = "https://w3id.org/oc/index/doci/", <https://doi.org/[[doi]]>,
-          	<http://dx.doi.org/[[doi]]>
-            )
-          AS ?cited_iri) .
+          VALUES ?cited_iri {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
 
           ?cited_iri ^cito:hasCitedEntity ?oci_iri .
           ?oci_iri
