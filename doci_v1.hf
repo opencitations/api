@@ -82,7 +82,7 @@ The fields returned by this operation are:
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/doci/> {
         BIND(<https://doi.org/[[doi]]> as ?citing_iri) .
@@ -109,7 +109,7 @@ WHERE {
         BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
         BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
         BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id)
     }
 }
 LIMIT 50000
@@ -163,7 +163,7 @@ The fields returned by this operation are:
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/doci/> {
         BIND(<https://doi.org/[[doi]]> as ?cited_iri) .
@@ -186,9 +186,11 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing_doi)
+        BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
+        BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id)
     }
 }
 LIMIT 50000
@@ -227,7 +229,7 @@ The fields returned by this operation are:
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/doci/> {
         BIND(<https://w3id.org/oc/index/doci/ci/[[oci]]> as ?oci_iri) .
@@ -250,9 +252,11 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing_doi)
+        BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
+        BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id)
     }
 }
 LIMIT 50000
