@@ -17,10 +17,15 @@
 
 __author__ = 'essepuntato'
 
-from urllib.parse import quote, unquote
-from requests import get
+import re
 from json import loads
+from urllib.parse import quote, unquote
 
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
+from requests import get
+
+IDS_WITHIN_SQUARE_BRACKETS = '\[((?:[^\s]+:[^\s]+)(?:\s[^\s]+:[^\s]+)*)\]'
 
 def lower(s):
     return s.lower(),
@@ -88,10 +93,7 @@ def merge(res, *args):
         row.pop(prefix_idx)
     return final_result, False
 
-def find_all_ids(ids):
-    pass
-
-def metadata(res, *args):
+def metadata(res):
     header = res[0]
     id_field = header.index("id")
     citation_field = header.index("citation")
@@ -100,45 +102,125 @@ def metadata(res, *args):
     header.extend(additional_fields)
     rows_to_remove = []
     processed_metaids = set()
+    identifiers = set()
+    for row in res[1:]:
+        identifiers.add(row[id_field][1])
+        identifiers.update(row[citation_field][1].split('; '))
+        identifiers.update(row[reference_field][1].split('; '))
+    r = __meta_parser('__'.join(identifiers))
+    index_by_id = index_meta_results(r)
     for row in res[1:]:
         starting_ids = [row[id_field][1]]
         citations = row[citation_field][1].split('; ')
         references = row[reference_field][1].split('; ')
-        to_be_search_by_meta = set(starting_ids + citations + references)
-        r = __meta_parser('__'.join(to_be_search_by_meta))
-        if r is None or all([i in ("", None) for i in r]):
+        relevant_index = index_by_id[starting_ids[0]]
+        metadata = r[relevant_index['index']]
+        all_ids = metadata['id'].split()
+        metaid = relevant_index['metaid']
+        if metaid in processed_metaids:
             rows_to_remove.append(row)
         else:
-            index_by_id = dict()
-            for i, metadata in enumerate(r):
-                all_ids = metadata['id'].split()
-                metaid = [identifier for identifier in all_ids if identifier.startswith('meta:')][0]
-                for identifier in all_ids:
-                    index_by_id[identifier] = {'index': i, 'metaid': metaid}
-            relevant_index = index_by_id[starting_ids[0]]
-            metadata = r[relevant_index['index']]
-            all_ids = metadata['id'].split()
-            metaid = relevant_index['metaid']
-            if metaid in processed_metaids:
-                rows_to_remove.append(row)
-            else:
-                processed_metaids.add(metaid)
-                row[id_field] = ('; '.join(all_ids), '; '.join(all_ids))
-                row.extend([
-                    metadata["author"], metadata["editor"], 
-                    metadata["date"], metadata["title"], 
-                    metadata["venue"], metadata["volume"], 
-                    metadata["issue"], metadata["page"]])
-                for field, sequence in {citation_field: citations, reference_field: references}.items():
-                    new_sequence = set()
-                    for real_id in sequence:
-                        new_sequence.add(index_by_id[real_id]['metaid'])
-                    row[field] = ('; '.join(new_sequence), '; '.join(new_sequence))
-    for row in rows_to_remove:
-        res.remove(row)
+            processed_metaids.add(metaid)
+            row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
+            row.extend([
+                (metadata["author"], metadata["author"]),
+                (metadata["editor"], metadata["editor"]), 
+                (metadata["date"], metadata["date"]),
+                (metadata["title"], metadata["title"]), 
+                (metadata["venue"], metadata["venue"]),
+                (metadata["volume"], metadata["volume"]), 
+                (metadata["issue"], metadata["issue"]),
+                (metadata["page"], metadata["page"])])
+            for field, sequence in {citation_field: citations, reference_field: references}.items():
+                new_sequence = set()
+                for real_id in sequence:
+                    new_sequence.add(index_by_id[real_id]['metaid'])
+                row[field] = (' '.join(new_sequence), ' '.join(new_sequence))
     return res, True
 
-def deduplicate_based_on_metaids(res, *args):
+def index_meta_results(meta_results: list) -> dict:
+    index_by_id = dict()
+    for i, metadata in enumerate(meta_results):
+        all_ids = metadata['id'].split()
+        metaid = [identifier for identifier in all_ids if identifier.startswith('meta:')][0]
+        for identifier in all_ids:
+            index_by_id[identifier] = {'index': i, 'metaid': metaid}
+    return index_by_id
+
+def process_citations(res, *args):
+    header = res[0]
+    input_field = header.index(args[0])
+    other_field = header.index(args[1])
+    additional_fields = ['creation', 'timespan', 'journal_sc', 'author_sc']
+    header.extend(additional_fields)
+    identifiers = set()
+    for row in res[1:]:
+        identifiers.add(row[input_field][1])
+        identifiers.add(row[other_field][1])
+    r = __meta_parser('__'.join(identifiers))
+    index_by_id = index_meta_results(r)
+    input_id = res[1][input_field][1]
+    input_id_index = index_by_id[input_id]['index']
+    input_id_metadata = r[input_id_index]
+    input_creation = input_id_metadata['date']
+    input_venue_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, input_id_metadata['venue'])
+    input_venue_ids = set(input_venue_ids.group(1).split()) if input_venue_ids else set()
+    input_authors_ids = get_all_authors_ids(input_id_metadata['author'])
+    for row in res[1:]:
+        row[input_field] = (input_id_metadata['id'], input_id_metadata['id'])
+        other_id = row[other_field][1]
+        other_id_index = index_by_id[other_id]['index']
+        other_metadata = r[other_id_index]
+        row[other_field] = (other_metadata['id'], other_metadata['id'])
+        other_creation = other_metadata['date']
+        other_venue_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, other_metadata['venue'])
+        journal_sc = 'no'
+        author_sc = 'no'
+        if other_venue_ids and input_venue_ids:
+            other_venue_ids = other_venue_ids.group(1).split()
+            if input_venue_ids.intersection(other_venue_ids):
+                journal_sc = 'yes'
+        other_authors_ids = get_all_authors_ids(other_metadata['author'])
+        if input_authors_ids.intersection(other_authors_ids):
+            author_sc = 'yes'
+        timespan = calculate_timespan(input_creation, other_creation) if args[0] == 'citing' else calculate_timespan(other_creation, input_creation)
+        row.extend([
+            (input_creation, input_creation),
+            (timespan, timespan),
+            (journal_sc, journal_sc),
+            (author_sc, author_sc)])
+    return res, True
+
+def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
+    citing_pub_datetime = parse(citing_pub_date)
+    cited_pub_datetime = parse(cited_pub_date)
+    delta = relativedelta(citing_pub_datetime, cited_pub_datetime)
+    result = ''
+    if (
+        delta.years < 0
+        or (delta.years == 0 and delta.months < 0)
+        or (
+            delta.years == 0
+            and delta.months == 0
+            and delta.days < 0
+        )
+    ):
+        result += '-'
+    result += 'P%sY' % abs(delta.years)
+    result += '%sM' % abs(delta.months)
+    result += '%sD' % abs(delta.days)
+    return result
+
+def get_all_authors_ids(authors: str) -> set:
+    all_authors_ids = set()
+    authors_list = authors.split('; ')
+    for author in authors_list:
+        author_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, author)
+        if author_ids:
+            all_authors_ids.update(author_ids.group(1).split())
+    return all_authors_ids
+        
+def count_metaids(res):
     r = __meta_parser('__'.join([row[0][0] for row in res[1:]]))
     return [["count"], [(len(r), str(len(r)))]], True
 
@@ -155,29 +237,3 @@ def __meta_parser(doi):
         pass  # do nothing
     except Exception as e:
         pass  # do nothing
-
-def oalink(res, *args):
-    base_api_url = "https://api.unpaywall.org/v2/%s?email=contact@opencitations.net"
-    # id, reference, citation_count
-    header = res[0]
-    doi_field = header.index("id")
-    additional_fields = ["oa_link"]
-    header.extend(additional_fields)
-    for row in res[1:]:
-        citing_doi = row[doi_field][1]
-        try:
-            r = get(base_api_url % citing_doi,
-                    headers={"User-Agent": "COCI REST API (via OpenCitations - "
-                                           "http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
-            if r.status_code == 200:
-                res_json = loads(r.text)
-                if "best_oa_location" in res_json and res_json["best_oa_location"] is not None and \
-                        "url" in res_json["best_oa_location"]:
-                    row.append(res_json["best_oa_location"]["url"])
-                else:
-                    row.append("")  # empty element
-            else:
-                row.append("")  # empty element
-        except Exception as e:
-            row.append("")  # empty element
-    return res, True

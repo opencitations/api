@@ -15,6 +15,7 @@
 
 import json
 import unittest
+
 from ramose import APIManager
 
 CONFIG = 'index_v2.hf'
@@ -31,10 +32,10 @@ class test_API(unittest.TestCase):
         status_expected = 200
         result_expected = [
             {
-                "id": "doi:10.1016/j.compedu.2018.11.010; meta:br/06220662347",
+                "id": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "citation_count": "2",
-                "citation": "meta:br/06150578485; meta:br/06150578417",
-                "reference": "meta:br/06901039881; meta:br/062403286732; meta:br/06150903011",
+                "citation": "meta:br/06150578485 meta:br/06150578417",
+                "reference": "meta:br/06901039881 meta:br/062403286732 meta:br/06150903011",
                 "author": "Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan",
                 "editor": "",
                 "pub_date": "2019-03",
@@ -42,12 +43,11 @@ class test_API(unittest.TestCase):
                 "venue": "Computers & Education [issn:0360-1315]",
                 "volume": "130",
                 "issue": "",
-                "page": "81-93",
-                "oa_link": ""
+                "page": "81-93"
             }
         ]
-        results = [{k: '; '.join(sorted(v.split('; ')))} if k in {'citation', 'author', 'reference', 'id'} else {k:v} for result in json.loads(results) for k, v in result.items()]
-        result_expected = [{k: '; '.join(sorted(v.split('; ')))} if k in {'citation', 'author', 'reference', 'id'} else {k:v} for result in result_expected for k, v in result.items()]
+        results = [{k: '; '.join(sorted(v.split('; ')))} if k == 'author' else {k: ' '.join(sorted(v.split()))} if k in {'citation', 'reference', 'id'} else {k:v} for result in json.loads(results) for k, v in result.items()]
+        result_expected = [{k: '; '.join(sorted(v.split('; ')))} if k == 'author' else {k: ' '.join(sorted(v.split()))} if k in {'citation', 'reference', 'id'} else {k:v} for result in result_expected for k, v in result.items()]
         format_expected = 'application/json'
         output = status, results, format
         expected_output = status_expected, result_expected, format_expected
@@ -62,36 +62,36 @@ class test_API(unittest.TestCase):
         status_expected = 200
         result_expected = [
             {
-                "oci": "coci => 02001000808360107040263060509063601050101360136000102000202-0200101010136193701030605630207020937020000000308033733; doci => 02001000808360107040263060509063601050101360136000102000202-0200101010136193701030605630207020937020000000308033733",
-                "citing": "coci => doi:10.1016/j.compedu.2018.11.010; doci => doi:10.1016/j.compedu.2018.11.010",
-                "cited": "coci => doi:10.1111/j.1365-2729.2010.00383.x; doci => doi:10.1111/j.1365-2729.2010.00383.x",
-                "creation": "coci => 2020-03; doci => 2020-03",
-                "timespan": "coci => P9Y3M; doci => P9Y3M",
-                "journal_sc": "coci => no; doci => no",
-                "author_sc": "coci => no; doci => no"
+                "id": "oci:02001000808360107040263060509063601050101360136000102000202-0200101010136193701030605630207020937020000000308033733",
+                "citing": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "cited": "doi:10.1111/j.1365-2729.2010.00383.x meta:br/06150903011",
+                "creation": "2019-03",
+                "timespan": "P8Y3M7D",
+                "journal_sc": "no",
+                "author_sc": "no"
             },
             {
-                "oci": "coci => 02001000808360107040263060509063601050101360136000102000209-02001000007362801010400096300000663060809036300",
-                "citing": "coci => doi:10.1016/j.compedu.2018.11.010",
-                "cited": "coci => doi:10.1007/s11409-006-6893-0",
-                "creation": "coci => 2020-03",
-                "timespan": "coci => P14Y0M",
-                "journal_sc": "coci => no",
-                "author_sc": "coci => no"
+                "id": "oci:02001000808360107040263060509063601050101360136000102000209-02001000007362801010400096300000663060809036300",
+                "citing": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "cited": "doi:10.1007/s11409-006-6893-0 meta:br/062403286732",
+                "creation": "2019-03",
+                "timespan": "P13Y0M6D",
+                "journal_sc": "no",
+                "author_sc": "no"
             },
             {
-                "oci": "doci => 02001000808360107040263060509063601050101360136000102000307-0200101010136193701030605630209020937020000053700020200053733",
-                "citing": "doci => doi:10.1016/j.compedu.2018.11.010",
-                "cited": "doci => doi:10.1111/j.1365-2929.2005.02205.x",
-                "creation": "doci => 2020-03",
-                "timespan": "doci => P14Y8M",
-                "journal_sc": "doci => no",
-                "author_sc": "doci => no"
+                "id": "oci:02001000808360107040263060509063601050101360136000102000307-0200101010136193701030605630209020937020000053700020200053733",
+                "citing": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "cited": "doi:10.1111/j.1365-2929.2005.02205.x meta:br/06901039881",
+                "creation": "2019-03",
+                "timespan": "P13Y8M0D",
+                "journal_sc": "no",
+                "author_sc": "no"
             }
         ]
         format_expected = 'application/json'
-        output = status, sorted(json.loads(results), key=lambda x: x['oci']), format
-        expected_output = status_expected, sorted(result_expected, key=lambda x: x['oci']), format_expected
+        output = status, sorted(json.loads(results), key=lambda x: x['id']), format
+        expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
         self.assertEqual(output, expected_output)
 
     def test_citations(self):
@@ -103,27 +103,27 @@ class test_API(unittest.TestCase):
         status_expected = 200
         result_expected = [
             {
-                "oci": "coci => 02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100",
-                "citing": "coci => doi:10.1088/1742-6596/1511/1/012022",
-                "cited": "coci => doi:10.1016/j.compedu.2018.11.010",
-                "creation": "coci => 2020-03",
-                "timespan": "coci => P1Y0M",
-                "journal_sc": "coci => no",
-                "author_sc": "coci => no"
+                "id": "oci:02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100",
+                "citing": "doi:10.1088/1742-6596/1511/1/012022 meta:br/06150578485",
+                "cited": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "creation": "2019-03",
+                "timespan": "P0Y11M16D",
+                "journal_sc": "no",
+                "author_sc": "no"
             },
             {
-                "oci": "doci => 02001000808360107040263060509063601050101360136000102000307-020010209070336181914281437020001033702010810",
-                "citing": "doci => doi:10.1088/1742-6596/1511/1/012037",
-                "cited": "doci => doi:10.1016/j.compedu.2018.11.010",
-                "creation": "doci => 2020-03",
-                "timespan": "doci => P6Y5M",
-                "journal_sc": "doci => no",
-                "author_sc": "doci => no"
+                "id": "oci:02001000808360107040263060509063601050101360136000102000307-020010209070336181914281437020001033702010810",
+                "citing": "doi:10.1088/1742-6596/1511/1/012037 meta:br/06150578417",
+                "cited": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "creation": "2019-03",
+                "timespan": "P0Y11M16D",
+                "journal_sc": "no",
+                "author_sc": "no"
             }
         ]
         format_expected = 'application/json'
-        output = status, sorted(json.loads(results), key=lambda x: x['oci']), format
-        expected_output = status_expected, sorted(result_expected, key=lambda x: x['oci']), format_expected
+        output = status, sorted(json.loads(results), key=lambda x: x['id']), format
+        expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
         self.assertEqual(output, expected_output)
 
     def test_citation_count(self):
