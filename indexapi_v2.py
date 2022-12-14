@@ -125,7 +125,7 @@ def metadata(res):
             row.extend([
                 (metadata["author"], metadata["author"]),
                 (metadata["editor"], metadata["editor"]), 
-                (metadata["date"], metadata["date"]),
+                (metadata["pub_date"], metadata["pub_date"]),
                 (metadata["title"], metadata["title"]), 
                 (metadata["venue"], metadata["venue"]),
                 (metadata["volume"], metadata["volume"]), 
@@ -162,7 +162,7 @@ def process_citations(res, *args):
     input_id = res[1][input_field][1]
     input_id_index = index_by_id[input_id]['index']
     input_id_metadata = r[input_id_index]
-    input_creation = input_id_metadata['date']
+    input_creation = input_id_metadata['pub_date']
     input_venue_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, input_id_metadata['venue'])
     input_venue_ids = set(input_venue_ids.group(1).split()) if input_venue_ids else set()
     input_authors_ids = get_all_authors_ids(input_id_metadata['author'])
@@ -172,7 +172,7 @@ def process_citations(res, *args):
         other_id_index = index_by_id[other_id]['index']
         other_metadata = r[other_id_index]
         row[other_field] = (other_metadata['id'], other_metadata['id'])
-        other_creation = other_metadata['date']
+        other_creation = other_metadata['pub_date']
         other_venue_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, other_metadata['venue'])
         journal_sc = 'no'
         author_sc = 'no'
