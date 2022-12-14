@@ -7,7 +7,7 @@
 # with or without fee is hereby granted, provided that the above copyright notice
 # and this permission notice appear in all copies.
 #
-# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# THE SOFTWARE IS PROVIDED 'AS IS' AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
 # REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
 # FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
 # OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
@@ -15,11 +15,11 @@
 # ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 # SOFTWARE.
 
-__author__ = 'essepuntato'
+__author__ = 'Arcangelo Massari'
 
 import re
 from json import loads
-from urllib.parse import quote, unquote
+from urllib.parse import quote
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -27,31 +27,11 @@ from requests import get
 
 IDS_WITHIN_SQUARE_BRACKETS = '\[((?:[^\s]+:[^\s]+)(?:\s[^\s]+:[^\s]+)*)\]'
 
-def lower(s):
-    return s.lower(),
-
-def encode(s):
-    return quote(s),
-
-def decode_doi(res, *args):
-    header = res[0]
-    field_idx = []
-    for field in args:
-        field_idx.append(header.index(field))
-    for row in res[1:]:
-        for idx in field_idx:
-            t, v = row[idx]
-            row[idx] = t, unquote(v)
-    return res, True
-
-def split_dois(s):
-    return "\"%s\"" % "\" \"".join(s.split("__")),
-
 def generate_id_search(ids:str):
     id_searches = list()
     r = __meta_parser(ids)
     ids_to_search = ids.split('__')
-    if r is not None and not all([i in ("", None) for i in r]):
+    if r is not None and not all([i in ('', None) for i in r]):
         ids_to_search = [identifier for identifier in r[0]['id'].split() if not identifier.startswith('meta:')]
     for identifier in ids_to_search:
         scheme_literal_value = identifier.split(':')
@@ -60,45 +40,18 @@ def generate_id_search(ids:str):
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'doi':
             id_searches.append(f'"http://dx.doi.org/{literal_value}"')
+            # id_searches.append(f'"https://doi.org/{literal_value}"')
         elif scheme in {'pmid', 'pmcid'}:
             id_searches.append(f'"https://pubmed.ncbi.nlm.nih.gov/{literal_value}"')
     ids_search = ' '.join(id_searches)
     return ids_search, 
 
-def merge(res, *args):
-    final_result = []
-    header = res[0]
-    final_result.append(header)
-    prefix_idx = header.index(args[0])
-    citing_idx = header.index(args[1])
-    cited_idx = header.index(args[2])
-    citations = {}
-    row_idx = 0
-    for row in res[1:]:
-        source = row[prefix_idx][1]
-        citation = row[citing_idx][1], row[cited_idx][1]
-        for idx in range(len(header)):
-            t, v = row[idx]
-            row[idx] = t, source.replace("/", " => ") + v
-        if citation in citations:
-            processed_row = citations[citation]
-            for idx in range(len(header)):
-                t, v = final_result[processed_row][idx]
-                final_result[processed_row][idx] = t, v + "; " + row[idx][1]
-        else:
-            row_idx += 1
-            citations[citation] = row_idx
-            final_result.append(list(row))
-    for row in final_result:
-        row.pop(prefix_idx)
-    return final_result, False
-
 def metadata(res):
     header = res[0]
-    id_field = header.index("id")
-    citation_field = header.index("citation")
-    reference_field = header.index("reference")
-    additional_fields = ["author", "editor", "pub_date", "title", "venue", "volume", "issue", "page"]
+    id_field = header.index('id')
+    citation_field = header.index('citation')
+    reference_field = header.index('reference')
+    additional_fields = ['citation_count', 'author', 'editor', 'pub_date', 'title', 'venue', 'volume', 'issue', 'page']
     header.extend(additional_fields)
     rows_to_remove = []
     processed_metaids = set()
@@ -120,22 +73,23 @@ def metadata(res):
         if metaid in processed_metaids:
             rows_to_remove.append(row)
         else:
-            processed_metaids.add(metaid)
-            row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
-            row.extend([
-                (metadata["author"], metadata["author"]),
-                (metadata["editor"], metadata["editor"]), 
-                (metadata["pub_date"], metadata["pub_date"]),
-                (metadata["title"], metadata["title"]), 
-                (metadata["venue"], metadata["venue"]),
-                (metadata["volume"], metadata["volume"]), 
-                (metadata["issue"], metadata["issue"]),
-                (metadata["page"], metadata["page"])])
             for field, sequence in {citation_field: citations, reference_field: references}.items():
                 new_sequence = set()
                 for real_id in sequence:
-                    new_sequence.add(index_by_id[real_id]['metaid'])
+                    new_sequence.add(index_by_id[real_id]['metaid'])                
                 row[field] = (' '.join(new_sequence), ' '.join(new_sequence))
+            processed_metaids.add(metaid)
+            row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
+            row.extend([
+                (len(row[citation_field][1].split()), len(row[citation_field][1].split())),
+                (metadata['author'], metadata['author']),
+                (metadata['editor'], metadata['editor']), 
+                (metadata['pub_date'], metadata['pub_date']),
+                (metadata['title'], metadata['title']), 
+                (metadata['venue'], metadata['venue']),
+                (metadata['volume'], metadata['volume']), 
+                (metadata['issue'], metadata['issue']),
+                (metadata['page'], metadata['page'])])
     return res, True
 
 def index_meta_results(meta_results: list) -> dict:
@@ -222,10 +176,10 @@ def get_all_authors_ids(authors: str) -> set:
         
 def count_metaids(res):
     r = __meta_parser('__'.join([row[0][0] for row in res[1:]]))
-    return [["count"], [(len(r), str(len(r)))]], True
+    return [['count'], [(len(r), str(len(r)))]], True
 
 def __meta_parser(doi):
-    api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
+    api = 'https://test.opencitations.net/meta/api/v1/metadata/%s'
     try:
         r = get(api % doi, timeout=30)
         if r.status_code == 200:

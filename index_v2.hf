@@ -89,14 +89,16 @@ WHERE {
     ?citing_iri ^cito:hasCitingEntity ?oci_iri .
     ?oci_iri cito:hasCitedEntity ?cited_iri .
     BIND(
-        REPLACE(REPLACE(STR(?citing_iri), 
+        REPLACE(REPLACE(REPLACE(STR(?citing_iri), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:") 
     AS ?citing)
     BIND(
-        REPLACE(REPLACE(STR(?cited_iri), 
+        REPLACE(REPLACE(REPLACE(STR(?cited_iri), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
     AS ?cited)
     BIND(CONCAT("oci:", STRAFTER(STR(?oci_iri), "/ci/")) AS ?id)
 }
@@ -159,14 +161,16 @@ WHERE {
     ?cited_iri ^cito:hasCitedEntity ?oci_iri .
     ?oci_iri cito:hasCitingEntity ?citing_iri .
     BIND(
-        REPLACE(REPLACE(STR(?citing_iri), 
+        REPLACE(REPLACE(REPLACE(STR(?citing_iri), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:") 
     AS ?citing)
     BIND(
-        REPLACE(REPLACE(STR(?cited_iri), 
+        REPLACE(REPLACE(REPLACE(STR(?cited_iri), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
     AS ?cited)
     BIND(CONCAT("oci:", STRAFTER(STR(?oci_iri), "/ci/")) AS ?id)
 }
@@ -228,8 +232,8 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?citing_iri), "doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
         BIND(STRAFTER(str(?g), "/index/") AS ?source)
     }
@@ -240,7 +244,7 @@ LIMIT 50000
 #type operation
 #ids str((doi|issn|isbn|meta):[^__]+(__(doi|issn|isbn|meta):[^__]+)*)
 #preprocess generate_id_search(ids)
-#postprocess metadata() --> decode_doi(id, reference, citation)
+#postprocess metadata()
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input IDs.
 
@@ -292,38 +296,40 @@ It is possible to specify one or more IDs as input of this operation. In this ca
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT DISTINCT ?id ?citation_count ?citation (GROUP_CONCAT(distinct ?cited_doi; separator="; ") as ?reference)
+SELECT DISTINCT ?id ?citation (GROUP_CONCAT(distinct ?cited_id; separator="; ") as ?reference)
 WHERE {
 	VALUES ?citing_id { [[ids]] }
 	BIND(IRI(?citing_id) AS ?citing)
     BIND(
-        REPLACE(REPLACE(STR(?citing_id), 
+        REPLACE(REPLACE(REPLACE(STR(?citing_id), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
         AS ?id)
     OPTIONAL {
 	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
 	    BIND(
-        	REPLACE(REPLACE(STR(?cited), 
+        	REPLACE(REPLACE(REPLACE(STR(?cited), 
             	"https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            	"http://dx.doi.org/", "doi:") 
-        	AS ?cited_doi)
+            	"http://dx.doi.org/", "doi:"),
+                "https://doi.org/", "doi:")
+        	AS ?cited_id)
 	}
 	OPTIONAL {
-	    SELECT ?citing (count(distinct ?citing_source) as ?c_count) (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
+	    SELECT ?citing (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
 	        VALUES ?citing_id { [[ids]] }
 	        BIND(IRI(?citing_id) AS ?citing)
 	        ?citing ^cito:hasCitedEntity ?c .
       		?c cito:hasCitingEntity ?source .
 			BIND(
-          		REPLACE(REPLACE(STR(?source), 
+          		REPLACE(REPLACE(REPLACE(STR(?source), 
             		"https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            		"http://dx.doi.org/", "doi:") 
+            		"http://dx.doi.org/", "doi:"),
+                    "https://doi.org/", "doi:")
           		AS ?citing_source)
 	    } GROUP BY ?citing
 	}
-	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
-} GROUP BY ?id ?citation_count ?citation
+} GROUP BY ?id ?citation
 LIMIT 50000
 
 #url /citation-count/{id}
@@ -350,9 +356,10 @@ WHERE {
     BIND(IRI([[id]]) as ?cited)
     ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing.
     BIND(
-        REPLACE(REPLACE(STR(?citing), 
+        REPLACE(REPLACE(REPLACE(STR(?citing), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
         AS ?citing_source)
 }
 
@@ -380,8 +387,9 @@ WHERE {
     BIND(IRI([[id]]) as ?citing) .
     ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
     BIND(
-        REPLACE(REPLACE(STR(?cited), 
+        REPLACE(REPLACE(REPLACE(STR(?cited), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
         AS ?cited_source)
 }
