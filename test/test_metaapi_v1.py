@@ -1,7 +1,6 @@
 import json
 import time
 import unittest
-from signal import SIGTERM
 from subprocess import Popen
 
 from psutil import process_iter
@@ -14,12 +13,14 @@ api_base = 'http://127.0.0.1:8081/api/v1'
 class test_metaapi_v1(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        already_running = False
         for proc in process_iter():
             for conns in proc.connections(kind='inet'):
                 if conns.laddr.port == 3013:
-                    proc.send_signal(SIGTERM)
-        Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/meta.jnl',f'-Djetty.port=3013', '-jar', f'test/blazegraph.jar'])
-        time.sleep(5)
+                    already_running = True
+        if not already_running:
+            Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/meta.jnl',f'-Djetty.port=3013', '-jar', f'test/blazegraph.jar'])
+            time.sleep(5)
 
     def test_metadata(self):
         operation_url = 'metadata'
