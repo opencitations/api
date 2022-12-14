@@ -37,6 +37,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip3 install ramose
+        pip3 install psutil
         pip3 install coverage
         pip3 install coverage-badge
     - name: Check the coverage
