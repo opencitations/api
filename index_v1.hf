@@ -373,7 +373,7 @@ SELECT (count(DISTINCT ?citing_id) as ?count)
 WHERE {
     VALUES ?cited {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
     ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing .
-    BIND(STRAFTER(str(?citing), "http://dx.doi.org/") as ?citing_id)
+    BIND(STRAFTER(str(?citing), ".org/") as ?citing_id)
 }
 
 #url /reference-count/{doi}
@@ -398,5 +398,5 @@ SELECT (count(DISTINCT ?cited_id) as ?count)
 WHERE {
     VALUES ?citing {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
     ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited .
-    BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_id)
+    BIND(STRAFTER(str(?cited), ".org/") as ?cited_id)
 }
