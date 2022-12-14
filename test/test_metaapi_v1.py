@@ -37,7 +37,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -50,7 +50,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -61,8 +61,8 @@ class test_metaapi_v1(unittest.TestCase):
             }
         ]
         format_expected = 'application/json'
-        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['date']), format
-        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['date'])
+        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['pub_date']), format
+        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['pub_date'])
         expected_output = status_expected, result_expected, format_expected
         self.assertEqual(output, expected_output)
 
@@ -78,7 +78,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -91,7 +91,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "issn:0022-3727 meta:br/0604",
                 "title": "Journal Of Physics D: Applied Physics",
                 "author": "",
-                "date": "",
+                "pub_date": "",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -102,8 +102,8 @@ class test_metaapi_v1(unittest.TestCase):
             }
         ]
         format_expected = 'application/json'
-        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['date']), format
-        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['date'])
+        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['pub_date']), format
+        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['pub_date'])
         expected_output = status_expected, result_expected, format_expected
         self.assertEqual(output, expected_output)
 
@@ -119,7 +119,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -132,7 +132,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -145,7 +145,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "issn:0022-3727 meta:br/0604",
                 "title": "Journal Of Physics D: Applied Physics",
                 "author": "",
-                "date": "",
+                "pub_date": "",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -156,8 +156,8 @@ class test_metaapi_v1(unittest.TestCase):
             }
         ]
         format_expected = 'application/json'
-        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['date']), format
-        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['date'])
+        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['pub_date']), format
+        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['pub_date'])
         expected_output = status_expected, result_expected, format_expected
         self.assertEqual(output, expected_output)
 
@@ -173,7 +173,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -200,7 +200,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -228,7 +228,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 isbn:9789048127108 isbn:9781402096327 meta:br/0601",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -256,7 +256,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 isbn:9789048127108 isbn:9781402096327 meta:br/0601",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -284,7 +284,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -312,7 +312,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -340,7 +340,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1520/f2792-10e01 meta:br/0603",
                 "title": "Terminology For Additive Manufacturing Technologies,",
                 "author": "F42 Committee",
-                "date": "",
+                "pub_date": "",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -368,7 +368,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 isbn:9789048127108 isbn:9781402096327 meta:br/0601",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -396,7 +396,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 isbn:9789048127108 isbn:9781402096327 meta:br/0601",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -424,7 +424,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -452,7 +452,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -488,7 +488,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -516,7 +516,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -529,7 +529,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
@@ -557,7 +557,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
                 "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
-                "date": "2006-06-30",
+                "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
@@ -570,7 +570,7 @@ class test_metaapi_v1(unittest.TestCase):
                 "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
                 "title": "Adaptive Environmental Management",
                 "author": "",
-                "date": "2009",
+                "pub_date": "2009",
                 "page": "",
                 "issue": "",
                 "volume": "",
