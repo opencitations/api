@@ -18,9 +18,9 @@
 name: Run tests
 on:
   push:
-    branches: [ master ]
+    branches: [ test.opencitations.net ]
   pull_request:
-    branches: [ master ]
+    branches: [ test.opencitations.net ]
 jobs:
   CheckCoverage:
     runs-on: ubuntu-latest
