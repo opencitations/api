@@ -18,7 +18,7 @@ import time
 import unittest
 from subprocess import Popen
 
-from psutil import process_iter
+from psutil import AccessDenied, process_iter
 from ramose import APIManager
 
 CONFIG = 'index_v2.hf'
@@ -29,10 +29,13 @@ class test_indexapi_v2(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         already_running = False
-        for proc in process_iter():
-            for conns in proc.connections(kind='inet'):
-                if conns.laddr.port == 3001:
-                    already_running = True
+        try:
+            for proc in process_iter():
+                for conns in proc.connections(kind='inet'):
+                    if conns.laddr.port == 3001:
+                        already_running = True
+        except AccessDenied:
+            pass
         if not already_running:
             Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/index.jnl',f'-Djetty.port=3001', '-jar', f'test/blazegraph.jar'])
             time.sleep(5)
