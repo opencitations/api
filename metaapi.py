@@ -16,11 +16,12 @@
 
 __author__ = 'Arcangelo Massari'
 
+import re
 from difflib import get_close_matches
-from publishers import PUBLISHERS
 from typing import List, Tuple
 from urllib.parse import quote
-import re
+
+from publishers import PUBLISHERS
 
 URI_TYPE_DICT = {
     'http://purl.org/spar/fabio/ArchivalDocument': 'archival document', 
