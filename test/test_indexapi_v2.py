@@ -225,3 +225,26 @@ class test_indexapi_v2(unittest.TestCase):
         output = status, json.loads(results), format
         expected_output = status_expected, result_expected, format_expected
         self.assertEqual(output, expected_output)
+
+    def test_citation_oci(self):
+        operation_url = 'citation'
+        request = '02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100",
+                "citing": "doi:10.1088/1742-6596/1511/1/012022 meta:br/06150578485",
+                "cited": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "creation": "2020-03-01",
+                "timespan": "P0Y11M15D",
+                "journal_sc": "no",
+                "author_sc": "no"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, json.loads(results), format
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
