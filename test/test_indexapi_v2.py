@@ -46,7 +46,6 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
-        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -77,7 +76,6 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
-        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -119,7 +117,6 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
-        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -152,7 +149,6 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
-        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -170,7 +166,6 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
-        print(status, results, format)
         status_expected = 200
         result_expected = [
             {

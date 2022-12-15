@@ -23,7 +23,7 @@ class test_metaapi_v1(unittest.TestCase):
             pass
         if not already_running:
             Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/meta.jnl',f'-Djetty.port=3013', '-jar', f'test/blazegraph.jar'])
-            time.sleep(5)
+            time.sleep(10)
 
     def test_metadata(self):
         operation_url = 'metadata'
