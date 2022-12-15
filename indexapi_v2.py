@@ -15,10 +15,13 @@
 # ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 # SOFTWARE.
 
+from __future__ import annotations
+
 __author__ = 'Arcangelo Massari'
 
 import re
 from json import loads
+from typing import List, Tuple
 from urllib.parse import quote
 
 from dateutil.parser import parse
@@ -39,14 +42,15 @@ def generate_id_search(ids:str):
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'doi':
-            id_searches.append(f'"http://dx.doi.org/{literal_value}"')
-            # id_searches.append(f'"https://doi.org/{literal_value}"')
+            id_searches.append(f'<http://dx.doi.org/{literal_value}>')
+            id_searches.append(f'<https://doi.org/{literal_value}>')
         elif scheme in {'pmid', 'pmcid'}:
-            id_searches.append(f'"https://pubmed.ncbi.nlm.nih.gov/{literal_value}"')
+            id_searches.append(f'<https://pubmed.ncbi.nlm.nih.gov/{literal_value}>')
     ids_search = ' '.join(id_searches)
     return ids_search, 
 
-def metadata(res):
+def metadata(res: list):
+    res = replace_schemas(res)
     header = res[0]
     id_field = header.index('id')
     citation_field = header.index('citation')
@@ -57,9 +61,11 @@ def metadata(res):
     processed_metaids = set()
     identifiers = set()
     for row in res[1:]:
+        citation = filter(None, row[citation_field][1].split('; '))
+        reference = filter(None, row[reference_field][1].split('; '))
         identifiers.add(row[id_field][1])
-        identifiers.update(row[citation_field][1].split('; '))
-        identifiers.update(row[reference_field][1].split('; '))
+        identifiers.update(citation)
+        identifiers.update(reference)
     r = __meta_parser('__'.join(identifiers))
     index_by_id = index_meta_results(r)
     for row in res[1:]:
@@ -90,6 +96,8 @@ def metadata(res):
                 (metadata['volume'], metadata['volume']), 
                 (metadata['issue'], metadata['issue']),
                 (metadata['page'], metadata['page'])])
+    for row in rows_to_remove:
+        res.remove(row)
     return res, True
 
 def index_meta_results(meta_results: list) -> dict:
@@ -101,14 +109,30 @@ def index_meta_results(meta_results: list) -> dict:
             index_by_id[identifier] = {'index': i, 'metaid': metaid}
     return index_by_id
 
+def replace_schemas(res: List[List[Tuple[str, str]]]) -> list:
+    new_res = [res[0]]
+    for row in res[1:]:
+        new_row = list()
+        for row_tuple in row:
+            new_el = row_tuple[1] \
+                .replace('https://doi.org/', 'doi:') \
+                .replace('http://dx.doi.org/', 'doi:') \
+                .replace('https://pubmed.ncbi.nlm.nih.gov/', 'pmid:')
+            new_row.append((new_el, new_el))
+        new_res.append(new_row)
+    return new_res
+
 def process_citations(res, *args):
+    res = replace_schemas(res)
     header = res[0]
     input_field = header.index(args[0])
     other_field = header.index(args[1])
     additional_fields = ['creation', 'timespan', 'journal_sc', 'author_sc']
     header.extend(additional_fields)
     identifiers = set()
+    rows_to_remove = []
     for row in res[1:]:
+        print(row)
         identifiers.add(row[input_field][1])
         identifiers.add(row[other_field][1])
     r = __meta_parser('__'.join(identifiers))
@@ -175,6 +199,7 @@ def get_all_authors_ids(authors: str) -> set:
     return all_authors_ids
         
 def count_metaids(res):
+    res = replace_schemas(res)
     r = __meta_parser('__'.join([row[0][0] for row in res[1:]]))
     return [['count'], [(len(r), str(len(r)))]], True
 

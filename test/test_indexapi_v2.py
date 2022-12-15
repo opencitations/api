@@ -83,7 +83,7 @@ class test_indexapi_v2(unittest.TestCase):
                 "citing": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "cited": "doi:10.1111/j.1365-2729.2010.00383.x meta:br/06150903011",
                 "creation": "2019-03",
-                "timespan": "P8Y3M7D",
+                "timespan": "P8Y3M8D",
                 "journal_sc": "no",
                 "author_sc": "no"
             },
@@ -92,7 +92,7 @@ class test_indexapi_v2(unittest.TestCase):
                 "citing": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "cited": "doi:10.1007/s11409-006-6893-0 meta:br/062403286732",
                 "creation": "2019-03",
-                "timespan": "P13Y0M6D",
+                "timespan": "P13Y0M7D",
                 "journal_sc": "no",
                 "author_sc": "no"
             },
@@ -124,7 +124,7 @@ class test_indexapi_v2(unittest.TestCase):
                 "citing": "doi:10.1088/1742-6596/1511/1/012022 meta:br/06150578485",
                 "cited": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "creation": "2019-03",
-                "timespan": "P0Y11M16D",
+                "timespan": "P0Y11M15D",
                 "journal_sc": "no",
                 "author_sc": "no"
             },
@@ -133,7 +133,7 @@ class test_indexapi_v2(unittest.TestCase):
                 "citing": "doi:10.1088/1742-6596/1511/1/012037 meta:br/06150578417",
                 "cited": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "creation": "2019-03",
-                "timespan": "P0Y11M16D",
+                "timespan": "P0Y11M15D",
                 "journal_sc": "no",
                 "author_sc": "no"
             }
