@@ -45,6 +45,21 @@ def decode_doi(res, *args):
     return res, True
 
 
+def decode_pmid(res, *args):
+    header = res[0]
+    field_idx = []
+
+    for field in args:
+        field_idx.append(header.index(field))
+
+    for row in res[1:]:
+        for idx in field_idx:
+            t, v = row[idx]
+            row[idx] = t, unquote(v)
+
+    return res, True
+
+
 def merge(res, *args):
     final_result = []
     header = res[0]
