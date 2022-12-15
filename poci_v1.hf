@@ -99,8 +99,36 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citations/__TODO__
+#call /citations/12680880
 #output_json [
+  {
+    "id": "oci:01600102060800080800-01600100030901060506",
+    "citing": "pmid:12680880",
+    "cited": "pmid:10391656",
+    "creation": "2003",
+    "timespan": "P4Y",
+    "journal_sc": "no",
+    "author_sc": "no"
+  },
+  {
+    "id": "oci:01600102060800080800-01600100070009030001",
+    "citing": "pmid:12680880",
+    "cited": "pmid:10709301",
+    "creation": "2003",
+    "timespan": "P4Y",
+    "journal_sc": "no",
+    "author_sc": "no"
+  },
+  {
+    "id": "oci:01600102060800080800-01600100070009030101",
+    "citing": "pmid:12680880",
+    "cited": "pmid:10709311",
+    "creation": "2003",
+    "timespan": "P4Y",
+    "journal_sc": "no",
+    "author_sc": "no"
+  },
+  ...
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -157,10 +185,17 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citation/__TODO__
+#call /citation/10414674
 #output_json [
-    {
-    }
+  {
+    "id": "oci:01600102060800080900-01600100040104060704",
+    "citing": "pmid:12680890",
+    "cited": "pmid:10414674",
+    "creation": "2003",
+    "timespan": "P4Y",
+    "journal_sc": "no",
+    "author_sc": "no"
+  }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -207,9 +242,12 @@ LIMIT 50000
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/__TODO__
+#call /citation-count/10414674
 #field_type int(count)
 #output_json [
+  {
+    "count": "1"
+  }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(?c) as ?count)
@@ -230,9 +268,12 @@ WHERE {
 The field returned by this operation is:
 
 * *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/__TODO__
+#call /reference-count/12680890
 #field_type int(count)
 #output_json [
+  {
+    "count": "26"
+  }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(?c) as ?count)
