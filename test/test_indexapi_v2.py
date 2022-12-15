@@ -38,7 +38,7 @@ class test_indexapi_v2(unittest.TestCase):
             pass
         if not already_running:
             Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/index.jnl',f'-Djetty.port=3001', '-jar', f'test/blazegraph.jar'])
-            time.sleep(5)
+            time.sleep(10)
 
     def test_metadata(self):
         operation_url = 'metadata'
@@ -46,6 +46,7 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
+        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -76,6 +77,7 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
+        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -117,6 +119,7 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
+        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -149,6 +152,7 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
+        print(status, results, format)
         status_expected = 200
         result_expected = [
             {
@@ -166,6 +170,7 @@ class test_indexapi_v2(unittest.TestCase):
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
+        print(status, results, format)
         status_expected = 200
         result_expected = [
             {

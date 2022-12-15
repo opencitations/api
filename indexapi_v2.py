@@ -132,7 +132,6 @@ def process_citations(res, *args):
     identifiers = set()
     rows_to_remove = []
     for row in res[1:]:
-        print(row)
         identifiers.add(row[input_field][1])
         identifiers.add(row[other_field][1])
     r = __meta_parser('__'.join(identifiers))
