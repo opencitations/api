@@ -17,10 +17,10 @@ HTTP_HEADERS = {"authorization": "YOUR-OPENCITATIONS-ACCESS-TOKEN"}
 get(API_CALL, headers=HTTP_HEADERS)
 </code></pre>
 
-#version Version 1.1.0 (2020-03-25)
+#version Version 2.0.0 (2022-12-20)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
-#endpoint http://127.0.0.1:9999/blazegraph/sparql
+#endpoint http://127.0.0.1:3001/blazegraph/sparql
 #method post
 #addon indexapi_v2
 
@@ -28,21 +28,20 @@ get(API_CALL, headers=HTTP_HEADERS)
 #type operation
 #id str((doi|pmid):(10\..+|\d+))
 #preprocess generate_id_search(id)
-#postprocess decode_doi(citing, cited) --> merge(source, citing, cited)
+#postprocess process_citations(citing, cited)
 #method get
 #description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input identifier.
 
 The fields returned by this operation are:
 
-* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
-* *citing*: the id of the citing entity;
-* *cited*: the id of the cited entity;
+* *id*: the Open Citation Identifier (OCI) of the citation in consideration. If the citation is in multiple Indexes, multiple OCIs separated by space are reported;
+* *citing*: the identifiers of the citing entity;
+* *cited*: the identifiers of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
-The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
 #call /references/doi:10.1186/1756-8722-6-59
 #output_json [
     {
@@ -82,38 +81,26 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
         "author_sc": "coci => no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#field_type str(id) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited
 WHERE {
-    GRAPH ?g {
-        BIND(IRI([[id]]) as ?citing_iri) .
-        ?citing_iri ^cito:hasCitingEntity ?oci_iri .
-        ?oci_iri
-            cito:hasCitedEntity ?cited_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
-        OPTIONAL {
-            ?oci_iri a cito:JournalSelfCitation .
-            BIND("yes" as ?jsc)
-        }
-        OPTIONAL {
-            ?oci_iri a cito:AuthorSelfCitation .
-            BIND("yes" as ?asc)
-        }
-        BIND(
-            REPLACE(REPLACE(STR(?citing_iri), 
-                "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-                "http://dx.doi.org/", "doi:") 
-        AS ?citing)
-        BIND(
-            REPLACE(REPLACE(STR(?cited_iri), 
-                "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-                "http://dx.doi.org/", "doi:") 
-        AS ?cited)
-        BIND(STRAFTER(STR(?oci_iri), "/ci/") AS ?oci)
-        BIND(STRAFTER(STR(?g), "/index/") AS ?source)
-    }
+    BIND(IRI([[id]]) as ?citing_iri) .
+    ?citing_iri ^cito:hasCitingEntity ?oci_iri .
+    ?oci_iri cito:hasCitedEntity ?cited_iri .
+    BIND(
+        REPLACE(REPLACE(REPLACE(STR(?citing_iri), 
+            "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:") 
+    AS ?citing)
+    BIND(
+        REPLACE(REPLACE(REPLACE(STR(?cited_iri), 
+            "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
+    AS ?cited)
+    BIND(CONCAT("oci:", STRAFTER(STR(?oci_iri), "/ci/")) AS ?id)
 }
 LIMIT 50000
 
@@ -121,15 +108,15 @@ LIMIT 50000
 #type operation
 #id str((doi|pmid):(10\..+|\d+))
 #preprocess generate_id_search(id)
-#postprocess decode_doi(citing, cited) --> merge(source, citing, cited)
+#postprocess process_citations(cited, citing)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input identifier, that constitute the incoming citations of that identified bibliographic entity.
 
 The fields returned by this operation are:
 
-* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
-* *citing*: the identifier of the citing entity;
-* *cited*: the identifier of the cited entity;
+* *id*: the Open Citation Identifier (OCI) of the citation in consideration. If the citation is in multiple Indexes, multiple OCIs separated by space are reported;
+* *citing*: the identifiers of the citing entity;
+* *cited*: the identifiers of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
@@ -166,38 +153,26 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
         "author_sc": "coci => no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#field_type str(id) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?source ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited
 WHERE {
-    GRAPH ?g {
-        BIND(IRI([[id]]) as ?cited_iri) .
-        ?cited_iri ^cito:hasCitedEntity ?oci_iri .
-        ?oci_iri
-            cito:hasCitingEntity ?citing_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
-        OPTIONAL {
-            ?oci_iri a cito:JournalSelfCitation .
-            BIND("yes" as ?jsc)
-        }
-        OPTIONAL {
-            ?oci_iri a cito:AuthorSelfCitation .
-            BIND("yes" as ?asc)
-        }
-        BIND(
-            REPLACE(REPLACE(STR(?citing_iri), 
-                "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-                "http://dx.doi.org/", "doi:") 
-        AS ?citing)
-        BIND(
-            REPLACE(REPLACE(STR(?cited_iri), 
-                "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-                "http://dx.doi.org/", "doi:") 
-        AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
-        BIND(STRAFTER(str(?g), "/index/") AS ?source)
-    }
+    BIND(IRI([[id]]) as ?cited_iri) .
+    ?cited_iri ^cito:hasCitedEntity ?oci_iri .
+    ?oci_iri cito:hasCitingEntity ?citing_iri .
+    BIND(
+        REPLACE(REPLACE(REPLACE(STR(?citing_iri), 
+            "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:") 
+    AS ?citing)
+    BIND(
+        REPLACE(REPLACE(REPLACE(STR(?cited_iri), 
+            "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
+    AS ?cited)
+    BIND(CONCAT("oci:", STRAFTER(STR(?oci_iri), "/ci/")) AS ?id)
 }
 LIMIT 50000
 
@@ -257,8 +232,8 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?citing_iri), "doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
         BIND(STRAFTER(str(?g), "/index/") AS ?source)
     }
@@ -269,7 +244,7 @@ LIMIT 50000
 #type operation
 #ids str((doi|issn|isbn|meta):[^__]+(__(doi|issn|isbn|meta):[^__]+)*)
 #preprocess generate_id_search(ids)
-#postprocess metadata() --> oalink() --> decode_doi(id, reference, citation)
+#postprocess metadata()
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input IDs.
 
@@ -321,45 +296,47 @@ It is possible to specify one or more IDs as input of this operation. In this ca
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT DISTINCT ?id ?citation_count ?citation (GROUP_CONCAT(distinct ?cited_doi; separator="; ") as ?reference)
+SELECT DISTINCT ?id ?citation (GROUP_CONCAT(distinct ?cited_id; separator="; ") as ?reference)
 WHERE {
 	VALUES ?citing_id { [[ids]] }
 	BIND(IRI(?citing_id) AS ?citing)
     BIND(
-        REPLACE(REPLACE(STR(?citing_id), 
+        REPLACE(REPLACE(REPLACE(STR(?citing_id), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
         AS ?id)
     OPTIONAL {
 	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
 	    BIND(
-        	REPLACE(REPLACE(STR(?cited), 
+        	REPLACE(REPLACE(REPLACE(STR(?cited), 
             	"https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            	"http://dx.doi.org/", "doi:") 
-        	AS ?cited_doi)
+            	"http://dx.doi.org/", "doi:"),
+                "https://doi.org/", "doi:")
+        	AS ?cited_id)
 	}
 	OPTIONAL {
-	    SELECT ?citing (count(distinct ?citing_source) as ?c_count) (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
+	    SELECT ?citing (GROUP_CONCAT(distinct ?citing_source; separator="; ") as ?citation) {
 	        VALUES ?citing_id { [[ids]] }
 	        BIND(IRI(?citing_id) AS ?citing)
 	        ?citing ^cito:hasCitedEntity ?c .
       		?c cito:hasCitingEntity ?source .
 			BIND(
-          		REPLACE(REPLACE(STR(?source), 
+          		REPLACE(REPLACE(REPLACE(STR(?source), 
             		"https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            		"http://dx.doi.org/", "doi:") 
+            		"http://dx.doi.org/", "doi:"),
+                    "https://doi.org/", "doi:")
           		AS ?citing_source)
 	    } GROUP BY ?citing
 	}
-	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
-} GROUP BY ?id ?citation_count ?citation
+} GROUP BY ?id ?citation
 LIMIT 50000
 
 #url /citation-count/{id}
 #type operation
 #id str((doi|pmid):(10\..+|\d+))
 #preprocess generate_id_search(id)
-#postprocess deduplicate_based_on_metaids()
+#postprocess count_metaids()
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
 
@@ -379,9 +356,10 @@ WHERE {
     BIND(IRI([[id]]) as ?cited)
     ?cited ^cito:hasCitedEntity/cito:hasCitingEntity ?citing.
     BIND(
-        REPLACE(REPLACE(STR(?citing), 
+        REPLACE(REPLACE(REPLACE(STR(?citing), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
         AS ?citing_source)
 }
 
@@ -389,7 +367,7 @@ WHERE {
 #type operation
 #id str((doi|pmid):(10\..+|\d+))
 #preprocess generate_id_search(id)
-#postprocess deduplicate_based_on_metaids()
+#postprocess count_metaids()
 #method get
 #description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input identifier.
 
@@ -409,8 +387,9 @@ WHERE {
     BIND(IRI([[id]]) as ?citing) .
     ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited
     BIND(
-        REPLACE(REPLACE(STR(?cited), 
+        REPLACE(REPLACE(REPLACE(STR(?cited), 
             "https://pubmed.ncbi.nlm.nih.gov/", "pmid:"), 
-            "http://dx.doi.org/", "doi:") 
+            "http://dx.doi.org/", "doi:"),
+            "https://doi.org/", "doi:")
         AS ?cited_source)
 }

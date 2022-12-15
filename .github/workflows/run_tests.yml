@@ -18,9 +18,9 @@
 name: Run tests
 on:
   push:
-    branches: [ master ]
+    branches: [ test.opencitations.net ]
   pull_request:
-    branches: [ master ]
+    branches: [ test.opencitations.net ]
 jobs:
   CheckCoverage:
     runs-on: ubuntu-latest
@@ -37,15 +37,9 @@ jobs:
     - name: Install dependencies
       run: |
         pip3 install ramose
+        pip3 install psutil
         pip3 install coverage
         pip3 install coverage-badge
-    - name: Run Blazegraph
-      run: |
-        cd test
-        java -server -jar blazegraph.jar &
-        python3 -c 'import time; time.sleep(10)'
-        curl -X POST  http://localhost:9999/blazegraph/namespace/kb/textIndex?force-index-create=true
-        cd ..
     - name: Check the coverage
       run: |
         coverage run --rcfile=test/coverage/.coveragerc
