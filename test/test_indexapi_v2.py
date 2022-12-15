@@ -14,11 +14,11 @@
 # SOFTWARE.
 
 import json
+import socket
 import time
 import unittest
 from subprocess import Popen
 
-from psutil import AccessDenied, process_iter
 from ramose import APIManager
 
 CONFIG = 'index_v2.hf'
@@ -28,21 +28,44 @@ api_base = 'http://127.0.0.1:8080/api/v2'
 class test_indexapi_v2(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        already_running = False
-        try:
-            for proc in process_iter():
-                for conns in proc.connections(kind='inet'):
-                    if conns.laddr.port == 3001:
-                        already_running = True
-        except AccessDenied:
-            pass
-        if not already_running:
-            Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/index.jnl',f'-Djetty.port=3001', '-jar', f'test/blazegraph.jar'])
-            time.sleep(10)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if not s.connect_ex(('localhost', 3001)) == 0:
+                Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/index.jnl',f'-Djetty.port=3001', '-jar', f'test/blazegraph.jar'])
+                time.sleep(10)
 
     def test_metadata(self):
         operation_url = 'metadata'
         request = 'doi:10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "citation": "meta:br/06150578485 meta:br/06150578417",
+                "reference": "meta:br/06901039881 meta:br/062403286732 meta:br/06150903011",
+                "citation_count": "2",
+                "author": "Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan",
+                "editor": "",
+                "pub_date": "2019-03",
+                "title": "Technology Integration Of Pre-Service Teachers Explained By Attitudes And Beliefs, Competency, Access, And Experience",
+                "venue": "Computers & Education [issn:0360-1315]",
+                "volume": "130",
+                "issue": "",
+                "page": "81-93"
+            }
+        ]
+        results = [{k: '; '.join(sorted(v.split('; ')))} if k == 'author' else {k: ' '.join(sorted(v.split()))} if k in {'citation', 'reference', 'id'} else {k:v} for result in json.loads(results) for k, v in result.items()]
+        result_expected = [{k: '; '.join(sorted(v.split('; ')))} if k == 'author' else {k: ' '.join(sorted(v.split()))} if k in {'citation', 'reference', 'id'} else {k:v} for result in result_expected for k, v in result.items()]
+        format_expected = 'application/json'
+        output = status, results, format
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_metadata_non_existing_input(self):
+        operation_url = 'metadata'
+        request = 'doi:12.1016/j.compedu.2018.11.010__doi:10.1016/j.compedu.2018.11.010'
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, results, format = op.exec()
@@ -111,6 +134,19 @@ class test_indexapi_v2(unittest.TestCase):
         expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
         self.assertEqual(output, expected_output)
 
+    def test_references_non_existing_input(self):
+        operation_url = 'references'
+        request = 'doi:10.1016/j.compeda.2018.11.010'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = []
+        format_expected = 'application/json'
+        output = status, sorted(json.loads(results), key=lambda x: x['id']), format
+        expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
+        self.assertEqual(output, expected_output)
+
     def test_citations(self):
         operation_url = 'citations'
         request = 'doi:10.1016/j.compedu.2018.11.010'
@@ -172,6 +208,19 @@ class test_indexapi_v2(unittest.TestCase):
                 "count": "3"
             }
         ]
+        format_expected = 'application/json'
+        output = status, json.loads(results), format
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_reference_count_non_existing_input(self):
+        operation_url = 'reference-count'
+        request = 'doi:10.1016/j.compeda.2018.11.010'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = []
         format_expected = 'application/json'
         output = status, json.loads(results), format
         expected_output = status_expected, result_expected, format_expected

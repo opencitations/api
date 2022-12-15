@@ -1,4 +1,22 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018, Silvio Peroni <essepuntato@gmail.com>
+# Copyright (c) 2022, Arcangelo Massari <arcangelo.massari@unibo.it>
+#
+# Permission to use, copy, modify, and/or distribute this software for any purpose
+# with or without fee is hereby granted, provided that the above copyright notice
+# and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED 'AS IS' AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+# DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+# ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+# SOFTWARE.
+
 import json
+import socket
 import time
 import unittest
 from subprocess import Popen
@@ -13,17 +31,10 @@ api_base = 'http://127.0.0.1:8081/api/v1'
 class test_metaapi_v1(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        already_running = False
-        try:
-            for proc in process_iter():
-                for conns in proc.connections(kind='inet'):
-                    if conns.laddr.port == 3013:
-                        already_running = True
-        except AccessDenied:
-            pass
-        if not already_running:
-            Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/meta.jnl',f'-Djetty.port=3013', '-jar', f'test/blazegraph.jar'])
-            time.sleep(10)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if not s.connect_ex(('localhost', 3013)) == 0:
+                Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/meta.jnl',f'-Djetty.port=3013', '-jar', f'test/blazegraph.jar'])
+                time.sleep(10)
 
     def test_metadata(self):
         operation_url = 'metadata'

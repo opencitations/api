@@ -50,6 +50,8 @@ def generate_id_search(ids:str):
     return ids_search, 
 
 def metadata(res: list):
+    if not res[1:]:
+        return res, True
     res = replace_schemas(res)
     header = res[0]
     id_field = header.index('id')
@@ -70,32 +72,38 @@ def metadata(res: list):
     index_by_id = index_meta_results(r)
     for row in res[1:]:
         starting_ids = [row[id_field][1]]
-        citations = row[citation_field][1].split('; ')
-        references = row[reference_field][1].split('; ')
+        if starting_ids[0] not in index_by_id:
+            rows_to_remove.append(row)
+            continue
         relevant_index = index_by_id[starting_ids[0]]
-        metadata = r[relevant_index['index']]
-        all_ids = metadata['id'].split()
         metaid = relevant_index['metaid']
         if metaid in processed_metaids:
             rows_to_remove.append(row)
-        else:
-            for field, sequence in {citation_field: citations, reference_field: references}.items():
-                new_sequence = set()
-                for real_id in sequence:
-                    new_sequence.add(index_by_id[real_id]['metaid'])                
-                row[field] = (' '.join(new_sequence), ' '.join(new_sequence))
-            processed_metaids.add(metaid)
-            row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
-            row.extend([
-                (len(row[citation_field][1].split()), len(row[citation_field][1].split())),
-                (metadata['author'], metadata['author']),
-                (metadata['editor'], metadata['editor']), 
-                (metadata['pub_date'], metadata['pub_date']),
-                (metadata['title'], metadata['title']), 
-                (metadata['venue'], metadata['venue']),
-                (metadata['volume'], metadata['volume']), 
-                (metadata['issue'], metadata['issue']),
-                (metadata['page'], metadata['page'])])
+            continue
+        citations = row[citation_field][1].split('; ')
+        references = row[reference_field][1].split('; ')
+        metadata = r[relevant_index['index']]
+        all_ids = metadata['id'].split()
+        for field, sequence in {citation_field: citations, reference_field: references}.items():
+            new_sequence = set()
+            for real_id in sequence:
+                if real_id in index_by_id:
+                    new_sequence.add(index_by_id[real_id]['metaid'])
+                else:
+                    new_sequence.add(real_id)              
+            row[field] = (' '.join(new_sequence), ' '.join(new_sequence))
+        processed_metaids.add(metaid)
+        row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
+        row.extend([
+            (len(row[citation_field][1].split()), len(row[citation_field][1].split())),
+            (metadata['author'], metadata['author']),
+            (metadata['editor'], metadata['editor']), 
+            (metadata['pub_date'], metadata['pub_date']),
+            (metadata['title'], metadata['title']), 
+            (metadata['venue'], metadata['venue']),
+            (metadata['volume'], metadata['volume']), 
+            (metadata['issue'], metadata['issue']),
+            (metadata['page'], metadata['page'])])
     for row in rows_to_remove:
         res.remove(row)
     return res, True
@@ -123,6 +131,8 @@ def replace_schemas(res: List[List[Tuple[str, str]]]) -> list:
     return new_res
 
 def process_citations(res, *args):
+    if not res[1:]:
+        return res, True
     res = replace_schemas(res)
     header = res[0]
     input_field = header.index(args[0])
@@ -130,7 +140,6 @@ def process_citations(res, *args):
     additional_fields = ['creation', 'timespan', 'journal_sc', 'author_sc']
     header.extend(additional_fields)
     identifiers = set()
-    rows_to_remove = []
     for row in res[1:]:
         identifiers.add(row[input_field][1])
         identifiers.add(row[other_field][1])
@@ -198,6 +207,8 @@ def get_all_authors_ids(authors: str) -> set:
     return all_authors_ids
         
 def count_metaids(res):
+    if not res[1:]:
+        return res, True
     res = replace_schemas(res)
     r = __meta_parser('__'.join([row[0][0] for row in res[1:]]))
     return [['count'], [(len(r), str(len(r)))]], True
