@@ -144,15 +144,21 @@ def process_citations(res, *args):
     r = __meta_parser('__'.join(identifiers))
     index_by_id = index_meta_results(r)
     input_id = res[1][input_field][1]
+    if input_id not in index_by_id:
+        return [header], True
     input_id_index = index_by_id[input_id]['index']
     input_id_metadata = r[input_id_index]
     input_creation = input_id_metadata['pub_date']
     input_venue_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, input_id_metadata['venue'])
     input_venue_ids = set(input_venue_ids.group(1).split()) if input_venue_ids else set()
     input_authors_ids = get_all_authors_ids(input_id_metadata['author'])
+    rows_to_remove = list()
     for row in res[1:]:
-        row[input_field] = (input_id_metadata['id'], input_id_metadata['id'])
         other_id = row[other_field][1]
+        if other_id not in index_by_id:
+            rows_to_remove.append(row)
+            continue
+        row[input_field] = (input_id_metadata['id'], input_id_metadata['id'])
         other_id_index = index_by_id[other_id]['index']
         other_metadata = r[other_id_index]
         row[other_field] = (other_metadata['id'], other_metadata['id'])
@@ -173,6 +179,8 @@ def process_citations(res, *args):
             (timespan, timespan),
             (journal_sc, journal_sc),
             (author_sc, author_sc)])
+    for row in rows_to_remove:
+        res.remove(row)
     return res, True
 
 def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
@@ -217,7 +225,10 @@ def count_metaids(res):
         return res, True
     res = replace_schemas_and_decode(res)
     r = __meta_parser('__'.join([row[0][0] for row in res[1:]]))
-    return [['count'], [(len(r), str(len(r)))]], True
+    count = 0
+    if r:
+        count = len(r)
+    return [['count'], [(count, count)]], True
 
 def __meta_parser(doi):
     api = 'https://test.opencitations.net/meta/api/v1/metadata/%s'
