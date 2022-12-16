@@ -178,13 +178,19 @@ def process_citations(res, *args):
     return res, True
 
 def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
+    citing_contains_month = citing_pub_date is not None and len(citing_pub_date) >= 7
+    cited_contains_month = cited_pub_date is not None and len(cited_pub_date) >= 7
+    citing_contains_day = citing_pub_date is not None and len(citing_pub_date) >= 10
+    cited_contains_day = cited_pub_date is not None and len(cited_pub_date) >= 10
     citing_pub_datetime = parse(citing_pub_date)
     cited_pub_datetime = parse(cited_pub_date)
+    consider_months = citing_contains_month and cited_contains_month
+    consider_days = citing_contains_day and cited_contains_day
     delta = relativedelta(citing_pub_datetime, cited_pub_datetime)
     result = ''
     if (
         delta.years < 0
-        or (delta.years == 0 and delta.months < 0)
+        or (delta.years == 0 and delta.months < 0 and consider_months)
         or (
             delta.years == 0
             and delta.months == 0
@@ -193,8 +199,10 @@ def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
     ):
         result += '-'
     result += 'P%sY' % abs(delta.years)
-    result += '%sM' % abs(delta.months)
-    result += '%sD' % abs(delta.days)
+    if consider_months:
+        result += "%sM" % abs(delta.months)
+    if consider_days:
+        result += "%sD" % abs(delta.days)
     return result
 
 def get_all_authors_ids(authors: str) -> set:
