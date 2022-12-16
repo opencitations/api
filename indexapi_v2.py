@@ -22,7 +22,7 @@ __author__ = 'Arcangelo Massari'
 import re
 from json import loads
 from typing import List, Tuple
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -52,7 +52,7 @@ def generate_id_search(ids:str):
 def metadata(res: list):
     if not res[1:]:
         return res, True
-    res = replace_schemas(res)
+    res = replace_schemas_and_decode(res)
     header = res[0]
     id_field = header.index('id')
     citation_field = header.index('citation')
@@ -89,8 +89,6 @@ def metadata(res: list):
             for real_id in sequence:
                 if real_id in index_by_id:
                     new_sequence.add(index_by_id[real_id]['metaid'])
-                else:
-                    new_sequence.add(real_id)              
             row[field] = (' '.join(new_sequence), ' '.join(new_sequence))
         processed_metaids.add(metaid)
         row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
@@ -117,7 +115,7 @@ def index_meta_results(meta_results: list) -> dict:
             index_by_id[identifier] = {'index': i, 'metaid': metaid}
     return index_by_id
 
-def replace_schemas(res: List[List[Tuple[str, str]]]) -> list:
+def replace_schemas_and_decode(res: List[List[Tuple[str, str]]]) -> list:
     new_res = [res[0]]
     for row in res[1:]:
         new_row = list()
@@ -126,14 +124,14 @@ def replace_schemas(res: List[List[Tuple[str, str]]]) -> list:
                 .replace('https://doi.org/', 'doi:') \
                 .replace('http://dx.doi.org/', 'doi:') \
                 .replace('https://pubmed.ncbi.nlm.nih.gov/', 'pmid:')
-            new_row.append((new_el, new_el))
+            new_row.append((new_el, unquote(new_el)))
         new_res.append(new_row)
     return new_res
 
 def process_citations(res, *args):
     if not res[1:]:
         return res, True
-    res = replace_schemas(res)
+    res = replace_schemas_and_decode(res)
     header = res[0]
     input_field = header.index(args[0])
     other_field = header.index(args[1])
@@ -217,7 +215,7 @@ def get_all_authors_ids(authors: str) -> set:
 def count_metaids(res):
     if not res[1:]:
         return res, True
-    res = replace_schemas(res)
+    res = replace_schemas_and_decode(res)
     r = __meta_parser('__'.join([row[0][0] for row in res[1:]]))
     return [['count'], [(len(r), str(len(r)))]], True
 
