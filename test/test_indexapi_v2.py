@@ -23,8 +23,10 @@ from ramose import APIManager
 
 api_manager_index = APIManager(['index_v2.hf'])
 api_manager_coci = APIManager(['coci_v2.hf'])
+api_manager_doci = APIManager(['doci_v2.hf'])
 api_base_index = 'http://127.0.0.1:8080/api/v2'
 api_base_coci = 'http://127.0.0.1:8081/api/v2'
+api_base_doci = 'http://127.0.0.1:8082/api/v2'
 
 class test_indexapi_v2(unittest.TestCase):
     @classmethod
@@ -36,7 +38,7 @@ class test_indexapi_v2(unittest.TestCase):
     
     def test_metadata_coci(self):
         operation_url = 'metadata'
-        request = '10.1016/j.compedu.2018.11.010'
+        request = '10.1016/j.compedu.2018.11.010__10.1111/j.1365-2729.2010.00383.x__10.1111/j.1365-2729.2010.00383.k'
         call = "%s/%s/%s" % (api_base_coci, operation_url, request)
         op = api_manager_coci.get_op(call)
         status, result, format = op.exec()
@@ -55,6 +57,63 @@ class test_indexapi_v2(unittest.TestCase):
                 "volume": "130",
                 "issue": "",
                 "page": "81-93"
+            },
+            {
+                "id": "doi:10.1111/j.1365-2729.2010.00383.x meta:br/06150903011",
+                "citation_count": "1",
+                "citation": "doi:10.1016/j.compedu.2018.11.010",
+                "reference": "",
+                "author": "Zhu, Chang [orcid:0000-0002-0057-275X]; Valcke, Martin [orcid:0000-0001-9544-4197]; Tondeur, Jo [orcid:0000-0002-3807-5361]; Sang, Guoyuan; Van Braak, Johan",
+                "editor": "",
+                "pub_date": "2010-12-07",
+                "title": "Predicting ICT Integration Into Classroom Teaching In Chinese Primary Schools: Exploring The Complex Interplay Of Teacher-Related Variables",
+                "venue": "Journal Of Computer Assisted Learning [issn:1365-2729 issn:0266-4909]",
+                "volume": "27",
+                "issue": "2",
+                "page": "160-172"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['pub_date']), format
+        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['pub_date'])
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_metadata_doci(self):
+        operation_url = 'metadata'
+        request = '10.1016/j.compedu.2018.11.010__10.1111/j.1365-2729.2010.00383.x__10.1111/j.1365-2729.2010.00383.k'
+        call = "%s/%s/%s" % (api_base_doci, operation_url, request)
+        op = api_manager_doci.get_op(call)
+        status, result, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "citation_count": "0",
+                "citation": "",
+                "reference": "",
+                "author": "Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan",
+                "editor": "",
+                "pub_date": "2019-03",
+                "title": "Technology Integration Of Pre-Service Teachers Explained By Attitudes And Beliefs, Competency, Access, And Experience",
+                "venue": "Computers & Education [issn:0360-1315]",
+                "volume": "130",
+                "issue": "",
+                "page": "81-93"
+            },
+            {
+                "id": "doi:10.1111/j.1365-2729.2010.00383.x meta:br/06150903011",
+                "citation_count": "0",
+                "citation": "",
+                "reference": "",
+                "author": "Zhu, Chang [orcid:0000-0002-0057-275X]; Valcke, Martin [orcid:0000-0001-9544-4197]; Tondeur, Jo [orcid:0000-0002-3807-5361]; Sang, Guoyuan; Van Braak, Johan",
+                "editor": "",
+                "pub_date": "2010-12-07",
+                "title": "Predicting ICT Integration Into Classroom Teaching In Chinese Primary Schools: Exploring The Complex Interplay Of Teacher-Related Variables",
+                "venue": "Journal Of Computer Assisted Learning [issn:1365-2729 issn:0266-4909]",
+                "volume": "27",
+                "issue": "2",
+                "page": "160-172"
             }
         ]
         format_expected = 'application/json'

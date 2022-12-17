@@ -1,8 +1,8 @@
 #url /api/v2
 #type api
-#base https://w3id.org/oc/index/coci
-#title REST API for COCI, the OpenCitations Index of Crossref open DOI-to-DOI references
-#description This document describe the REST API for accessing the data stored in [COCI](https://w3id.org/oc/index/coci) hosted by [OpenCitations](http://opencitations.net). This API implements operations to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
+#base https://w3id.org/oc/index/doci
+#title REST API for DOCI, the OpenCitations Index of Datacite open DOI-to-DOI references
+#description This document describe the REST API for accessing the data stored in [DOCI](https://w3id.org/oc/index/doci) hosted by [OpenCitations](http://opencitations.net). This API implements operations to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
 All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. If you would like to suggest an additional operation to be included in this API, please use the [issue tracker](https://github.com/opencitations/api/issues) of the OpenCitations APIs available on GitHub.
 
@@ -11,13 +11,13 @@ If you are going to use the REST APIs within an application/code, we encourage y
 <pre style="height: 150px"><code>
 from requests import get
 
-API_CALL = "https://opencitations.net/index/coci/api/v1/references/10.1186/1756-8722-6-59"
+API_CALL = "https://opencitations.net/index/doci/api/v1/references/10.1594/pangaea.108852"
 HTTP_HEADERS = {"authorization": "YOUR-OPENCITATIONS-ACCESS-TOKEN"}
 
 get(API_CALL, headers=HTTP_HEADERS)
 </code></pre>
 
-#version Version 2.0.0 (2022-12-10)
+#version Version 2.0.0 (2022-12-20)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
 #endpoint http://127.0.0.1:3001/blazegraph/sparql
@@ -41,56 +41,32 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /references/10.1186/1756-8722-6-59
+#call /references/10.1594/pangaea.108852
 #output_json [
     {
-        "oci": "02001010806360107050663080702026306630509-0200101080636102703040309",
-        "citing": "10.1186/1756-8722-6-59",
-        "cited": "10.1186/ar3439",
-        "creation": "2013",
-        "timespan": "P2Y",
-        "journal_sc": "no",
-        "author_sc": "no"
-    },
-    {
-        "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
-        "citing": "10.1186/1756-8722-6-59",
-        "cited": "10.1186/ar4086",
-        "creation": "2013",
-        "timespan": "P1Y",
-        "journal_sc": "no",
-        "author_sc": "no"
-    },
-    {
-        "oci": "02001010806360107050663080702026306630509-020010200003619122437020001023704023707090006",
-        "citing": "10.1186/1756-8722-6-59",
-        "cited": "10.1200/jco.2012.42.7906",
-        "creation": "2013",
-        "timespan": "P0Y",
-        "journal_sc": "no",
-        "author_sc": "no"
-    },
-    {
-        "oci": "02001010806360107050663080702026306630509-02003010009360008080300010805370200010237060604070907",
-        "citing": "10.1186/1756-8722-6-59",
-        "cited": "10.3109/08830185.2012.664797",
-        "creation": "2013",
-        "timespan": "P0Y",
-        "journal_sc": "no",
-        "author_sc": "no"
+      "id": "oci:08001050904362510231610141037010008080502-08004030109362124370109090737040237013700000001",
+      "citing": "doi:10.1594/pangaea.108852",
+      "cited": "doi:10.4319/lo.1997.42.1.0001",
+      "creation": "2003",
+      "timespan": "",
+      "journal_sc": "no",
+      "author_sc": "no"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    GRAPH <https://w3id.org/oc/index/coci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?citing_iri) .
+    GRAPH <https://w3id.org/oc/index/doci/> {
+        BIND(<https://doi.org/[[doi]]> as ?citing_iri) .
         ?citing_iri ^cito:hasCitingEntity ?oci_iri .
         ?oci_iri
             cito:hasCitedEntity ?cited_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
+            cito:hasCitationCreationDate ?creation .
+
+        OPTIONAL {
+          ?oci_iri cito:hasCitationTimeSpan ?timespan .
+        }
 
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
@@ -102,9 +78,12 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing_doi)
+        BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
+        BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
+        BIND(CONCAT("oci:", str(?id_val)) as ?id)
     }
 }
 LIMIT 50000
@@ -126,47 +105,50 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citations/10.1002/adfm.201505328
+#call /citations/10.5281/zenodo.3773001
 #output_json [
     {
-        "oci": "0200100030836231029271431221029283702000106370908-02001000002361013152237020001050005030208",
-        "citing": "10.1038/natrevmats.2016.98",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2017-01-17",
-        "timespan": "P11M"
-        "journal_sc": "no",
-        "author_sc": "no"
+      "id": "oci:08005020801363514232413243703070907000600-08005020801363514232413243703070703000001",
+      "citing": "doi:10.5281/zenodo.3797060",
+      "cited": "doi:10.5281/zenodo.3773001",
+      "creation": "2020-04-28",
+      "timespan": "P0D",
+      "journal_sc": "no",
+      "author_sc": "no"
     },
     {
-        "oci": "02001000002361013221037020001070002060708-02001000002361013152237020001050005030208",
-        "citing": "10.1002/adma.201702678",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2017-07-25",
-        "timespan": "P1Y5M8D"
-        "journal_sc": "no",
-        "author_sc": "no"
+      "id": "oci:08005020801363514232413243703070907000604-08005020801363514232413243703070703000001",
+      "citing": "doi:10.5281/zenodo.3797064",
+      "cited": "doi:10.5281/zenodo.3773001",
+      "creation": "2020-04-28",
+      "timespan": "P0D",
+      "journal_sc": "no",
+      "author_sc": "no"
     },
     {
-        "oci": "020010003083623142314271634370200010737010005-02001000002361013152237020001050005030208",
-        "citing": "10.1038/nenergy.2017.105",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2017-07-10",
-        "timespan": "P1Y4M23D"
-        "journal_sc": "no",
-        "author_sc": "no"
+      "id": "oci:08005020801363514232413243703070907000606-08005020801363514232413243703070703000001",
+      "citing": "doi:10.5281/zenodo.3797066",
+      "cited": "doi:10.5281/zenodo.3773001",
+      "creation": "2020-04-28",
+      "timespan": "P0D",
+      "journal_sc": "no",
+      "author_sc": "no"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    GRAPH <https://w3id.org/oc/index/coci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?cited_iri) .
+    GRAPH <https://w3id.org/oc/index/doci/> {
+        BIND(<https://doi.org/[[doi]]> as ?cited_iri) .
         ?cited_iri ^cito:hasCitedEntity ?oci_iri .
         ?oci_iri
             cito:hasCitingEntity ?citing_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
+            cito:hasCitationCreationDate ?creation .
+
+        OPTIONAL {
+            ?oci_iri cito:hasCitationTimeSpan ?timespan .
+        }
 
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
@@ -178,9 +160,12 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing_doi)
+        BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
+        BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
+        BIND(CONCAT("oci:", str(?id_val)) as ?id)
     }
 }
 LIMIT 50000
@@ -205,29 +190,32 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citation/02001010806360107050663080702026306630509-0200101080636102704000806
+#call /citation/08005020801363514232413243703070907000604-08005020801363514232413243703070703000001
 #output_json [
     {
-        "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
-        "citing": "10.1186/1756-8722-6-59",
-        "cited": "10.1186/ar4086",
-        "creation": "2013",
-        "timespan": "P1Y",
-        "journal_sc": "no",
-        "author_sc": "no"
+      "id": "oci:08005020801363514232413243703070907000604-08005020801363514232413243703070703000001",
+      "citing": "doi:10.5281/zenodo.3797064",
+      "cited": "doi:10.5281/zenodo.3773001",
+      "creation": "2020-04-28",
+      "timespan": "P0D",
+      "journal_sc": "no",
+      "author_sc": "no"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
-    GRAPH <https://w3id.org/oc/index/coci/> {
-        BIND(<https://w3id.org/oc/index/coci/ci/[[oci]]> as ?oci_iri) .
+    GRAPH <https://w3id.org/oc/index/doci/> {
+        BIND(<https://w3id.org/oc/index/doci/ci/[[oci]]> as ?oci_iri) .
         ?oci_iri
             cito:hasCitingEntity ?citing_iri ;
             cito:hasCitedEntity ?cited_iri ;
-            cito:hasCitationCreationDate ?creation ;
-            cito:hasCitationTimeSpan ?timespan .
+            cito:hasCitationCreationDate ?creation .
+
+        OPTIONAL {
+            ?oci_iri cito:hasCitationTimeSpan ?timespan .
+        }
 
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
@@ -239,12 +227,67 @@ WHERE {
             BIND("yes" as ?asc)
         }
 
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(STRAFTER(str(?citing_iri), "https://doi.org/") AS ?citing_doi)
+        BIND(CONCAT("doi:", str(?citing_doi)) as ?citing)
+        BIND(STRAFTER(str(?cited_iri), "https://doi.org/") AS ?cited_doi)
+        BIND(CONCAT("doi:", str(?cited_doi)) as ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
+        BIND(CONCAT("oci:", str(?id_val)) as ?id)
     }
 }
 LIMIT 50000
+
+#url /citation-count/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> encode(doi)
+#method get
+#description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
+
+The field returned by this operation is:
+
+* *count*: the number of incoming citations to the input bibliographic entity.
+#call /citation-count/10.5281/zenodo.3773001
+#field_type int(count)
+#output_json [
+    {
+        "count": "3"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?c) as ?count)
+WHERE {
+    GRAPH <https://w3id.org/oc/index/doci/> {
+        BIND(<https://doi.org/[[doi]]> as ?cited) .
+		?cited ^cito:hasCitedEntity ?c
+    }
+}
+
+#url /reference-count/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> encode(doi)
+#method get
+#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
+
+The field returned by this operation is:
+
+* *count*: the number of outgoing citations from the input bibliographic entity.
+#call /reference-count/10.5281/zenodo.3797060
+#field_type int(count)
+#output_json [
+    {
+        "count": "10"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?c) as ?count)
+WHERE {
+    GRAPH <https://w3id.org/oc/index/doci/> {
+        BIND(<https://doi.org/[[doi]]> as ?citing) .
+		?citing ^cito:hasCitingEntity ?c
+    }
+}
 
 #url /metadata/{dois}
 #type operation
@@ -306,80 +349,28 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 SELECT DISTINCT ?id ?citation_count ?citation (GROUP_CONCAT(?cited_doi; separator=" ") as ?reference)
 WITH {
       SELECT ?citing (count(?c) as ?c_count) (GROUP_CONCAT(?citing_source; separator=" ") as ?citation) {
-        GRAPH <https://w3id.org/oc/index/coci/> {
+        GRAPH <https://w3id.org/oc/index/doci/> {
           VALUES ?doi { [[dois]] }
-          BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
+          BIND(IRI(CONCAT("https://doi.org/", ?doi)) as ?citing)
     	    ?citing ^cito:hasCitedEntity ?c .
     	    ?c cito:hasCitingEntity ?source .
-    	    BIND(CONCAT("doi:", STRAFTER(str(?source), "http://dx.doi.org/")) as ?citing_source)
+    	    BIND(CONCAT("doi:", STRAFTER(str(?source), "https://doi.org/")) as ?citing_source)
         }
       } GROUP BY ?citing
 } AS %results
 WHERE {
-    GRAPH <https://w3id.org/oc/index/coci/> {
+    GRAPH <https://w3id.org/oc/index/doci/> {
         OPTIONAL {
             INCLUDE %results
         }
         VALUES ?doi { [[dois]] }
-        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) AS ?citing)
+        BIND(IRI(CONCAT("https://doi.org/", ?doi)) AS ?citing)
         OPTIONAL {
             ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
-            BIND(CONCAT("doi:", STRAFTER(str(?cited), "http://dx.doi.org/")) as ?cited_doi)
+            BIND(CONCAT("doi:", STRAFTER(str(?cited), "https://doi.org/")) as ?cited_doi)
         }
         BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
         BIND(CONCAT("doi:", ?doi) AS ?id)
     }
 } GROUP BY ?id ?citation_count ?citation
 LIMIT 50000
-
-#url /citation-count/{doi}
-#type operation
-#doi str(10\..+)
-#preprocess lower(doi) --> encode(doi)
-#method get
-#description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
-
-The field returned by this operation is:
-
-* *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/10.1002/adfm.201505328
-#field_type int(count)
-#output_json [
-    {
-        "count": "124"
-    }
-]
-#sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(?c) as ?count)
-WHERE {
-    GRAPH <https://w3id.org/oc/index/coci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?cited) .
-		?cited ^cito:hasCitedEntity ?c
-    }
-}
-
-#url /reference-count/{doi}
-#type operation
-#doi str(10\..+)
-#preprocess lower(doi) --> encode(doi)
-#method get
-#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
-
-The field returned by this operation is:
-
-* *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/10.1002/adfm.201505328
-#field_type int(count)
-#output_json [
-    {
-        "count": "55"
-    }
-]
-#sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(?c) as ?count)
-WHERE {
-    GRAPH <https://w3id.org/oc/index/coci/> {
-        BIND(<http://dx.doi.org/[[doi]]> as ?citing) .
-		?citing ^cito:hasCitingEntity ?c
-    }
-}

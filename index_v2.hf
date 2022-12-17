@@ -219,10 +219,9 @@ It is possible to specify one or more IDs as input of this operation. In this ca
 * *reference*: the semicolon-separated MetaIDs of all the entities cited by the bibliographic entity, according to the citation data available in all the OpenCitations Indexes;
 * *citation*: the semicolon-separated MetaIDs of all the entities that cite the bibliographic entity, according to the citation data available in all the OpenCitations Indexes;
 * *citation_count*: the number of citations received by the bibliographic entity;
-* *oa_link*: the link to the Open Access version of the bibliographic entity, if available.
 
 #call /metadata/doi:10.1108/jd-12-2013-0166__doi:10.6084/m9.figshare.3443876
-#field_type str(author) str(editor) datetime(pub_date) str(title) str(venue) str(volume) str(issue) str(page) str(id) str(reference) str(citation) int(citation_count) str(oa_link)
+#field_type str(author) str(editor) datetime(pub_date) str(title) str(venue) str(volume) str(issue) str(page) str(id) str(reference) str(citation) int(citation_count)
 #output_json [
     {
         "citation": "10.1177/0961000615616450; 10.7554/elife.32822; 10.1145/3197026.3197050; 10.1093/bib/bbx057; 10.1007/978-3-319-68204-4_19; 10.3346/jkms.2015.30.11.1545; 10.1007/978-3-319-73165-0_24; 10.3233/sw-160224; 10.3233/sw-180307; 10.1007/978-3-319-90548-8_7; 10.1142/s021964921850034x; 10.1007/978-3-319-58694-6_23; 10.1057/s41275-017-0070-x",
