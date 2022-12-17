@@ -21,7 +21,6 @@ import time
 import unittest
 from subprocess import Popen
 
-from psutil import AccessDenied, process_iter
 from ramose import APIManager
 
 CONFIG = 'meta_v1.hf'

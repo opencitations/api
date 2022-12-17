@@ -21,9 +21,10 @@ from subprocess import Popen
 
 from ramose import APIManager
 
-CONFIG = 'index_v2.hf'
-api_manager = APIManager([CONFIG])
-api_base = 'http://127.0.0.1:8080/api/v2'
+api_manager_index = APIManager(['index_v2.hf'])
+api_manager_coci = APIManager(['coci_v2.hf'])
+api_base_index = 'http://127.0.0.1:8080/api/v2'
+api_base_coci = 'http://127.0.0.1:8081/api/v2'
 
 class test_indexapi_v2(unittest.TestCase):
     @classmethod
@@ -32,12 +33,41 @@ class test_indexapi_v2(unittest.TestCase):
             if not s.connect_ex(('localhost', 3001)) == 0:
                 Popen(['java', '-server', '-Xmx4g', F'-Dcom.bigdata.journal.AbstractJournal.file=test/index.jnl',f'-Djetty.port=3001', '-jar', f'test/blazegraph.jar'])
                 time.sleep(10)
+    
+    def test_metadata_coci(self):
+        operation_url = 'metadata'
+        request = '10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base_coci, operation_url, request)
+        op = api_manager_coci.get_op(call)
+        status, result, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
+                "citation_count": "1",
+                "citation": "doi:10.1088/1742-6596/1511/1/012022",
+                "reference": "doi:10.1111/j.1365-2729.2010.00383.x doi:10.1007/s11409-006-6893-0",
+                "author": "Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan",
+                "editor": "",
+                "pub_date": "2019-03",
+                "title": "Technology Integration Of Pre-Service Teachers Explained By Attitudes And Beliefs, Competency, Access, And Experience",
+                "venue": "Computers & Education [issn:0360-1315]",
+                "volume": "130",
+                "issue": "",
+                "page": "81-93"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['pub_date']), format
+        result_expected = sorted([{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['pub_date'])
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
 
     def test_metadata(self):
         operation_url = 'metadata'
         request = 'doi:10.1016/j.compedu.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
@@ -66,8 +96,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_metadata_non_existing_input(self):
         operation_url = 'metadata'
         request = 'doi:12.1016/j.compedu.2018.11.010__doi:10.1016/j.compedu.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
@@ -96,8 +126,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_references(self):
         operation_url = 'references'
         request = 'doi:10.1016/j.compedu.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
@@ -137,8 +167,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_references_non_existing_input(self):
         operation_url = 'references'
         request = 'doi:10.1016/j.compeda.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = []
@@ -150,8 +180,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_citations(self):
         operation_url = 'citations'
         request = 'doi:10.1016/j.compedu.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
@@ -182,8 +212,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_citation_count(self):
         operation_url = 'citation-count'
         request = 'doi:10.1016/j.compedu.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
@@ -199,8 +229,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_reference_count(self):
         operation_url = 'reference-count'
         request = 'doi:10.1016/j.compedu.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
@@ -216,8 +246,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_reference_count_non_existing_input(self):
         operation_url = 'reference-count'
         request = 'doi:10.1016/j.compeda.2018.11.010'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = []
@@ -229,8 +259,8 @@ class test_indexapi_v2(unittest.TestCase):
     def test_citation_oci(self):
         operation_url = 'citation'
         request = '02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100'
-        call = "%s/%s/%s" % (api_base, operation_url, request)
-        op = api_manager.get_op(call)
+        call = "%s/%s/%s" % (api_base_index, operation_url, request)
+        op = api_manager_index.get_op(call)
         status, results, format = op.exec()
         status_expected = 200
         result_expected = [
