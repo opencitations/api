@@ -45,7 +45,6 @@ class test_indexapi_v2(unittest.TestCase):
                 "id": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "citation": "meta:br/06150578485 meta:br/06150578417",
                 "reference": "meta:br/06901039881 meta:br/062403286732 meta:br/06150903011",
-                "citation_count": "2",
                 "author": "Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan",
                 "editor": "",
                 "pub_date": "2019-03",
@@ -53,7 +52,8 @@ class test_indexapi_v2(unittest.TestCase):
                 "venue": "Computers & Education [issn:0360-1315]",
                 "volume": "130",
                 "issue": "",
-                "page": "81-93"
+                "page": "81-93",
+                "citation_count": "2"
             }
         ]
         results = [{k: '; '.join(sorted(v.split('; ')))} if k == 'author' else {k: ' '.join(sorted(v.split()))} if k in {'citation', 'reference', 'id'} else {k:v} for result in json.loads(results) for k, v in result.items()]
@@ -75,7 +75,6 @@ class test_indexapi_v2(unittest.TestCase):
                 "id": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "citation": "meta:br/06150578485 meta:br/06150578417",
                 "reference": "meta:br/06901039881 meta:br/062403286732 meta:br/06150903011",
-                "citation_count": "2",
                 "author": "Voogt, Joke [orcid:0000-0001-5035-9263]; Smits, Anneke [orcid:0000-0003-4396-7177]; Farjon, Daan",
                 "editor": "",
                 "pub_date": "2019-03",
@@ -83,7 +82,8 @@ class test_indexapi_v2(unittest.TestCase):
                 "venue": "Computers & Education [issn:0360-1315]",
                 "volume": "130",
                 "issue": "",
-                "page": "81-93"
+                "page": "81-93",
+                "citation_count": "2"
             }
         ]
         results = [{k: '; '.join(sorted(v.split('; ')))} if k == 'author' else {k: ' '.join(sorted(v.split()))} if k in {'citation', 'reference', 'id'} else {k:v} for result in json.loads(results) for k, v in result.items()]

@@ -30,6 +30,26 @@ from requests import get
 
 IDS_WITHIN_SQUARE_BRACKETS = '\[((?:[^\s]+:[^\s]+)(?:\s[^\s]+:[^\s]+)*)\]'
 
+def lower(s):
+    return s.lower(),
+
+def encode(s):
+    return quote(s),
+
+def decode_doi(res, *args):
+    header = res[0]
+    field_idx = []
+    for field in args:
+        field_idx.append(header.index(field))
+    for row in res[1:]:
+        for idx in field_idx:
+            t, v = row[idx]
+            row[idx] = t, unquote(v)
+    return res, True
+
+def split_dois(s):
+    return "\"%s\"" % "\" \"".join(s.split("__")),
+
 def generate_id_search(ids:str):
     id_searches = list()
     r = __meta_parser(ids)
@@ -49,7 +69,8 @@ def generate_id_search(ids:str):
     ids_search = ' '.join(id_searches)
     return ids_search, 
 
-def metadata(res: list):
+def metadata(res: list, get_metadata_from_meta: str, id_schemas: str = None):
+    get_metadata_from_meta = True if get_metadata_from_meta == 'True' else False
     if not res[1:]:
         return res, True
     res = replace_schemas_and_decode(res)
@@ -57,7 +78,9 @@ def metadata(res: list):
     id_field = header.index('id')
     citation_field = header.index('citation')
     reference_field = header.index('reference')
-    additional_fields = ['citation_count', 'author', 'editor', 'pub_date', 'title', 'venue', 'volume', 'issue', 'page']
+    additional_fields = ['author', 'editor', 'pub_date', 'title', 'venue', 'volume', 'issue', 'page']
+    if get_metadata_from_meta:
+        additional_fields.append('citation_count')
     header.extend(additional_fields)
     rows_to_remove = []
     processed_metaids = set()
@@ -66,34 +89,35 @@ def metadata(res: list):
         citation = filter(None, row[citation_field][1].split('; '))
         reference = filter(None, row[reference_field][1].split('; '))
         identifiers.add(row[id_field][1])
-        identifiers.update(citation)
-        identifiers.update(reference)
+        if get_metadata_from_meta:
+            identifiers.update(citation)
+            identifiers.update(reference)
     r = __meta_parser('__'.join(identifiers))
     index_by_id = index_meta_results(r)
     for row in res[1:]:
-        starting_ids = [row[id_field][1]]
-        if starting_ids[0] not in index_by_id:
+        starting_id = [row[id_field][1]][0]
+        if starting_id not in index_by_id:
             rows_to_remove.append(row)
             continue
-        relevant_index = index_by_id[starting_ids[0]]
+        relevant_index = index_by_id[starting_id]
         metaid = relevant_index['metaid']
         if metaid in processed_metaids:
             rows_to_remove.append(row)
             continue
-        citations = row[citation_field][1].split('; ')
-        references = row[reference_field][1].split('; ')
         metadata = r[relevant_index['index']]
         all_ids = metadata['id'].split()
-        for field, sequence in {citation_field: citations, reference_field: references}.items():
-            new_sequence = set()
-            for real_id in sequence:
-                if real_id in index_by_id:
-                    new_sequence.add(index_by_id[real_id]['metaid'])
-            row[field] = (' '.join(new_sequence), ' '.join(new_sequence))
+        if get_metadata_from_meta:
+            citations = row[citation_field][1].split('; ')
+            references = row[reference_field][1].split('; ')
+            for field, sequence in {citation_field: citations, reference_field: references}.items():
+                new_sequence = set()
+                for real_id in sequence:
+                    if real_id in index_by_id:
+                        new_sequence.add(index_by_id[real_id]['metaid'])
+                row[field] = (' '.join(new_sequence), ' '.join(new_sequence))
         processed_metaids.add(metaid)
         row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
         row.extend([
-            (len(row[citation_field][1].split()), len(row[citation_field][1].split())),
             (metadata['author'], metadata['author']),
             (metadata['editor'], metadata['editor']), 
             (metadata['pub_date'], metadata['pub_date']),
@@ -102,6 +126,8 @@ def metadata(res: list):
             (metadata['volume'], metadata['volume']), 
             (metadata['issue'], metadata['issue']),
             (metadata['page'], metadata['page'])])
+        if get_metadata_from_meta:
+            row.extend([(len(row[citation_field][1].split()), len(row[citation_field][1].split()))])
     for row in rows_to_remove:
         res.remove(row)
     return res, True

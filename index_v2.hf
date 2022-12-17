@@ -202,7 +202,7 @@ LIMIT 50000
 #type operation
 #ids str((doi|pmid):[^__]+(__(doi|pmid):[^__]+)*)
 #preprocess generate_id_search(ids)
-#postprocess metadata()
+#postprocess metadata(True)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input IDs.
 
@@ -255,19 +255,22 @@ It is possible to specify one or more IDs as input of this operation. In this ca
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT DISTINCT ?id ?citation (GROUP_CONCAT(?cited_id; separator="; ") as ?reference)
+WITH {
+    SELECT DISTINCT ?citing (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
+        VALUES ?id { [[ids]] }
+        BIND(IRI(?id) AS ?citing)
+        ?citing ^cito:hasCitedEntity ?c .
+        ?c cito:hasCitingEntity ?citing_source .
+    } GROUP BY ?citing
+} AS %results
 WHERE {
 	VALUES ?id { [[ids]] }
 	BIND(IRI(?id) AS ?citing)
     OPTIONAL {
+        INCLUDE %results
+    }
+    OPTIONAL {
 	    ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited_id .
-	}
-	OPTIONAL {
-	    SELECT DISTINCT ?citing (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
-	        VALUES ?id { [[ids]] }
-	        BIND(IRI(?id) AS ?citing)
-	        ?citing ^cito:hasCitedEntity ?c .
-      		?c cito:hasCitingEntity ?citing_source .
-	    } GROUP BY ?citing
 	}
 } GROUP BY ?id ?citation
 LIMIT 50000

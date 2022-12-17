@@ -15,11 +15,12 @@
 # SOFTWARE.
 
 __author__ = 'essepuntato'
-from urllib.parse import quote, unquote
-from requests import get
-from rdflib import Graph, URIRef
-from re import sub
 from json import loads
+from re import sub
+from urllib.parse import quote, unquote
+
+from rdflib import Graph, URIRef
+from requests import get
 
 
 def lower(s):

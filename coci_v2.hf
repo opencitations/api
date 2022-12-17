@@ -1,4 +1,4 @@
-#url /api/v1
+#url /api/v2
 #type api
 #base https://w3id.org/oc/index/coci
 #title REST API for COCI, the OpenCitations Index of Crossref open DOI-to-DOI references
@@ -17,10 +17,10 @@ HTTP_HEADERS = {"authorization": "YOUR-OPENCITATIONS-ACCESS-TOKEN"}
 get(API_CALL, headers=HTTP_HEADERS)
 </code></pre>
 
-#version Version 1.3.0 (2020-03-25)
+#version Version 2.0.0 (2022-12-10)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
-#endpoint http://127.0.0.1/index/sparql
+#endpoint http://127.0.0.1:3001/blazegraph/sparql
 #method post
 #addon indexapi_v2
 
@@ -250,7 +250,7 @@ LIMIT 50000
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> encode(dois) --> split_dois(dois)
-#postprocess metadata() --> oalink() --> decode_doi(doi, reference, citation)
+#postprocess metadata(False, doi)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 
@@ -306,30 +306,33 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT DISTINCT ?doi ?citation_count ?citation (GROUP_CONCAT(?cited_doi; separator="; ") as ?reference)
+SELECT DISTINCT ?id ?citation_count ?citation (GROUP_CONCAT(?cited_doi; separator=" ") as ?reference)
+WITH {
+      SELECT ?citing (count(?c) as ?c_count) (GROUP_CONCAT(?citing_source; separator=" ") as ?citation) {
+        GRAPH <https://w3id.org/oc/index/coci/> {
+          VALUES ?doi { [[dois]] }
+          BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
+    	    ?citing ^cito:hasCitedEntity ?c .
+    	    ?c cito:hasCitingEntity ?source .
+    	    BIND(CONCAT("doi:", STRAFTER(str(?source), "http://dx.doi.org/")) as ?citing_source)
+        }
+      } GROUP BY ?citing
+} AS %results
 WHERE {
     GRAPH <https://w3id.org/oc/index/coci/> {
+        OPTIONAL {
+            INCLUDE %results
+        }
         VALUES ?doi { [[dois]] }
-        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
-
+        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) AS ?citing)
         OPTIONAL {
             ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
-            BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
-        }
-
-        OPTIONAL {
-            SELECT ?citing (count(?c) as ?c_count) (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
-                VALUES ?doi { [[dois]] }
-                BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
-                ?citing ^cito:hasCitedEntity ?c .
-                ?c cito:hasCitingEntity ?source .
-                BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
-            } GROUP BY ?citing
+            BIND(CONCAT("doi:", STRAFTER(str(?cited), "http://dx.doi.org/")) as ?cited_doi)
         }
         BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
+        BIND(CONCAT("doi:", ?doi) AS ?id)
     }
-
-} GROUP BY ?doi ?citation_count ?citation
+} GROUP BY ?id ?citation_count ?citation
 LIMIT 50000
 
 #url /citation-count/{doi}
