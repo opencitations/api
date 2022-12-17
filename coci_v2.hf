@@ -34,7 +34,7 @@ get(API_CALL, headers=HTTP_HEADERS)
 
 The fields returned by this operation are:
 
-* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *id*: the Open Citation Identifier (OCI) of the citation in consideration;
 * *citing*: the DOI of the citing entity;
 * *cited*: the DOI of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
@@ -44,7 +44,7 @@ The fields returned by this operation are:
 #call /references/10.1186/1756-8722-6-59
 #output_json [
     {
-        "oci": "02001010806360107050663080702026306630509-0200101080636102703040309",
+        "id": "02001010806360107050663080702026306630509-0200101080636102703040309",
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.1186/ar3439",
         "creation": "2013",
@@ -53,7 +53,7 @@ The fields returned by this operation are:
         "author_sc": "no"
     },
     {
-        "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
+        "id": "02001010806360107050663080702026306630509-0200101080636102704000806",
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.1186/ar4086",
         "creation": "2013",
@@ -80,9 +80,9 @@ The fields returned by this operation are:
         "author_sc": "no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#field_type str(id) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/coci/> {
         BIND(<http://dx.doi.org/[[doi]]> as ?citing_iri) .
@@ -91,20 +91,17 @@ WHERE {
             cito:hasCitedEntity ?cited_iri ;
             cito:hasCitationCreationDate ?creation ;
             cito:hasCitationTimeSpan ?timespan .
-
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
             BIND("yes" as ?jsc)
         }
-
         OPTIONAL {
             ?oci_iri a cito:AuthorSelfCitation .
             BIND("yes" as ?asc)
         }
-
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(CONCAT("doi:", STRAFTER(str(?citing_iri), "http://dx.doi.org/")) AS ?citing)
+        BIND(CONCAT("doi:", STRAFTER(str(?cited_iri), "http://dx.doi.org/")) AS ?cited)
+        BIND(CONCAT("oci:", STRAFTER(str(?oci_iri), "/ci/")) AS ?id)
     }
 }
 LIMIT 50000
@@ -119,7 +116,7 @@ LIMIT 50000
 
 The fields returned by this operation are:
 
-* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *id*: the Open Citation Identifier (OCI) of the citation in consideration;
 * *citing*: the DOI of the citing entity;
 * *cited*: the DOI of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
@@ -156,9 +153,9 @@ The fields returned by this operation are:
         "author_sc": "no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#field_type str(id) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/coci/> {
         BIND(<http://dx.doi.org/[[doi]]> as ?cited_iri) .
@@ -167,20 +164,17 @@ WHERE {
             cito:hasCitingEntity ?citing_iri ;
             cito:hasCitationCreationDate ?creation ;
             cito:hasCitationTimeSpan ?timespan .
-
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
             BIND("yes" as ?jsc)
         }
-
         OPTIONAL {
             ?oci_iri a cito:AuthorSelfCitation .
             BIND("yes" as ?asc)
         }
-
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(CONCAT("doi:", STRAFTER(str(?citing_iri), "http://dx.doi.org/")) AS ?citing)
+        BIND(CONCAT("doi:", STRAFTER(str(?cited_iri), "http://dx.doi.org/")) AS ?cited)
+        BIND(CONCAT("oci:", STRAFTER(str(?oci_iri), "/ci/")) AS ?id)
     }
 }
 LIMIT 50000
@@ -198,7 +192,7 @@ It is worth mentioning that, in this REST operation, the prefix "oci:" **should 
 
 The fields returned by this operation are:
 
-* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *id*: the Open Citation Identifier (OCI) of the citation in consideration;
 * *citing*: the DOI of the citing entity;
 * *cited*: the DOI of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
@@ -208,7 +202,7 @@ The fields returned by this operation are:
 #call /citation/02001010806360107050663080702026306630509-0200101080636102704000806
 #output_json [
     {
-        "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
+        "id": "02001010806360107050663080702026306630509-0200101080636102704000806",
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.1186/ar4086",
         "creation": "2013",
@@ -217,7 +211,7 @@ The fields returned by this operation are:
         "author_sc": "no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#field_type str(id) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
@@ -228,20 +222,17 @@ WHERE {
             cito:hasCitedEntity ?cited_iri ;
             cito:hasCitationCreationDate ?creation ;
             cito:hasCitationTimeSpan ?timespan .
-
         OPTIONAL {
             ?oci_iri a cito:JournalSelfCitation .
             BIND("yes" as ?jsc)
         }
-
         OPTIONAL {
             ?oci_iri a cito:AuthorSelfCitation .
             BIND("yes" as ?asc)
         }
-
-        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
-        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+        BIND(CONCAT("doi:", STRAFTER(str(?citing_iri), "http://dx.doi.org/")) AS ?citing)
+        BIND(CONCAT("doi:", STRAFTER(str(?cited_iri), "http://dx.doi.org/")) AS ?cited)
+        BIND(CONCAT("oci:", STRAFTER(str(?oci_iri), "/ci/")) AS ?oci)
     }
 }
 LIMIT 50000
@@ -250,7 +241,7 @@ LIMIT 50000
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> encode(dois) --> split_dois(dois)
-#postprocess metadata(False, doi)
+#postprocess metadata(False)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 

@@ -69,7 +69,7 @@ def generate_id_search(ids:str):
     ids_search = ' '.join(id_searches)
     return ids_search, 
 
-def metadata(res: list, get_metadata_from_meta: str, id_schemas: str = None):
+def metadata(res: list, get_metadata_from_meta: str):
     get_metadata_from_meta = True if get_metadata_from_meta == 'True' else False
     if not res[1:]:
         return res, True

@@ -182,6 +182,38 @@ class test_indexapi_v2(unittest.TestCase):
         expected_output = status_expected, result_expected, format_expected
         self.assertEqual(output, expected_output)
 
+    def test_references_coci(self):
+        operation_url = 'references'
+        request = '10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base_coci, operation_url, request)
+        op = api_manager_coci.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "oci:02001000808360107040263060509063601050101360136000102000202-0200101010136193701030605630207020937020000000308033733",
+                "citing": "doi:10.1016/j.compedu.2018.11.010",
+                "cited": "doi:10.1111/j.1365-2729.2010.00383.x",
+                "creation": "2020-03",
+                "timespan": "P9Y3M",
+                "journal_sc": "no",
+                "author_sc": "no"
+            },
+            {
+                "id": "oci:02001000808360107040263060509063601050101360136000102000209-02001000007362801010400096300000663060809036300",
+                "citing": "doi:10.1016/j.compedu.2018.11.010",
+                "cited": "doi:10.1007/s11409-006-6893-0",
+                "creation": "2020-03",
+                "timespan": "P14Y0M",
+                "journal_sc": "no",
+                "author_sc": "no"
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, sorted(json.loads(results), key=lambda x: x['id']), format
+        expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
+        self.assertEqual(output, expected_output)
+
     def test_references(self):
         operation_url = 'references'
         request = 'doi:10.1016/j.compedu.2018.11.010'
@@ -231,6 +263,29 @@ class test_indexapi_v2(unittest.TestCase):
         status, results, format = op.exec()
         status_expected = 200
         result_expected = []
+        format_expected = 'application/json'
+        output = status, sorted(json.loads(results), key=lambda x: x['id']), format
+        expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_citations_coci(self):
+        operation_url = 'citations'
+        request = '10.1016/j.compedu.2018.11.010'
+        call = "%s/%s/%s" % (api_base_coci, operation_url, request)
+        op = api_manager_coci.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "oci:02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100",
+                "citing": "doi:10.1088/1742-6596/1511/1/012022",
+                "cited": "doi:10.1016/j.compedu.2018.11.010",
+                "creation": "2020-03",
+                "timespan": "P1Y0M",
+                "journal_sc": "no",
+                "author_sc": "no"
+            }
+        ]
         format_expected = 'application/json'
         output = status, sorted(json.loads(results), key=lambda x: x['id']), format
         expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
@@ -310,6 +365,29 @@ class test_indexapi_v2(unittest.TestCase):
         status, results, format = op.exec()
         status_expected = 200
         result_expected = []
+        format_expected = 'application/json'
+        output = status, json.loads(results), format
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_citation_oci_coci(self):
+        operation_url = 'citation'
+        request = '02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100'
+        call = "%s/%s/%s" % (api_base_coci, operation_url, request)
+        op = api_manager_coci.get_op(call)
+        status, results, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "oci": "oci:02001000808360107040263060509063601050101360136000102000202-0200100010636193712242225141330370200010837010137000100",
+                "citing": "doi:10.1088/1742-6596/1511/1/012022",
+                "cited": "doi:10.1016/j.compedu.2018.11.010",
+                "creation": "2020-03",
+                "timespan": "P1Y0M",
+                "journal_sc": "no",
+                "author_sc": "no"
+            }
+        ]
         format_expected = 'application/json'
         output = status, json.loads(results), format
         expected_output = status_expected, result_expected, format_expected
