@@ -15,7 +15,7 @@
 # ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 # SOFTWARE.
 
-from __future__ import annotations
+# from __future__ import annotations
 
 __author__ = 'Arcangelo Massari'
 
@@ -62,10 +62,10 @@ def generate_id_search(ids:str):
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'doi':
-            id_searches.append(f'<http://dx.doi.org/{literal_value}>')
-            id_searches.append(f'<https://doi.org/{literal_value}>')
+            id_searches.append('<http://dx.doi.org/{0}>'.format(literal_value))
+            id_searches.append('<https://doi.org/{0}>'.format(literal_value))
         elif scheme in {'pmid', 'pmcid'}:
-            id_searches.append(f'<https://pubmed.ncbi.nlm.nih.gov/{literal_value}>')
+            id_searches.append('<https://pubmed.ncbi.nlm.nih.gov/{0}>'.format(literal_value))
     ids_search = ' '.join(id_searches)
     return ids_search, 
 
