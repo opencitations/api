@@ -50,8 +50,7 @@ It is possible to specify one or more IDs as input of this operation. In this ca
         "editor": "Allan, Catherine [orcid:0000-0003-2098-4759]; Stankey, George H."
     }
 ]
-#sparql
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+#sparql PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX pro: <http://purl.org/spar/pro/>
 PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
 PREFIX datacite: <http://purl.org/spar/datacite/>
@@ -247,8 +246,7 @@ The fields returned by this operation are:
         "editor": ""
     }
 ]
-#sparql
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+#sparql PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX pro: <http://purl.org/spar/pro/>
 PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
 PREFIX datacite: <http://purl.org/spar/datacite/>
@@ -435,8 +433,7 @@ The fields returned by this operation are:
       "editor": "Allan, Catherine [orcid:0000-0003-2098-4759]; Stankey, George H."
   }
 ]
-#sparql
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+#sparql PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX pro: <http://purl.org/spar/pro/>
 PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
 PREFIX datacite: <http://purl.org/spar/datacite/>
