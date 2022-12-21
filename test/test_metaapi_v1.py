@@ -53,20 +53,20 @@ class test_metaapi_v1(unittest.TestCase):
                 "volume": "",
                 "venue": "",
                 "type": "book",
-                "publisher": "Springer Science And Business Media Llc [crossref:297]",
-                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759]; Stankey, George H."
+                "publisher": "Springer Science And Business Media Llc [crossref:297 meta:ra/0601]",
+                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759 meta:ra/0602]; Stankey, George H. [meta:ra/0603]"
             },
             {
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
-                "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
+                "author": "Montijn, Carolynne [meta:ra/0604]; Ebert, Ute [orcid:0000-0003-3891-6869 meta:ra/0605]",
                 "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
-                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727]",
+                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727 meta:br/0604]",
                 "type": "journal article",
-                "publisher": "Iop Publishing [crossref:266]",
+                "publisher": "Iop Publishing [crossref:266 meta:ra/0606]",
                 "editor": ""
             }
         ]
@@ -94,8 +94,8 @@ class test_metaapi_v1(unittest.TestCase):
                 "volume": "",
                 "venue": "",
                 "type": "book",
-                "publisher": "Springer Science And Business Media Llc [crossref:297]",
-                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759]; Stankey, George H."
+                "publisher": "Springer Science And Business Media Llc [crossref:297 meta:ra/0601]",
+                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759 meta:ra/0602]; Stankey, George H. [meta:ra/0603]"
             },
             {
                 "id": "issn:0022-3727 meta:br/0604",
@@ -128,14 +128,14 @@ class test_metaapi_v1(unittest.TestCase):
             {
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
-                "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
+                "author": "Montijn, Carolynne [meta:ra/0604]; Ebert, Ute [orcid:0000-0003-3891-6869 meta:ra/0605]",
                 "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
-                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727]",
+                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727 meta:br/0604]",
                 "type": "journal article",
-                "publisher": "Iop Publishing [crossref:266]",
+                "publisher": "Iop Publishing [crossref:266 meta:ra/0606]",
                 "editor": ""
             },
             {
@@ -148,8 +148,8 @@ class test_metaapi_v1(unittest.TestCase):
                 "volume": "",
                 "venue": "",
                 "type": "book",
-                "publisher": "Springer Science And Business Media Llc [crossref:297]",
-                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759]; Stankey, George H."
+                "publisher": "Springer Science And Business Media Llc [crossref:297 meta:ra/0601]",
+                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759 meta:ra/0602]; Stankey, George H. [meta:ra/0603]"
             },
             {
                 "id": "issn:0022-3727 meta:br/0604",
@@ -182,14 +182,14 @@ class test_metaapi_v1(unittest.TestCase):
             {
                 "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
                 "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
-                "author": "Montijn, Carolynne; Ebert, Ute [orcid:0000-0003-3891-6869]",
+                "author": "Montijn, Carolynne [meta:ra/0604]; Ebert, Ute [orcid:0000-0003-3891-6869 meta:ra/0605]",
                 "pub_date": "2006-06-30",
                 "page": "2979-2992",
                 "issue": "14",
                 "volume": "39",
-                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727]",
+                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727 meta:br/0604]",
                 "type": "journal article",
-                "publisher": "Iop Publishing [crossref:266]",
+                "publisher": "Iop Publishing [crossref:266 meta:ra/0606]",
                 "editor": ""
             }]
         format_expected = 'application/json'
@@ -216,8 +216,8 @@ class test_metaapi_v1(unittest.TestCase):
                 "volume": "",
                 "venue": "",
                 "type": "book",
-                "publisher": "Springer Science And Business Media Llc [crossref:297]",
-                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759]; Stankey, George H."
+                "publisher": "Springer Science And Business Media Llc [crossref:297 meta:ra/0601]",
+                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759 meta:ra/0602]; Stankey, George H. [meta:ra/0603]"
             }]
         format_expected = 'application/json'
         output = status, [{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], format
