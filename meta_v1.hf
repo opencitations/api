@@ -2,7 +2,7 @@
 #type api
 #base https://test.opencitations.net/meta
 #title REST API for OC Meta
-#description This is the REST API for OC Meta, the OpenCitations Index containing bibliographic metadata associated with the documents involved in the citations stored in the OpenCitations infrastructure. All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. If you would like to suggest an additional operation to be included in this API, please use the [issue tracker](https://github.com/opencitations/api/issues) of the OpenCitations APIs available on GitHub.
+#description This is the REST API for OpenCitations Meta, the OpenCitations dataset containing bibliographic metadata associated with the documents involved in the citations stored in the OpenCitations Indexes. All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. If you would like to suggest an additional operation to be included in this API, please use the [issue tracker](https://github.com/opencitations/api/issues) of the OpenCitations APIs available on GitHub.
 #version Version 1.1.0 (2022-12-21)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
@@ -204,12 +204,15 @@ WHERE {
 }
 GROUP BY ?id
 
-#url /author/{orcid}
+#url /author/{orcid_or_omid}
 #type operation
-#orcid str(([0-9]{4}-){3}[0-9]{3}[0-9X])
+#orcid_or_omid str((([0-9]{4}-){3}[0-9]{3}[0-9X]|meta:ra/06[1-9]*0\d+))
+#preprocess generate_ra_search(orcid_or_omid)
 #postprocess create_metadata_output()
 #method get
-#description This operation retrieves the bibliographic metadata for each bibliographic entity authored by the person identified by the given ORCID
+#description This operation retrieves the bibliographic metadata for each bibliographic entity authored by the person identified by the given ORCID or OpenCitations Meta Identifier.
+
+The ORCID must be specified without prefixes (e.g., <code>0000-0003-1572-6747</code>), while the OMID must be preceded by the <code>meta:</code> prefix (e.g., <code>meta:ra/0601</code>).
 
 The fields returned by this operation are:
 
@@ -222,34 +225,47 @@ The fields returned by this operation are:
 * *issue*: the number of the issue in which the bibliographic entity has been published
 * *page*: the starting and ending pages of the bibliographic entity in the context of the venue where it has been published
 * *type*: the type of the bibliographic entity
-#call /author/0000-0003-1572-6747
+#call /author/0000-0002-8420-0696
 #field_type str(id) str(title) str(author) datetime(pub_date) str(issue) str(volume) str(venue) str(page) str(type) str(publisher) str(editor)
 #output_json [
     {
-        "id": "doi:10.1016/b978-0-12-802508-6.00019-3 meta:br/06140145109",
-        "title": "Chaotic Dynamical States In The Izhikevich Neuron Model",
-        "author": "Nishimura, Haruhiko [orcid:0000-0003-1572-6747]; Nobukawa, Sou; Yamanishi, Teruya; Liu, Jian-Qin",
-        "pub_date": "2015",
-        "page": "355-375",
-        "issue": "",
-        "volume": "",
-        "venue": "",
-        "type": "book chapter",
-        "publisher": "Elsevier Bv [crossref:78]",
-        "editor": ""
+        "page": "3593-3612",
+        "publisher": "Springer Science And Business Media Llc [crossref:297]",
+        "editor": "",
+        "issue": "6",
+        "title": "Identifying And Correcting Invalid Citations Due To DOI Errors In Crossref Data",
+        "type": "journal article",
+        "pub_date": "2022-06",
+        "venue": "Scientometrics [issn:1588-2861 issn:0138-9130]",
+        "volume": "127",
+        "author": "Peroni, Silvio [orcid:0000-0003-0530-4305]; Santini, Cristian [orcid:0000-0001-7363-6737]; Shahidzadeh, Nooshin [orcid:0000-0003-4114-074X]; Massari, Arcangelo [orcid:0000-0002-8420-0696]; Cioffi, Alessia [orcid:0000-0002-9812-4065]; Coppini, Sara [orcid:0000-0002-6279-3830]; Moretti, Arianna [orcid:0000-0001-5486-7070]",
+        "id": "doi:10.1007/s11192-022-04367-w meta:br/061202127149"
     },
     {
-        "id": "doi:10.1109/codit.2018.8394794 meta:br/0660204158",
-        "title": "Induced Synchronization Of Chaos-Chaos Intermittency In Coupled Cubic Maps By External Feedback Signals",
-        "author": "Nishimura, Haruhiko [orcid:0000-0003-1572-6747]; Nobukawa, Sou; Yamanishi, Teruya; Doho, Hirotaka",
-        "pub_date": "2018-04",
-        "page": "",
+        "page": "379-385",
+        "publisher": "Springer Science And Business Media Llc [crossref:297]",
+        "editor": "",
         "issue": "",
+        "title": "Enabling Portability And Reusability Of Open Science Infrastructures",
+        "type": "book chapter",
+        "pub_date": "2022",
+        "venue": "Linking Theory And Practice Of Digital Libraries [isbn:9783031168017 isbn:9783031168024]",
         "volume": "",
+        "author": "Peroni, Silvio [orcid:0000-0003-0530-4305]; Heibi, Ivan [orcid:0000-0001-5366-5194]; Massari, Arcangelo [orcid:0000-0002-8420-0696]; Moretti, Arianna [orcid:0000-0001-5486-7070]; Grieco, Giuseppe [orcid:0000-0001-5439-4576]",
+        "id": "doi:10.1007/978-3-031-16802-4_36 meta:br/061603442625"
+    },
+    {
+        "page": "",
+        "publisher": "ZappyLab, Inc. [crossref:7078]",
+        "editor": "",
+        "issue": "",
+        "title": "Protocol: Investigating DOIs Classes Of Errors V5",
+        "type": "web content",
+        "pub_date": "2021-05-08",
         "venue": "",
-        "type": "proceedings article",
-        "publisher": "Institute Of Electrical And Electronics Engineers (Ieee) [crossref:263]",
-        "editor": ""
+        "volume": "",
+        "author": "Santini, Cristian [orcid:0000-0001-7363-6737]; Massari, Arcangelo [orcid:0000-0002-8420-0696]; Boente, Ricarda [orcid:0000-0002-2133-8735]; Tural, Deniz [orcid:0000-0002-6391-4198]",
+        "id": "doi:10.17504/protocols.io.buuknwuw meta:br/06903005993"
     }
 ]
 #sparql PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -275,13 +291,10 @@ SELECT DISTINCT
 WITH {
   SELECT DISTINCT ?res
   WHERE {
-    ?knownPersonIdentifier literal:hasLiteralValue "[[orcid]]";
-                           datacite:usesIdentifierScheme datacite:orcid.
-    ?knownPerson datacite:hasIdentifier ?knownPersonIdentifier.
-    ?knownAuthor pro:isHeldBy ?knownPerson;
-                 pro:withRole pro:author.
-    ?res pro:isDocumentContextFor ?knownAuthor;
-        a fabio:Expression.
+    [[orcid_or_omid]]
+    ?knownRole pro:withRole pro:author.
+    ?res pro:isDocumentContextFor ?knownRole;
+          a fabio:Expression.
   } LIMIT 1000
 } AS %results
 WHERE {
@@ -410,12 +423,15 @@ WHERE {
 }
 GROUP BY ?id
 
-#url /editor/{orcid}
+#url /editor/{orcid_or_omid}
 #type operation
-#orcid str(([0-9]{4}-){3}[0-9]{3}[0-9X])
+#orcid_or_omid str((([0-9]{4}-){3}[0-9]{3}[0-9X]|meta:ra/06[1-9]*0\d+))
+#preprocess generate_ra_search(orcid_or_omid)
 #postprocess create_metadata_output()
 #method get
-#description This operation retrieves the bibliographic metadata for each bibliographic entity edited by the person identified by the given ORCID
+#description This operation retrieves the bibliographic metadata for each bibliographic entity edited by the person identified by the given ORCID or OpenCitations Meta Identifier.
+
+The ORCID must be specified without prefixes (e.g., <code>0000-0003-1572-6747</code>), while the OMID must be preceded by the <code>meta:</code> prefix (e.g., <code>meta:ra/0601</code>).
 
 The fields returned by this operation are:
 
@@ -468,13 +484,10 @@ SELECT DISTINCT
 WITH {
   SELECT DISTINCT ?res
   WHERE {
-    ?knownPersonIdentifier literal:hasLiteralValue "[[orcid]]";
-                           datacite:usesIdentifierScheme datacite:orcid.
-    ?knownPerson datacite:hasIdentifier ?knownPersonIdentifier.
-    ?knownEditor pro:isHeldBy ?knownPerson;
-                 pro:withRole pro:editor.
-    ?res pro:isDocumentContextFor ?knownEditor;
-         a fabio:Expression.    
+    [[orcid_or_omid]]
+    ?knownRole pro:withRole pro:editor.
+    ?res pro:isDocumentContextFor ?knownRole;
+          a fabio:Expression.
   } LIMIT 1000
 } AS %results
 WHERE {

@@ -198,9 +198,63 @@ class test_metaapi_v1(unittest.TestCase):
         expected_output = status_expected, result_expected, format_expected
         self.assertEqual(output, expected_output)
 
+    def test_author_by_omid(self):
+        operation_url = 'author'
+        request = 'meta:ra/0604'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, result, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
+                "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
+                "author": "Montijn, Carolynne [meta:ra/0604]; Ebert, Ute [orcid:0000-0003-3891-6869 meta:ra/0605]",
+                "pub_date": "2006-06-30",
+                "page": "2979-2992",
+                "issue": "14",
+                "volume": "39",
+                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727 meta:br/0604]",
+                "type": "journal article",
+                "publisher": "Iop Publishing [crossref:266 meta:ra/0606]",
+                "editor": ""
+            }]
+        format_expected = 'application/json'
+        output = status, [{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], format
+        result_expected = [{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected]
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
     def test_editor(self):
         operation_url = 'editor'
         request = '0000-0003-2098-4759'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, result, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
+                "title": "Adaptive Environmental Management",
+                "author": "",
+                "pub_date": "2009",
+                "page": "",
+                "issue": "",
+                "volume": "",
+                "venue": "",
+                "type": "book",
+                "publisher": "Springer Science And Business Media Llc [crossref:297 meta:ra/0601]",
+                "editor": "Allan, Catherine [orcid:0000-0003-2098-4759 meta:ra/0602]; Stankey, George H. [meta:ra/0603]"
+            }]
+        format_expected = 'application/json'
+        output = status, [{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], format
+        result_expected = [{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected]
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
+    def test_editor_by_omid(self):
+        operation_url = 'editor'
+        request = 'meta:ra/0602'
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, result, format = op.exec()

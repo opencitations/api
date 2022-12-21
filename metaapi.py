@@ -65,7 +65,19 @@ def generate_id_search(ids:str) -> Tuple[str]:
                 ?res datacite:hasIdentifier ?identifier;
                      a fabio:Expression.}}'''.format(literal_value, scheme))
     ids_search = 'UNION'.join(id_searches)
-    return ids_search, 
+    return ids_search,
+
+def generate_ra_search(orcid_or_omid:str) -> Tuple[str]:
+    scheme_literal_value = orcid_or_omid.split(':')
+    if len(scheme_literal_value) == 2:
+        return '<https://w3id.org/oc/meta/{0}> ^pro:isHeldBy ?knownRole.'.format(scheme_literal_value[1]),
+    else:
+        return '''
+            ?knownPersonIdentifier literal:hasLiteralValue "{0}";
+                                   datacite:usesIdentifierScheme datacite:orcid.
+            ?knownPerson datacite:hasIdentifier ?knownPersonIdentifier;
+                         ^pro:isHeldBy ?knownRole.
+        '''.format(scheme_literal_value[0]),
 
 def create_metadata_output(results):
     header = results[0]
