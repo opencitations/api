@@ -169,68 +169,64 @@ def replace_schemas_and_decode(res: List[List[Tuple[str, str]]]) -> list:
 
 
 def process_citations(res, *args):
-    try:
-        if not res[1:]:
-            return res, True
-        res = replace_schemas_and_decode(res)
-        header = res[0]
-        input_field = header.index(args[0])
-        other_field = header.index(args[1])
-        additional_fields = ['creation', 'timespan', 'journal_sc', 'author_sc']
-        header.extend(additional_fields)
-        identifiers = set()
-        for row in res[1:]:
-            identifiers.add(row[input_field][1])
-            identifiers.add(row[other_field][1])
-        r = __meta_parser('__'.join(identifiers))
-        index_by_id = index_meta_results(r)
-        input_id = res[1][input_field][1]
-        if input_id not in index_by_id:
-            return [header], True
-        input_id_index = index_by_id[input_id]['index']
-        input_id_metadata = r[input_id_index]
-        input_creation = input_id_metadata['pub_date']
-        input_venue_ids = re.search(
-            IDS_WITHIN_SQUARE_BRACKETS, input_id_metadata['venue'])
-        input_venue_ids = set(input_venue_ids.group(
-            1).split()) if input_venue_ids else set()
-        input_authors_ids = get_all_authors_ids(input_id_metadata['author'])
-        rows_to_remove = list()
-        for row in res[1:]:
-            other_id = row[other_field][1]
-            if other_id not in index_by_id:
-                rows_to_remove.append(row)
-                continue
-            row[input_field] = (input_id_metadata['id'],
-                                input_id_metadata['id'])
-            other_id_index = index_by_id[other_id]['index']
-            other_metadata = r[other_id_index]
-            row[other_field] = (other_metadata['id'], other_metadata['id'])
-            other_creation = other_metadata['pub_date']
-            other_venue_ids = re.search(
-                IDS_WITHIN_SQUARE_BRACKETS, other_metadata['venue'])
-            journal_sc = 'no'
-            author_sc = 'no'
-            if other_venue_ids and input_venue_ids:
-                other_venue_ids = other_venue_ids.group(1).split()
-                if input_venue_ids.intersection(other_venue_ids):
-                    journal_sc = 'yes'
-            other_authors_ids = get_all_authors_ids(other_metadata['author'])
-            if input_authors_ids.intersection(other_authors_ids):
-                author_sc = 'yes'
-            timespan = calculate_timespan(input_creation, other_creation) if args[0] == 'citing' else calculate_timespan(
-                other_creation, input_creation)
-            row.extend([
-                (input_creation, input_creation),
-                (timespan, timespan),
-                (journal_sc, journal_sc),
-                (author_sc, author_sc)])
-        for row in rows_to_remove:
-            res.remove(row)
+    if not res[1:]:
         return res, True
-    except Exception as e:
-        print(e)
-        return res, True
+    res = replace_schemas_and_decode(res)
+    header = res[0]
+    input_field = header.index(args[0])
+    other_field = header.index(args[1])
+    additional_fields = ['creation', 'timespan', 'journal_sc', 'author_sc']
+    header.extend(additional_fields)
+    identifiers = set()
+    for row in res[1:]:
+        identifiers.add(row[input_field][1])
+        identifiers.add(row[other_field][1])
+    r = __meta_parser('__'.join(identifiers))
+    index_by_id = index_meta_results(r)
+    input_id = res[1][input_field][1]
+    if input_id not in index_by_id:
+        return [header], True
+    input_id_index = index_by_id[input_id]['index']
+    input_id_metadata = r[input_id_index]
+    input_creation = input_id_metadata['pub_date']
+    input_venue_ids = re.search(
+        IDS_WITHIN_SQUARE_BRACKETS, input_id_metadata['venue'])
+    input_venue_ids = set(input_venue_ids.group(
+        1).split()) if input_venue_ids else set()
+    input_authors_ids = get_all_authors_ids(input_id_metadata['author'])
+    rows_to_remove = list()
+    for row in res[1:]:
+        other_id = row[other_field][1]
+        if other_id not in index_by_id:
+            rows_to_remove.append(row)
+            continue
+        row[input_field] = (input_id_metadata['id'],
+                            input_id_metadata['id'])
+        other_id_index = index_by_id[other_id]['index']
+        other_metadata = r[other_id_index]
+        row[other_field] = (other_metadata['id'], other_metadata['id'])
+        other_creation = other_metadata['pub_date']
+        other_venue_ids = re.search(
+            IDS_WITHIN_SQUARE_BRACKETS, other_metadata['venue'])
+        journal_sc = 'no'
+        author_sc = 'no'
+        if other_venue_ids and input_venue_ids:
+            other_venue_ids = other_venue_ids.group(1).split()
+            if input_venue_ids.intersection(other_venue_ids):
+                journal_sc = 'yes'
+        other_authors_ids = get_all_authors_ids(other_metadata['author'])
+        if input_authors_ids.intersection(other_authors_ids):
+            author_sc = 'yes'
+        timespan = calculate_timespan(input_creation, other_creation) if args[0] == 'citing' else calculate_timespan(
+            other_creation, input_creation)
+        row.extend([
+            (input_creation, input_creation),
+            (timespan, timespan),
+            (journal_sc, journal_sc),
+            (author_sc, author_sc)])
+    for row in rows_to_remove:
+        res.remove(row)
+    return res, True
 
 
 def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
