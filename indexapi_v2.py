@@ -229,7 +229,7 @@ def process_citations(res, *args):
             res.remove(row)
         return res, True
     except Exception as e:
-        res[1][0] = e
+        print(e)
         return res, True
 
 
