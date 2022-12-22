@@ -67,17 +67,23 @@ def generate_id_search(ids:str) -> Tuple[str]:
     ids_search = 'UNION'.join(id_searches)
     return ids_search,
 
-def generate_ra_search(orcid_or_omid:str) -> Tuple[str]:
-    scheme_literal_value = orcid_or_omid.split(':')
+def generate_ra_search(identifier:str) -> Tuple[str]:
+    scheme_literal_value = identifier.split(':')
     if len(scheme_literal_value) == 2:
-        return '<https://w3id.org/oc/meta/{0}> ^pro:isHeldBy ?knownRole.'.format(scheme_literal_value[1]),
+        scheme = scheme_literal_value[0]
+        literal_value = scheme_literal_value[1]
+    else:
+        scheme = 'orcid'
+        literal_value = scheme_literal_value[0]
+    if scheme == 'meta':
+        return '<https://w3id.org/oc/meta/{0}> ^pro:isHeldBy ?knownRole.'.format(literal_value),
     else:
         return '''
             ?knownPersonIdentifier literal:hasLiteralValue "{0}";
-                                   datacite:usesIdentifierScheme datacite:orcid.
+                                datacite:usesIdentifierScheme datacite:{1}.
             ?knownPerson datacite:hasIdentifier ?knownPersonIdentifier;
-                         ^pro:isHeldBy ?knownRole.
-        '''.format(scheme_literal_value[0]),
+                        ^pro:isHeldBy ?knownRole.
+        '''.format(literal_value, scheme),
 
 def create_metadata_output(results):
     header = results[0]
