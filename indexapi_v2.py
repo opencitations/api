@@ -30,11 +30,14 @@ from requests import get
 
 IDS_WITHIN_SQUARE_BRACKETS = '\[((?:[^\s]+:[^\s]+)(?:\s[^\s]+:[^\s]+)*)\]'
 
+
 def lower(s):
     return s.lower(),
 
+
 def encode(s):
     return quote(s),
+
 
 def decode_doi(res, *args):
     header = res[0]
@@ -47,15 +50,18 @@ def decode_doi(res, *args):
             row[idx] = t, unquote(v)
     return res, True
 
+
 def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
 
-def generate_id_search(ids:str):
+
+def generate_id_search(ids: str):
     id_searches = list()
     r = __meta_parser(ids)
     ids_to_search = ids.split('__')
     if r is not None and not all([i in ('', None) for i in r]):
-        ids_to_search = [identifier for identifier in r[0]['id'].split() if not identifier.startswith('meta:')]
+        ids_to_search = [identifier for identifier in r[0]
+                         ['id'].split() if not identifier.startswith('meta:')]
     for identifier in ids_to_search:
         scheme_literal_value = identifier.split(':')
         scheme = scheme_literal_value[0].lower()
@@ -65,9 +71,11 @@ def generate_id_search(ids:str):
             id_searches.append('<http://dx.doi.org/{0}>'.format(literal_value))
             id_searches.append('<https://doi.org/{0}>'.format(literal_value))
         elif scheme in {'pmid', 'pmcid'}:
-            id_searches.append('<https://pubmed.ncbi.nlm.nih.gov/{0}>'.format(literal_value))
+            id_searches.append(
+                '<https://pubmed.ncbi.nlm.nih.gov/{0}>'.format(literal_value))
     ids_search = ' '.join(id_searches)
-    return ids_search, 
+    return ids_search,
+
 
 def metadata(res: list, get_metadata_from_meta: str):
     get_metadata_from_meta = True if get_metadata_from_meta == 'True' else False
@@ -78,7 +86,8 @@ def metadata(res: list, get_metadata_from_meta: str):
     id_field = header.index('id')
     citation_field = header.index('citation')
     reference_field = header.index('reference')
-    additional_fields = ['author', 'editor', 'pub_date', 'title', 'venue', 'volume', 'issue', 'page']
+    additional_fields = ['author', 'editor', 'pub_date',
+                         'title', 'venue', 'volume', 'issue', 'page']
     if get_metadata_from_meta:
         additional_fields.append('citation_count')
     header.extend(additional_fields)
@@ -119,27 +128,31 @@ def metadata(res: list, get_metadata_from_meta: str):
         row[id_field] = (' '.join(all_ids), ' '.join(all_ids))
         row.extend([
             (metadata['author'], metadata['author']),
-            (metadata['editor'], metadata['editor']), 
+            (metadata['editor'], metadata['editor']),
             (metadata['pub_date'], metadata['pub_date']),
-            (metadata['title'], metadata['title']), 
+            (metadata['title'], metadata['title']),
             (metadata['venue'], metadata['venue']),
-            (metadata['volume'], metadata['volume']), 
+            (metadata['volume'], metadata['volume']),
             (metadata['issue'], metadata['issue']),
             (metadata['page'], metadata['page'])])
         if get_metadata_from_meta:
-            row.extend([(len(row[citation_field][1].split()), len(row[citation_field][1].split()))])
+            row.extend([(len(row[citation_field][1].split()),
+                       len(row[citation_field][1].split()))])
     for row in rows_to_remove:
         res.remove(row)
     return res, True
+
 
 def index_meta_results(meta_results: list) -> dict:
     index_by_id = dict()
     for i, metadata in enumerate(meta_results):
         all_ids = metadata['id'].split()
-        metaid = [identifier for identifier in all_ids if identifier.startswith('meta:')][0]
+        metaid = [
+            identifier for identifier in all_ids if identifier.startswith('meta:')][0]
         for identifier in all_ids:
             index_by_id[identifier] = {'index': i, 'metaid': metaid}
     return index_by_id
+
 
 def replace_schemas_and_decode(res: List[List[Tuple[str, str]]]) -> list:
     new_res = [res[0]]
@@ -154,66 +167,81 @@ def replace_schemas_and_decode(res: List[List[Tuple[str, str]]]) -> list:
         new_res.append(new_row)
     return new_res
 
+
 def process_citations(res, *args):
-    if not res[1:]:
+    try:
+        if not res[1:]:
+            return res, True
+        res = replace_schemas_and_decode(res)
+        header = res[0]
+        input_field = header.index(args[0])
+        other_field = header.index(args[1])
+        additional_fields = ['creation', 'timespan', 'journal_sc', 'author_sc']
+        header.extend(additional_fields)
+        identifiers = set()
+        for row in res[1:]:
+            identifiers.add(row[input_field][1])
+            identifiers.add(row[other_field][1])
+        r = __meta_parser('__'.join(identifiers))
+        index_by_id = index_meta_results(r)
+        input_id = res[1][input_field][1]
+        if input_id not in index_by_id:
+            return [header], True
+        input_id_index = index_by_id[input_id]['index']
+        input_id_metadata = r[input_id_index]
+        input_creation = input_id_metadata['pub_date']
+        input_venue_ids = re.search(
+            IDS_WITHIN_SQUARE_BRACKETS, input_id_metadata['venue'])
+        input_venue_ids = set(input_venue_ids.group(
+            1).split()) if input_venue_ids else set()
+        input_authors_ids = get_all_authors_ids(input_id_metadata['author'])
+        rows_to_remove = list()
+        for row in res[1:]:
+            other_id = row[other_field][1]
+            if other_id not in index_by_id:
+                rows_to_remove.append(row)
+                continue
+            row[input_field] = (input_id_metadata['id'],
+                                input_id_metadata['id'])
+            other_id_index = index_by_id[other_id]['index']
+            other_metadata = r[other_id_index]
+            row[other_field] = (other_metadata['id'], other_metadata['id'])
+            other_creation = other_metadata['pub_date']
+            other_venue_ids = re.search(
+                IDS_WITHIN_SQUARE_BRACKETS, other_metadata['venue'])
+            journal_sc = 'no'
+            author_sc = 'no'
+            if other_venue_ids and input_venue_ids:
+                other_venue_ids = other_venue_ids.group(1).split()
+                if input_venue_ids.intersection(other_venue_ids):
+                    journal_sc = 'yes'
+            other_authors_ids = get_all_authors_ids(other_metadata['author'])
+            if input_authors_ids.intersection(other_authors_ids):
+                author_sc = 'yes'
+            timespan = calculate_timespan(input_creation, other_creation) if args[0] == 'citing' else calculate_timespan(
+                other_creation, input_creation)
+            row.extend([
+                (input_creation, input_creation),
+                (timespan, timespan),
+                (journal_sc, journal_sc),
+                (author_sc, author_sc)])
+        for row in rows_to_remove:
+            res.remove(row)
         return res, True
-    res = replace_schemas_and_decode(res)
-    header = res[0]
-    input_field = header.index(args[0])
-    other_field = header.index(args[1])
-    additional_fields = ['creation', 'timespan', 'journal_sc', 'author_sc']
-    header.extend(additional_fields)
-    identifiers = set()
-    for row in res[1:]:
-        identifiers.add(row[input_field][1])
-        identifiers.add(row[other_field][1])
-    r = __meta_parser('__'.join(identifiers))
-    index_by_id = index_meta_results(r)
-    input_id = res[1][input_field][1]
-    if input_id not in index_by_id:
-        return [header], True
-    input_id_index = index_by_id[input_id]['index']
-    input_id_metadata = r[input_id_index]
-    input_creation = input_id_metadata['pub_date']
-    input_venue_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, input_id_metadata['venue'])
-    input_venue_ids = set(input_venue_ids.group(1).split()) if input_venue_ids else set()
-    input_authors_ids = get_all_authors_ids(input_id_metadata['author'])
-    rows_to_remove = list()
-    for row in res[1:]:
-        other_id = row[other_field][1]
-        if other_id not in index_by_id:
-            rows_to_remove.append(row)
-            continue
-        row[input_field] = (input_id_metadata['id'], input_id_metadata['id'])
-        other_id_index = index_by_id[other_id]['index']
-        other_metadata = r[other_id_index]
-        row[other_field] = (other_metadata['id'], other_metadata['id'])
-        other_creation = other_metadata['pub_date']
-        other_venue_ids = re.search(IDS_WITHIN_SQUARE_BRACKETS, other_metadata['venue'])
-        journal_sc = 'no'
-        author_sc = 'no'
-        if other_venue_ids and input_venue_ids:
-            other_venue_ids = other_venue_ids.group(1).split()
-            if input_venue_ids.intersection(other_venue_ids):
-                journal_sc = 'yes'
-        other_authors_ids = get_all_authors_ids(other_metadata['author'])
-        if input_authors_ids.intersection(other_authors_ids):
-            author_sc = 'yes'
-        timespan = calculate_timespan(input_creation, other_creation) if args[0] == 'citing' else calculate_timespan(other_creation, input_creation)
-        row.extend([
-            (input_creation, input_creation),
-            (timespan, timespan),
-            (journal_sc, journal_sc),
-            (author_sc, author_sc)])
-    for row in rows_to_remove:
-        res.remove(row)
-    return res, True
+    except Exception as e:
+        res[1][0] = e
+        return res, True
+
 
 def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
-    citing_contains_month = citing_pub_date is not None and len(citing_pub_date) >= 7
-    cited_contains_month = cited_pub_date is not None and len(cited_pub_date) >= 7
-    citing_contains_day = citing_pub_date is not None and len(citing_pub_date) >= 10
-    cited_contains_day = cited_pub_date is not None and len(cited_pub_date) >= 10
+    citing_contains_month = citing_pub_date is not None and len(
+        citing_pub_date) >= 7
+    cited_contains_month = cited_pub_date is not None and len(
+        cited_pub_date) >= 7
+    citing_contains_day = citing_pub_date is not None and len(
+        citing_pub_date) >= 10
+    cited_contains_day = cited_pub_date is not None and len(
+        cited_pub_date) >= 10
     citing_pub_datetime = parse(citing_pub_date)
     cited_pub_datetime = parse(cited_pub_date)
     consider_months = citing_contains_month and cited_contains_month
@@ -237,6 +265,7 @@ def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
         result += "%sD" % abs(delta.days)
     return result
 
+
 def get_all_authors_ids(authors: str) -> set:
     all_authors_ids = set()
     authors_list = authors.split('; ')
@@ -245,7 +274,8 @@ def get_all_authors_ids(authors: str) -> set:
         if author_ids:
             all_authors_ids.update(author_ids.group(1).split())
     return all_authors_ids
-        
+
+
 def count_metaids(res):
     if not res[1:]:
         return res, True
@@ -255,6 +285,7 @@ def count_metaids(res):
     if r:
         count = len(r)
     return [['count'], [(count, count)]], True
+
 
 def __meta_parser(doi):
     api = 'https://test.opencitations.net/meta/api/v1/metadata/%s'
