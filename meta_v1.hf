@@ -394,7 +394,7 @@ WHERE {
       BIND(
         COALESCE(
           CONCAT(?editorName, " [", ?editor_id, " ", ?editor_metaid, "]"),
-          CONCAT(?editorName, "[", ?editor_metaid, "]"))
+          CONCAT(?editorName, " [", ?editor_metaid, "]"))
         AS ?editor__)
     }
     OPTIONAL {?res dcterm:title ?title__.}
@@ -563,7 +563,7 @@ WHERE {
         COALESCE(
           CONCAT(?authorName, " [", ?author_id, " ", ?author_metaid, "]"),
           CONCAT(?authorName, " [", ?author_metaid, "]"))
-        AS ?editor__)
+        AS ?author__)
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arEditor.
