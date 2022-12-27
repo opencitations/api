@@ -45,6 +45,21 @@ def decode_doi(res, *args):
     return res, True
 
 
+def decode_pmid(res, *args):
+    header = res[0]
+    field_idx = []
+
+    for field in args:
+        field_idx.append(header.index(field))
+
+    for row in res[1:]:
+        for idx in field_idx:
+            t, v = row[idx]
+            row[idx] = t, unquote(v)
+
+    return res, True
+
+
 def merge(res, *args):
     final_result = []
     header = res[0]
@@ -86,7 +101,8 @@ def metadata(res, *args):
     # doi, reference, citation_count
     header = res[0]
     doi_field = header.index("doi")
-    additional_fields = ["author", "year", "title", "source_title", "volume", "issue", "page", "source_id"]
+    additional_fields = ["author", "year", "title",
+                         "source_title", "volume", "issue", "page", "source_id"]
 
     header.extend(additional_fields)
 
@@ -180,7 +196,9 @@ def __crossref_parser(doi):
                             if "given" in author:
                                 author_string += ", " + author["given"].title()
                                 if "ORCID" in author:
-                                    author_string += ", " + author["ORCID"].replace("http://orcid.org/", "")
+                                    author_string += ", " + \
+                                        author["ORCID"].replace(
+                                            "http://orcid.org/", "")
                         if author_string is not None:
                             authors.append(__normalise(author_string))
 
@@ -195,7 +213,8 @@ def __crossref_parser(doi):
 
                 source_title = ""
                 if "container-title" in body:
-                    source_title = __create_title_from_list(body["container-title"])
+                    source_title = __create_title_from_list(
+                        body["container-title"])
 
                 volume = ""
                 if "volume" in body:
@@ -245,7 +264,9 @@ def __datacite_parser(doi):
                             if "given" in author:
                                 author_string += ", " + author["given"].title()
                                 if "ORCID" in author:
-                                    author_string += ", " + author["ORCID"].replace("http://orcid.org/", "")
+                                    author_string += ", " + \
+                                        author["ORCID"].replace(
+                                            "http://orcid.org/", "")
                         if author_string is not None:
                             authors.append(__normalise(author_string))
 
