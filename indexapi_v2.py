@@ -30,14 +30,11 @@ from requests import get
 
 IDS_WITHIN_SQUARE_BRACKETS = '\[((?:[^\s]+:[^\s]+)(?:\s[^\s]+:[^\s]+)*)\]'
 
-
 def lower(s):
     return s.lower(),
 
-
 def encode(s):
     return quote(s),
-
 
 def decode_doi(res, *args):
     header = res[0]
@@ -50,18 +47,15 @@ def decode_doi(res, *args):
             row[idx] = t, unquote(v)
     return res, True
 
-
 def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
-
 
 def generate_id_search(ids: str):
     id_searches = list()
     r = __meta_parser(ids)
     ids_to_search = ids.split('__')
     if r is not None and not all([i in ('', None) for i in r]):
-        ids_to_search = [identifier for identifier in r[0]
-                         ['id'].split() if not identifier.startswith('meta:')]
+        ids_to_search = {identifier for r_dict in r for identifier in r_dict['id'].split() if not identifier.startswith('meta:')}
     for identifier in ids_to_search:
         scheme_literal_value = identifier.split(':')
         scheme = scheme_literal_value[0].lower()
@@ -75,7 +69,6 @@ def generate_id_search(ids: str):
                 '<https://pubmed.ncbi.nlm.nih.gov/{0}>'.format(literal_value))
     ids_search = ' '.join(id_searches)
     return ids_search,
-
 
 def metadata(res: list, get_metadata_from_meta: str):
     get_metadata_from_meta = True if get_metadata_from_meta == 'True' else False
@@ -142,7 +135,6 @@ def metadata(res: list, get_metadata_from_meta: str):
         res.remove(row)
     return res, True
 
-
 def index_meta_results(meta_results: list) -> dict:
     index_by_id = dict()
     for i, metadata in enumerate(meta_results):
@@ -152,7 +144,6 @@ def index_meta_results(meta_results: list) -> dict:
         for identifier in all_ids:
             index_by_id[identifier] = {'index': i, 'metaid': metaid}
     return index_by_id
-
 
 def replace_schemas_and_decode(res: List[List[Tuple[str, str]]]) -> list:
     new_res = [res[0]]
@@ -166,7 +157,6 @@ def replace_schemas_and_decode(res: List[List[Tuple[str, str]]]) -> list:
             new_row.append((new_el, unquote(new_el)))
         new_res.append(new_row)
     return new_res
-
 
 def process_citations(res, *args):
     if not res[1:]:
@@ -228,7 +218,6 @@ def process_citations(res, *args):
         res.remove(row)
     return res, True
 
-
 def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
     citing_contains_month = citing_pub_date is not None and len(
         citing_pub_date) >= 7
@@ -261,7 +250,6 @@ def calculate_timespan(citing_pub_date: str, cited_pub_date: str) -> str:
         result += "%sD" % abs(delta.days)
     return result
 
-
 def get_all_authors_ids(authors: str) -> set:
     all_authors_ids = set()
     authors_list = authors.split('; ')
@@ -270,7 +258,6 @@ def get_all_authors_ids(authors: str) -> set:
         if author_ids:
             all_authors_ids.update(author_ids.group(1).split())
     return all_authors_ids
-
 
 def count_metaids(res):
     if not res[1:]:
@@ -282,11 +269,17 @@ def count_metaids(res):
         count = len(r)
     return [['count'], [(count, count)]], True
 
+def __meta_parser(ids: str):
+    api = 'https://opencitations.net/meta/api/v1/metadata/%s'
+    api_url = api % ids
+    if len(api_url) > 2048:
+        return __divide_api_call(api, ids)
+    else:
+        return __call_meta(api_url)
 
-def __meta_parser(doi):
-    api = 'https://test.opencitations.net/meta/api/v1/metadata/%s'
+def __call_meta(api_url: str):
     try:
-        r = get(api % doi, timeout=30)
+        r = get(api_url, timeout=30)
         if r.status_code == 200:
             return loads(r.text)
     except Exception as e:
@@ -296,3 +289,27 @@ def __meta_parser(doi):
         pass  # do nothing
     except Exception as e:
         pass  # do nothing
+
+def __divide_api_call(api: str, ids: str):
+    characters_left = 2048 - len(api)
+    ids_portion_len = len(ids)
+    divider = 2
+    while ids_portion_len > characters_left:
+        ids_list = ids.split('__')
+        slicer = len(ids_list) // divider
+        portion = ids_list
+        portions = list()
+        for _ in range(divider):
+            portion = portion[:slicer]
+            portions.append(portion)
+        longest_portion = []
+        for item in portions:
+            if len('__'.join(item)) > len('__'.join(longest_portion)):
+                longest_portion = item
+        ids_portion_len = len('__'.join(longest_portion))
+        divider += 1
+    responses = list()
+    for portion in portions:
+        api_url = api % '__'.join(portion)
+        responses.extend(__call_meta(api_url))
+    return responses
