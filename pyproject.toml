@@ -6,7 +6,8 @@ authors = ["arcangelo7 <arcangelomas@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.5.3"
+python = ">=3.7,<4.0"
+ramose = "^1.0.6"
 
 
 [build-system]
