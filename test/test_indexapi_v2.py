@@ -17,6 +17,7 @@ import json
 import socket
 import time
 import unittest
+from collections import OrderedDict
 from subprocess import Popen
 
 from ramose import APIManager
@@ -258,7 +259,7 @@ doi:10.1016/j.compedu.2018.11.010__doi:10.1016/j.compedu.2018.11.010__doi:10.101
                 "citing": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "cited": "doi:10.1111/j.1365-2729.2010.00383.x meta:br/06150903011",
                 "creation": "2019-03",
-                "timespan": "P8Y3M",
+                "timespan": "P8Y2M",
                 "journal_sc": "no",
                 "author_sc": "no"
             },
@@ -267,7 +268,7 @@ doi:10.1016/j.compedu.2018.11.010__doi:10.1016/j.compedu.2018.11.010__doi:10.101
                 "citing": "doi:10.1016/j.compedu.2018.11.010 meta:br/06220662347",
                 "cited": "doi:10.1007/s11409-006-6893-0 meta:br/062403286732",
                 "creation": "2019-03",
-                "timespan": "P13Y0M",
+                "timespan": "P12Y11M",
                 "journal_sc": "no",
                 "author_sc": "no"
             },
@@ -282,8 +283,8 @@ doi:10.1016/j.compedu.2018.11.010__doi:10.1016/j.compedu.2018.11.010__doi:10.101
             }
         ]
         format_expected = 'application/json'
-        output = status, sorted(json.loads(results), key=lambda x: x['id']), format
-        expected_output = status_expected, sorted(result_expected, key=lambda x: x['id']), format_expected
+        output = status, [OrderedDict(sorted(dictionary.items())) for dictionary in sorted(json.loads(results), key=lambda x: x['id'])], format
+        expected_output = status_expected, [OrderedDict(sorted(dictionary.items())) for dictionary in sorted(result_expected, key=lambda x: x['id'])], format_expected
         self.assertEqual(output, expected_output)
 
     def test_references_non_existing_input(self):

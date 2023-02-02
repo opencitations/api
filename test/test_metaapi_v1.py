@@ -37,7 +37,7 @@ class test_metaapi_v1(unittest.TestCase):
 
     def test_metadata(self):
         operation_url = 'metadata'
-        request = 'doi:10.1007/978-1-4020-9632-7__doi:10.1088/0022-3727/39/14/017'
+        request = 'doi:10.1007/978-1-4020-9632-7__doi:10.1088/0022-3727/39/14/017__doi:10.1162/qss_a_00023'
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, result, format = op.exec()
