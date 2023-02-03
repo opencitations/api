@@ -12,7 +12,7 @@
 
 #url /metadata/{ids}
 #type operation
-#ids str((doi|issn|isbn|meta):[^__]+(__(doi|issn|isbn|meta):[^__]+)*)
+#ids str((doi|issn|isbn|meta):.+?(__(doi|issn|isbn|meta):.+?)*$)
 #preprocess generate_id_search(ids)
 #postprocess create_metadata_output()
 #method get
