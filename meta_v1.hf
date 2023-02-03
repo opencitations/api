@@ -108,7 +108,13 @@ WHERE {
       BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
     }
     OPTIONAL {
-      ?res frbr:partOf+ ?journal.
+      {
+        ?res a fabio:JournalArticle;
+              frbr:partOf+ ?journal.
+        ?journal a fabio:Journal.
+      } UNION {
+        ?res frbr:partOf ?journal.
+      }
       ?journal dcterm:title ?venueName_.
       BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
@@ -332,7 +338,13 @@ WHERE {
       BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
     }
     OPTIONAL {
-      ?res frbr:partOf+ ?journal.
+      {
+        ?res a fabio:JournalArticle;
+              frbr:partOf+ ?journal.
+        ?journal a fabio:Journal.
+      } UNION {
+        ?res frbr:partOf ?journal.
+      }
       ?journal dcterm:title ?venueName_.
       BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
@@ -530,7 +542,13 @@ WHERE {
       BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
     }
     OPTIONAL {
-      ?res frbr:partOf+ ?journal.
+      {
+        ?res a fabio:JournalArticle;
+              frbr:partOf+ ?journal.
+        ?journal a fabio:Journal.
+      } UNION {
+        ?res frbr:partOf ?journal.
+      }
       ?journal dcterm:title ?venueName_.
       BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
@@ -760,7 +778,13 @@ WHERE {
       BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
     }
     OPTIONAL {
-      ?res frbr:partOf+ ?journal.
+      {
+        ?res a fabio:JournalArticle;
+              frbr:partOf+ ?journal.
+        ?journal a fabio:Journal.
+      } UNION {
+        ?res frbr:partOf ?journal.
+      }
       ?journal dcterm:title ?venueName_.
       BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
