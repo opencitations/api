@@ -58,6 +58,7 @@ PREFIX dcterm: <http://purl.org/dc/terms/>
 PREFIX frbr: <http://purl.org/vocab/frbr/core#>
 PREFIX fabio: <http://purl.org/spar/fabio/>
 PREFIX prism: <http://prismstandard.org/namespaces/basic/2.0/>
+PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (GROUP_CONCAT(DISTINCT ?title_) AS ?title)
@@ -95,6 +96,8 @@ WHERE {
   (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
   (GROUP_CONCAT(DISTINCT ?publisher_ids_; SEPARATOR=' ') AS ?publisher_ids)
   (GROUP_CONCAT(DISTINCT ?publisherMetaid_) AS ?publisherMetaid)
+  (COUNT(?arAuthorNext) AS ?totAuthor)
+  (COUNT(?arEditorNext) AS ?totEditor)
   WHERE {
     INCLUDE %results
     OPTIONAL {?res a ?type__. FILTER (?type__ != fabio:Expression)}
@@ -105,7 +108,13 @@ WHERE {
       BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
     }
     OPTIONAL {
-      ?res frbr:partOf+ ?journal.
+      {
+        ?res a fabio:JournalArticle;
+              frbr:partOf+ ?journal.
+        ?journal a fabio:Journal.
+      } UNION {
+        ?res frbr:partOf ?journal.
+      }
       ?journal dcterm:title ?venueName_.
       BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
@@ -130,6 +139,7 @@ WHERE {
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arAuthor.
+      OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
       ?arAuthor pro:withRole pro:author;
                 pro:isHeldBy ?raAuthor.
       BIND(CONCAT("meta:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
@@ -155,6 +165,7 @@ WHERE {
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arEditor.
+      OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
       ?arEditor pro:withRole pro:editor;
                 pro:isHeldBy ?raEditor.
       BIND(CONCAT("meta:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
@@ -195,7 +206,7 @@ WHERE {
       ?resVolume a fabio:JournalVolume;
                 fabio:hasSequenceIdentifier ?volume__.
     }
-  } GROUP BY ?res}
+  } GROUP BY ?res ORDER BY DESC(?totAuthor) DESC(?totEditor)}
   BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "meta:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
   BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
   BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
@@ -276,6 +287,7 @@ PREFIX dcterm: <http://purl.org/dc/terms/>
 PREFIX frbr: <http://purl.org/vocab/frbr/core#>
 PREFIX fabio: <http://purl.org/spar/fabio/>
 PREFIX prism: <http://prismstandard.org/namespaces/basic/2.0/>
+PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (GROUP_CONCAT(DISTINCT ?title_) AS ?title)
@@ -314,6 +326,8 @@ WHERE {
   (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' ') AS ?ids)
   (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
   (GROUP_CONCAT(DISTINCT ?publisher_ids_; SEPARATOR=' ') AS ?publisher_ids)
+  (COUNT(?arAuthorNext) AS ?totAuthor)
+  (COUNT(?arEditorNext) AS ?totEditor)
   WHERE {
     INCLUDE %results
     OPTIONAL {?res a ?type__. FILTER (?type__ != fabio:Expression)}
@@ -324,7 +338,13 @@ WHERE {
       BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
     }
     OPTIONAL {
-      ?res frbr:partOf+ ?journal.
+      {
+        ?res a fabio:JournalArticle;
+              frbr:partOf+ ?journal.
+        ?journal a fabio:Journal.
+      } UNION {
+        ?res frbr:partOf ?journal.
+      }
       ?journal dcterm:title ?venueName_.
       BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
@@ -349,6 +369,7 @@ WHERE {
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arAuthor.
+      OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
       ?arAuthor pro:withRole pro:author;
                 pro:isHeldBy ?raAuthor.
       BIND(CONCAT("meta:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
@@ -374,6 +395,7 @@ WHERE {
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arEditor.
+      OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
       ?arEditor pro:withRole pro:editor;
                 pro:isHeldBy ?raEditor.
       BIND(CONCAT("meta:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
@@ -414,7 +436,7 @@ WHERE {
       ?resVolume a fabio:JournalVolume;
                 fabio:hasSequenceIdentifier ?volume__.
     }
-  } GROUP BY ?res}
+  } GROUP BY ?res ORDER BY DESC(?totAuthor) DESC(?totEditor)}
   BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "meta:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
   BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
   BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
@@ -469,6 +491,7 @@ PREFIX dcterm: <http://purl.org/dc/terms/>
 PREFIX frbr: <http://purl.org/vocab/frbr/core#>
 PREFIX fabio: <http://purl.org/spar/fabio/>
 PREFIX prism: <http://prismstandard.org/namespaces/basic/2.0/>
+PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (GROUP_CONCAT(DISTINCT ?title_) AS ?title)
@@ -507,6 +530,8 @@ WHERE {
   (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' ') AS ?ids)
   (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
   (GROUP_CONCAT(DISTINCT ?publisher_ids_; SEPARATOR=' ') AS ?publisher_ids)
+  (COUNT(?arAuthorNext) AS ?totAuthor)
+  (COUNT(?arEditorNext) AS ?totEditor)
   WHERE {
     INCLUDE %results
     OPTIONAL {?res a ?type__. FILTER (?type__ != fabio:Expression)}
@@ -517,7 +542,13 @@ WHERE {
       BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
     }
     OPTIONAL {
-      ?res frbr:partOf+ ?journal.
+      {
+        ?res a fabio:JournalArticle;
+              frbr:partOf+ ?journal.
+        ?journal a fabio:Journal.
+      } UNION {
+        ?res frbr:partOf ?journal.
+      }
       ?journal dcterm:title ?venueName_.
       BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
@@ -542,6 +573,7 @@ WHERE {
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arAuthor.
+      OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
       ?arAuthor pro:withRole pro:author;
                 pro:isHeldBy ?raAuthor.
       BIND(CONCAT("meta:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
@@ -567,6 +599,7 @@ WHERE {
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arEditor.
+      OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
       ?arEditor pro:withRole pro:editor;
                 pro:isHeldBy ?raEditor.
       BIND(CONCAT("meta:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
@@ -607,7 +640,7 @@ WHERE {
       ?resVolume a fabio:JournalVolume;
                 fabio:hasSequenceIdentifier ?volume__.
     }
-  } GROUP BY ?res}
+  } GROUP BY ?res ORDER BY DESC(?totAuthor) DESC(?totEditor)}
   BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "meta:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
   BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
   BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
