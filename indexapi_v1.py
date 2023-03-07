@@ -303,22 +303,23 @@ def oalink(res, *args):
     header.extend(additional_fields)
 
     for row in res[1:]:
-        citing_doi = row[doi_field][1]
-
-        try:
-            r = get(base_api_url % citing_doi,
-                    headers={"User-Agent": "COCI REST API (via OpenCitations - "
-                                           "http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
-            if r.status_code == 200:
-                res_json = loads(r.text)
-                if "best_oa_location" in res_json and res_json["best_oa_location"] is not None and \
-                        "url" in res_json["best_oa_location"]:
-                    row.append(res_json["best_oa_location"]["url"])
-                else:
-                    row.append("")  # empty element
-            else:
-                row.append("")  # empty element
-        except Exception as e:
-            row.append("")  # empty element
+        row.append("")  # empty element
+        # citing_doi = row[doi_field][1]
+        #
+        # try:
+        #     r = get(base_api_url % citing_doi,
+        #             headers={"User-Agent": "COCI REST API (via OpenCitations - "
+        #                                    "http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
+        #     if r.status_code == 200:
+        #         res_json = loads(r.text)
+        #         if "best_oa_location" in res_json and res_json["best_oa_location"] is not None and \
+        #                 "url" in res_json["best_oa_location"]:
+        #             row.append(res_json["best_oa_location"]["url"])
+        #         else:
+        #             row.append("")  # empty element
+        #     else:
+        #         row.append("")  # empty element
+        # except Exception as e:
+        #     row.append("")  # empty element
 
     return res, True
