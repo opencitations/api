@@ -121,7 +121,7 @@ def metadata(res, *args):
         citing_doi = row[doi_field][1]
 
         r = None
-        for p in (__crossref_parser):
+        for p in (__crossref_parser,__datacite_parser):
             if r is None:
                 r = p(citing_doi)
 
