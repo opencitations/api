@@ -191,6 +191,7 @@ def __ocmeta_parser(doi):
                 headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
         if r.status_code == 200:
             json_res = loads(r.text)
+            print(json_res)
             if len(json_res) > 0:
                 #take the one and only result given back by META
                 body = json_res[0]
