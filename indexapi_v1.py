@@ -120,10 +120,12 @@ def metadata(res, *args):
     for row in res[1:]:
         citing_doi = row[doi_field][1]
 
-        r = None
-        for p in (__crossref_parser,__datacite_parser):
-            if r is None:
-                r = p(citing_doi)
+        # r = None
+        # for p in (__crossref_parser,__datacite_parser):
+        #     if r is None:
+        #         r = p(citing_doi)
+
+        r = __ocmeta_parser(citing_doi)
 
         if r is None or all([i in ("", None) for i in r]):
             rows_to_remove.append(row)
