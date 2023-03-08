@@ -224,6 +224,7 @@ def __ocmeta_parser(doi):
                         source_id = source_issn[0]
                     elif len(source_isbn) > 0:
                         source_id = source_isbn[0]
+                    source_title = source_title_string
 
             year = ""
             if "pub_date" in body:
