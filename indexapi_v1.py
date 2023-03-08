@@ -126,11 +126,10 @@ def metadata(res, *args):
         #         r = p(citing_doi)
 
         r = __ocmeta_parser(citing_doi)
-        row.extend(r)
-        #if r is None or all([i in ("", None) for i in r]):
-        #    rows_to_remove.append(row)
-        #else:
-        #    row.extend(r)
+        if r is None or all([i in ("", None) for i in r]):
+            rows_to_remove.append(row)
+        else:
+            row.extend(r)
 
     for row in rows_to_remove:
         res.remove(row)
@@ -190,7 +189,7 @@ def __ocmeta_parser(doi):
 
     try:
         r = get(api % doi,
-                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
+                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
         if r.status_code == 200:
             json_res = loads(r.text)
             if len(json_res) > 0:
