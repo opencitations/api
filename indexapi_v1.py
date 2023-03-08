@@ -1,4 +1,4 @@
-findall#!/usr/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Silvio Peroni <essepuntato@gmail.com>
 #
