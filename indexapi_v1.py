@@ -126,11 +126,11 @@ def metadata(res, *args):
         #         r = p(citing_doi)
 
         r = __ocmeta_parser(citing_doi)
-
-        if r is None or all([i in ("", None) for i in r]):
-            rows_to_remove.append(row)
-        else:
-            row.extend(r)
+        row.extend(r)
+        #if r is None or all([i in ("", None) for i in r]):
+        #    rows_to_remove.append(row)
+        #else:
+        #    row.extend(r)
 
     for row in rows_to_remove:
         res.remove(row)
@@ -216,15 +216,15 @@ def __ocmeta_parser(doi):
                 if "venue" in body:
                     if body["venue"] != "":
                         source_title_string = body["venue"]
-                        source_issn = re.findall(r"(issn\:[^\]]{1,})",source_title_string)
-                        source_isbn = re.findall(r"(isbn\:[^\]]{1,})",source_title_string)
+                        source_issn = re.findall(r"(issn\:[\d\-^\]]{1,})",source_title_string)
+                        source_isbn = re.findall(r"(isbn\:[\d\-^\]]{1,})",source_title_string)
                         source_ids = re.findall(r"\[.{1,}\]",source_title_string)
                         if len(source_ids) > 0:
                             source_title_string = source_title_string.replace(source_ids[0],"").strip()
                         if len(source_issn) > 0:
-                            source_id = source_issn
+                            source_id = source_issn[0]
                         elif len(source_isbn) > 0:
-                            source_id = source_isbn
+                            source_id = source_isbn[0]
 
                 year = ""
                 if "pub_date" in body:
