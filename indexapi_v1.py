@@ -1,4 +1,4 @@
-#!/usr/bin/python
+findall#!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Silvio Peroni <essepuntato@gmail.com>
 #
@@ -16,7 +16,7 @@
 
 __author__ = 'essepuntato'
 from json import loads
-from re import sub
+from re import sub,findall
 from urllib.parse import quote, unquote
 
 from rdflib import Graph, URIRef
@@ -201,8 +201,8 @@ def __ocmeta_parser(doi):
                 if body["author"] != "":
                     for author in body["author"].split(";"):
                         author_string = author
-                        author_orcid = re.findall(r"orcid\:([^\]]{1,})",author)
-                        author_ids = re.findall(r"\[.{1,}\]",author)
+                        author_orcid = findall(r"orcid\:([^\]]{1,})",author)
+                        author_ids = findall(r"\[.{1,}\]",author)
                         if len(author_ids) > 0:
                             author_string = author.replace(author_ids[0],"").strip()
                             if len(author_orcid) > 0:
@@ -215,9 +215,9 @@ def __ocmeta_parser(doi):
             if "venue" in body:
                 if body["venue"] != "":
                     source_title_string = body["venue"]
-                    source_issn = re.findall(r"(issn\:[\d\-^\]]{1,})",source_title_string)
-                    source_isbn = re.findall(r"(isbn\:[\d\-^\]]{1,})",source_title_string)
-                    source_ids = re.findall(r"\[.{1,}\]",source_title_string)
+                    source_issn = findall(r"(issn\:[\d\-^\]]{1,})",source_title_string)
+                    source_isbn = findall(r"(isbn\:[\d\-^\]]{1,})",source_title_string)
+                    source_ids = findall(r"\[.{1,}\]",source_title_string)
                     if len(source_ids) > 0:
                         source_title_string = source_title_string.replace(source_ids[0],"").strip()
                     if len(source_issn) > 0:
