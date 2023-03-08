@@ -121,7 +121,7 @@ def metadata(res, *args):
         citing_doi = row[doi_field][1]
 
         r = None
-        for p in (__ocmeta_parser):
+        for p in (__crossref_parser):
             if r is None:
                 r = p(citing_doi)
 
@@ -191,7 +191,6 @@ def __ocmeta_parser(doi):
                 headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
         if r.status_code == 200:
             json_res = loads(r.text)
-            print(json_res)
             if len(json_res) > 0:
                 #take the one and only result given back by META
                 body = json_res[0]
