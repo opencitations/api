@@ -192,7 +192,7 @@ def __ocmeta_parser(doi):
                     if body["author"] != "":
                         for author in body["author"].split(";"):
                             author_string = author
-                            author_orcid = findall(r"orcid\:([^\]]{1,})",author)
+                            author_orcid = findall(r"orcid\:([\d\-^\]]{1,})",author)
                             author_ids = findall(r"\[.{1,}\]",author)
                             if len(author_ids) > 0:
                                 author_string = author.replace(author_ids[0],"").strip()
