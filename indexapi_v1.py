@@ -403,7 +403,7 @@ def __oc_coci_references(res, *args):
     api = "http://127.0.0.1/index/coci/api/v1/references/%s"
 
     header = res[0]
-    doi = header.index("doi")
+    doi_field = header.index("doi")
     additional_fields = ["reference"]
 
     header.extend(additional_fields)
