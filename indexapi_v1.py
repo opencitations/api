@@ -399,7 +399,7 @@ def oalink(res, *args):
 
     return res, True
 
-def __oc_coci_references(res, *args):
+def oc_coci_references(res, *args):
     api = "http://127.0.0.1/index/coci/api/v1/references/%s"
 
     header = res[0]

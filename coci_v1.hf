@@ -259,7 +259,7 @@ LIMIT 50000
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> encode(dois) --> split_dois(dois)
-#postprocess metadata() --> __oc_coci_references() --> oalink() --> decode_doi(doi, reference, citation)
+#postprocess metadata() --> oc_coci_references() --> oalink() --> decode_doi(doi, reference, citation)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 
