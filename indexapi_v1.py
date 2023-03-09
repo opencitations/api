@@ -18,7 +18,7 @@ __author__ = 'essepuntato'
 from urllib.parse import quote, unquote
 from requests import get
 from rdflib import Graph, URIRef
-from re import sub
+from re import sub,findall
 from json import loads
 
 
@@ -111,11 +111,12 @@ def metadata(res, *args):
     for row in res[1:]:
         citing_doi = row[doi_field][1]
 
-        r = None
-        for p in (__crossref_parser, __datacite_parser):
-            if r is None:
-                r = p(citing_doi)
+        # r = None
+        # for p in (__crossref_parser,__datacite_parser):
+        #     if r is None:
+        #         r = p(citing_doi)
 
+        r = __ocmeta_parser(citing_doi)
         if r is None or all([i in ("", None) for i in r]):
             rows_to_remove.append(row)
         else:
@@ -174,14 +175,81 @@ def __normalise(o):
         s = str(o)
     return sub("\s+", " ", s).strip()
 
+def __ocmeta_parser(doi):
+    api = "http://127.0.0.1/meta/api/v1/metadata/doi:%s"
+
+    try:
+        r = get(api % doi,
+                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
+        if r.status_code == 200:
+            json_res = loads(r.text)
+            if len(json_res) > 0:
+                #take the one and only result given back by META
+                body = json_res[0]
+
+                authors = []
+                if "author" in body:
+                    if body["author"] != "":
+                        for author in body["author"].split(";"):
+                            author_string = author
+                            author_orcid = findall(r"orcid\:([^\]]{1,})",author)
+                            author_ids = findall(r"\[.{1,}\]",author)
+                            if len(author_ids) > 0:
+                                author_string = author.replace(author_ids[0],"").strip()
+                                if len(author_orcid) > 0:
+                                    author_string = author_string+", "+author_orcid[0].strip()
+                            if author_string is not None:
+                                authors.append(__normalise(author_string))
+
+                source_title = ""
+                source_id = ""
+                if "venue" in body:
+                    if body["venue"] != "":
+                        source_title_string = body["venue"]
+                        source_issn = findall(r"(issn\:[\d\-^\]]{1,})",source_title_string)
+                        source_isbn = findall(r"(isbn\:[\d\-^\]]{1,})",source_title_string)
+                        source_ids = findall(r"\[.{1,}\]",source_title_string)
+                        if len(source_ids) > 0:
+                            source_title_string = source_title_string.replace(source_ids[0],"").strip()
+                        if len(source_issn) > 0:
+                            source_id = source_issn[0]
+                        elif len(source_isbn) > 0:
+                            source_id = source_isbn[0]
+                        source_title = source_title_string
+
+                year = ""
+                if "pub_date" in body:
+                    if len(body["pub_date"]) >= 4:
+                        year = __normalise(body["pub_date"][:4])
+
+                title = ""
+                if "title" in body:
+                    title = body["title"]
+
+                volume = ""
+                if "volume" in body:
+                    volume = __normalise(body["volume"])
+
+                issue = ""
+                if "issue" in body:
+                    issue = __normalise(body["issue"])
+
+                page = ""
+                if "page" in body:
+                    page = __normalise(body["page"])
+
+                return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
+
+    except Exception as e:
+        return ["", "", "", "", "", "", "", ""]
+
 
 def __crossref_parser(doi):
     api = "https://api.crossref.org/works/%s"
 
     try:
         r = get(api % doi,
-                headers={"User-Agent": "COCI REST API (via OpenCitations - "
-                                       "http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
+                headers={"User-Agent": "COCI REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
         if r.status_code == 200:
             json_res = loads(r.text)
             if "message" in json_res:
@@ -240,7 +308,7 @@ def __crossref_parser(doi):
                 return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
 
     except Exception as e:
-        pass  # do nothing
+        return ["", "", "", "", "", "", "", ""]
 
 
 def __datacite_parser(doi):
@@ -248,8 +316,7 @@ def __datacite_parser(doi):
 
     try:
         r = get(api % doi,
-                headers={"User-Agent": "COCI REST API (via OpenCitations - "
-                                       "http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
+                headers={"User-Agent": "COCI REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
         if r.status_code == 200:
             json_res = loads(r.text)
             if "data" in json_res and "attributes" in json_res["data"]:
@@ -289,7 +356,7 @@ def __datacite_parser(doi):
                 return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
 
     except Exception as e:
-        pass  # do nothing
+        return ["", "", "", "", "", "", "", ""]
 
 
 def oalink(res, *args):
