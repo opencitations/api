@@ -15,12 +15,11 @@
 # SOFTWARE.
 
 __author__ = 'essepuntato'
-from json import loads
-from re import sub,findall
 from urllib.parse import quote, unquote
-
-from rdflib import Graph, URIRef
 from requests import get
+from rdflib import Graph, URIRef
+from re import sub,findall
+from json import loads
 
 
 def lower(s):
@@ -397,5 +396,32 @@ def oalink(res, *args):
         #         row.append("")  # empty element
         # except Exception as e:
         #     row.append("")  # empty element
+
+    return res, True
+
+def __oc_coci_references(res, *args):
+    api = "http://127.0.0.1/index/coci/api/v1/references/%s"
+
+    header = res[0]
+    doi = header.index("doi")
+    additional_fields = ["reference"]
+
+    header.extend(additional_fields)
+
+    for row in res[1:]:
+        citing_doi = row[doi_field][1]
+
+        try:
+            r = get(api % citing_doi, headers={"User-Agent": "COCI REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
+            if r.status_code == 200:
+                citing_dois = []
+                res_json = loads(r.text)
+                for item in res_json:
+                    citing_dois.append(item["cited"])
+                row.append("; ".join(citing_dois))  # list of dois
+            else:
+                row.append("")  # empty element
+        except Exception as e:
+            row.append("")  # empty element
 
     return res, True

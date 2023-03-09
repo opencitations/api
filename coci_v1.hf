@@ -259,7 +259,7 @@ LIMIT 50000
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> encode(dois) --> split_dois(dois)
-#postprocess metadata() --> oalink() --> decode_doi(doi, reference, citation)
+#postprocess metadata() --> __oc_coci_references() --> oalink() --> decode_doi(doi, reference, citation)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 
@@ -315,30 +315,15 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT DISTINCT ?doi ?citation_count ?citation (GROUP_CONCAT(?cited_doi; separator="; ") as ?reference)
-WITH {
-      SELECT ?citing (count(?c) as ?c_count) (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
-          VALUES ?doi { [[dois]] }
-          BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
-    	    ?citing ^cito:hasCitedEntity ?c .
-    	    ?c cito:hasCitingEntity ?source .
-    	    BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
-      } GROUP BY ?citing
-} AS %results
-WHERE {
-      VALUES ?doi { [[dois]] }
-      BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
-
-      OPTIONAL {
-         ?citing ^cito:hasCitingEntity / cito:hasCitedEntity ?cited .
-         BIND(STRAFTER(str(?cited), "http://dx.doi.org/") as ?cited_doi)
-      }
-      OPTIONAL {
-      	INCLUDE %results
-      }
-      BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
-} GROUP BY ?doi ?citation_count ?citation
-LIMIT 50000
+SELECT ?doi (count(?c) as ?citation_count) (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
+        VALUES ?doi { [[dois]] }
+        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?val)
+	  	  OPTIONAL{
+  			    ?val ^cito:hasCitedEntity ?c .
+    	      ?c cito:hasCitingEntity ?source .
+    	      BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
+  		  }
+} GROUP BY ?doi
 
 #url /citation-count/{doi}
 #type operation
