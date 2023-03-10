@@ -200,7 +200,7 @@ def __ocmeta_parser(doi):
                     if body["author"] != "":
                         for author in body["author"].split(";"):
                             author_string = author
-                            author_orcid = findall(r"orcid\:([^\]]{1,})",author)
+                            author_orcid = findall(r"orcid\:([\d\-^\]]{1,})",author)
                             author_ids = findall(r"\[.{1,}\]",author)
                             if len(author_ids) > 0:
                                 author_string = author.replace(author_ids[0],"").strip()
@@ -414,11 +414,14 @@ def oc_coci_references(res, *args):
         try:
             r = get(api % citing_doi, headers={"User-Agent": "COCI REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
             if r.status_code == 200:
-                citing_dois = []
+                cited_dois = []
                 res_json = loads(r.text)
-                for item in res_json:
-                    citing_dois.append(item["cited"])
-                row.append("; ".join(citing_dois))  # list of dois
+                if len(res_json) > 0:
+                    for item in res_json:
+                        cited_dois.append(item["cited"])
+                    row.append("; ".join(cited_dois))  # list of dois
+                else:
+                    row.append("")  # empty element
             else:
                 row.append("")  # empty element
         except Exception as e:
