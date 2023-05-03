@@ -76,6 +76,34 @@ class test_metaapi_v1(unittest.TestCase):
         expected_output = status_expected, result_expected, format_expected
         self.assertEqual(output, expected_output)
 
+    def test_metadata_order_of_authors(self):
+        operation_url = 'metadata'
+        request = 'doi:10.1038/sdata.2016.18'
+        call = "%s/%s/%s" % (api_base, operation_url, request)
+        op = api_manager.get_op(call)
+        status, result, format = op.exec()
+        status_expected = 200
+        result_expected = [
+            {
+                "id": "doi:10.1038/sdata.2016.18 meta:br/06101",
+                "title": "Influence Of Dielectric Properties, State, And Electrodes On Electric Strength",
+                "author": "Hoen, Peter-Bram 'T [orcid:0000-0003-4450-3112 meta:ra/06101]; Martone, Maryann E [orcid:0000-0002-8406-3871 meta:ra/06102]; Roos, Marco [orcid:0000-0002-8691-772X meta:ra/06103]; Swertz, Morris [orcid:0000-0002-0979-3401 meta:ra/06104]; Dumontier, Michel [orcid:0000-0003-4727-9435 meta:ra/06105]; Evelo, Chris [orcid:0000-0002-5301-3142 meta:ra/06106]; Persson, Bengt [orcid:0000-0003-3165-5344 meta:ra/06107]; Finkers, Richard [orcid:0000-0002-4368-8058 meta:ra/06108]; Wilkinson, Mark [orcid:0000-0001-6960-357X meta:ra/06109]; Mons, Barend [orcid:0000-0003-3934-0072 meta:ra/061010]; Grethe, Jeffrey [orcid:0000-0001-5212-7052 meta:ra/061011]; Waagmeester, Andra [orcid:0000-0001-9773-4008 meta:ra/061012]; Schultes, Erik Anthony [orcid:0000-0001-8888-635X meta:ra/061013]; Hooft, Rob [orcid:0000-0001-6825-9439 meta:ra/061014]; Sansone, Susanna-Assunta [orcid:0000-0001-5306-5690 meta:ra/061015]; Blomberg, Niklas [orcid:0000-0003-4155-5910 meta:ra/061016]; Aalbersberg, IJsbrand Jan [orcid:0000-0002-0209-4480 meta:ra/061017]; Goble, Carole [orcid:0000-0003-1219-2137 meta:ra/061018]; Wolstencroft, Katy [orcid:0000-0002-1279-5133 meta:ra/061019]; Groth, Paul [orcid:0000-0003-0183-6910 meta:ra/061020]; Axton, Myles [orcid:0000-0002-8042-4131 meta:ra/061021]; Van Mulligen, Erik [orcid:0000-0003-1377-9386 meta:ra/061022]; Clark, Timothy [orcid:0000-0003-4060-7360 meta:ra/061023]; Bourne, Philip E [orcid:0000-0002-7618-7292 meta:ra/061024]; Brookes, Anthony J. [orcid:0000-0001-8686-0017 meta:ra/061025]; Crosas, Mercè [orcid:0000-0003-1304-1939 meta:ra/061026]; Dillo, Ingrid [orcid:0000-0001-5654-2392 meta:ra/061027]; Velterop, Jan [orcid:0000-0002-4836-6568 meta:ra/061028]; Kuhn, Tobias [orcid:0000-0002-1267-0234 meta:ra/061029]; Gray, Alasdair [orcid:0000-0002-5711-4872 meta:ra/061030]; Edmunds, Scott C [orcid:0000-0001-6444-1436 meta:ra/061031]; Boiten, Jan-Willem [orcid:0000-0003-0327-638X meta:ra/061032]; Sengstag, Thierry [orcid:0000-0002-7516-6246 meta:ra/061033]; Zhao, Jun [orcid:0000-0001-6935-9028 meta:ra/061034]; Appleton, Gaby [orcid:0000-0003-0179-7384 meta:ra/061035]; Thompson, Mark [orcid:0000-0002-7633-1442 meta:ra/061036]; Heringa, Jaap [orcid:0000-0001-8641-4930 meta:ra/061037]; Kok, Ruben [meta:ra/061038]; Kok, Joost [orcid:0000-0002-7352-1400 meta:ra/061039]; Lusher, Scott J. [orcid:0000-0003-2401-4223 meta:ra/061040]; Mons, Albert [meta:ra/061041]; Van Schaik, Rene [meta:ra/061042]; Rocca-Serra, Philippe [orcid:0000-0001-9853-5668 meta:ra/061043]; Packer, Abel L [orcid:0000-0001-9610-5728 meta:ra/061044]; Santos, Luiz Olavo Bonino Da Silva [orcid:0000-0002-1164-1351 meta:ra/061045]; Slater, Ted [orcid:0000-0003-1386-0731 meta:ra/061046]; Baak, Arie [orcid:0000-0003-2829-6715 meta:ra/061047]; Strawn, George [meta:ra/061048]; Van Der Lei, Johan [meta:ra/061049]; Wittenburg, Peter [meta:ra/061050]; Bouwman, Jildau [meta:ra/061051]; Dumon, Olivier [orcid:0000-0001-8599-7345 meta:ra/061052]; Gonzalez-Beltran, Alejandra [orcid:0000-0003-3499-8262 meta:ra/061053]",
+                "pub_date": "2016-03-15",
+                "page": "3",
+                "issue": "",
+                "volume": "",
+                "venue": "Scientific Data [issn:2052-4463 meta:br/06102]",
+                "type": "journal article",
+                "publisher": "Springer Science And Business Media Llc [crossref:297 meta:ra/0601]",
+                "editor": ""
+            }
+        ]
+        format_expected = 'application/json'
+        output = status, sorted([{k:sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], key=lambda x:x['pub_date']), format
+        result_expected = sorted([{k:sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected], key=lambda x:x['pub_date'])
+        expected_output = status_expected, result_expected, format_expected
+        self.assertEqual(output, expected_output)
+
     def test_metadata_two_schemes(self):
         operation_url = 'metadata'
         request = 'doi:10.1007/978-1-4020-9632-7__issn:0022-3727'
@@ -173,25 +201,26 @@ class test_metaapi_v1(unittest.TestCase):
 
     def test_author(self):
         operation_url = 'author'
-        request = '0000-0003-3891-6869'
+        request = '0000-0002-0209-4480'
         call = "%s/%s/%s" % (api_base, operation_url, request)
         op = api_manager.get_op(call)
         status, result, format = op.exec()
         status_expected = 200
         result_expected = [
             {
-                "id": "doi:10.1088/0022-3727/39/14/017 meta:br/0602",
-                "title": "Diffusion Correction To The Raether–Meek Criterion For The Avalanche-To-Streamer Transition",
-                "author": "Montijn, Carolynne [meta:ra/0604]; Ebert, Ute [orcid:0000-0003-3891-6869 meta:ra/0605]",
-                "pub_date": "2006-06-30",
-                "page": "2979-2992",
-                "issue": "14",
-                "volume": "39",
-                "venue": "Journal Of Physics D: Applied Physics [issn:0022-3727 meta:br/0604]",
+                "id": "doi:10.1038/sdata.2016.18 meta:br/06101",
+                "title": "Influence Of Dielectric Properties, State, And Electrodes On Electric Strength",
+                "author": "Hoen, Peter-Bram 'T [orcid:0000-0003-4450-3112 meta:ra/06101]; Martone, Maryann E [orcid:0000-0002-8406-3871 meta:ra/06102]; Roos, Marco [orcid:0000-0002-8691-772X meta:ra/06103]; Swertz, Morris [orcid:0000-0002-0979-3401 meta:ra/06104]; Dumontier, Michel [orcid:0000-0003-4727-9435 meta:ra/06105]; Evelo, Chris [orcid:0000-0002-5301-3142 meta:ra/06106]; Persson, Bengt [orcid:0000-0003-3165-5344 meta:ra/06107]; Finkers, Richard [orcid:0000-0002-4368-8058 meta:ra/06108]; Wilkinson, Mark [orcid:0000-0001-6960-357X meta:ra/06109]; Mons, Barend [orcid:0000-0003-3934-0072 meta:ra/061010]; Grethe, Jeffrey [orcid:0000-0001-5212-7052 meta:ra/061011]; Waagmeester, Andra [orcid:0000-0001-9773-4008 meta:ra/061012]; Schultes, Erik Anthony [orcid:0000-0001-8888-635X meta:ra/061013]; Hooft, Rob [orcid:0000-0001-6825-9439 meta:ra/061014]; Sansone, Susanna-Assunta [orcid:0000-0001-5306-5690 meta:ra/061015]; Blomberg, Niklas [orcid:0000-0003-4155-5910 meta:ra/061016]; Aalbersberg, IJsbrand Jan [orcid:0000-0002-0209-4480 meta:ra/061017]; Goble, Carole [orcid:0000-0003-1219-2137 meta:ra/061018]; Wolstencroft, Katy [orcid:0000-0002-1279-5133 meta:ra/061019]; Groth, Paul [orcid:0000-0003-0183-6910 meta:ra/061020]; Axton, Myles [orcid:0000-0002-8042-4131 meta:ra/061021]; Van Mulligen, Erik [orcid:0000-0003-1377-9386 meta:ra/061022]; Clark, Timothy [orcid:0000-0003-4060-7360 meta:ra/061023]; Bourne, Philip E [orcid:0000-0002-7618-7292 meta:ra/061024]; Brookes, Anthony J. [orcid:0000-0001-8686-0017 meta:ra/061025]; Crosas, Mercè [orcid:0000-0003-1304-1939 meta:ra/061026]; Dillo, Ingrid [orcid:0000-0001-5654-2392 meta:ra/061027]; Velterop, Jan [orcid:0000-0002-4836-6568 meta:ra/061028]; Kuhn, Tobias [orcid:0000-0002-1267-0234 meta:ra/061029]; Gray, Alasdair [orcid:0000-0002-5711-4872 meta:ra/061030]; Edmunds, Scott C [orcid:0000-0001-6444-1436 meta:ra/061031]; Boiten, Jan-Willem [orcid:0000-0003-0327-638X meta:ra/061032]; Sengstag, Thierry [orcid:0000-0002-7516-6246 meta:ra/061033]; Zhao, Jun [orcid:0000-0001-6935-9028 meta:ra/061034]; Appleton, Gaby [orcid:0000-0003-0179-7384 meta:ra/061035]; Thompson, Mark [orcid:0000-0002-7633-1442 meta:ra/061036]; Heringa, Jaap [orcid:0000-0001-8641-4930 meta:ra/061037]; Kok, Ruben [meta:ra/061038]; Kok, Joost [orcid:0000-0002-7352-1400 meta:ra/061039]; Lusher, Scott J. [orcid:0000-0003-2401-4223 meta:ra/061040]; Mons, Albert [meta:ra/061041]; Van Schaik, Rene [meta:ra/061042]; Rocca-Serra, Philippe [orcid:0000-0001-9853-5668 meta:ra/061043]; Packer, Abel L [orcid:0000-0001-9610-5728 meta:ra/061044]; Santos, Luiz Olavo Bonino Da Silva [orcid:0000-0002-1164-1351 meta:ra/061045]; Slater, Ted [orcid:0000-0003-1386-0731 meta:ra/061046]; Baak, Arie [orcid:0000-0003-2829-6715 meta:ra/061047]; Strawn, George [meta:ra/061048]; Van Der Lei, Johan [meta:ra/061049]; Wittenburg, Peter [meta:ra/061050]; Bouwman, Jildau [meta:ra/061051]; Dumon, Olivier [orcid:0000-0001-8599-7345 meta:ra/061052]; Gonzalez-Beltran, Alejandra [orcid:0000-0003-3499-8262 meta:ra/061053]",
+                "pub_date": "2016-03-15",
+                "page": "3",
+                "issue": "",
+                "volume": "",
+                "venue": "Scientific Data [issn:2052-4463 meta:br/06102]",
                 "type": "journal article",
-                "publisher": "Iop Publishing [crossref:266 meta:ra/0606]",
+                "publisher": "Springer Science And Business Media Llc [crossref:297 meta:ra/0601]",
                 "editor": ""
-            }]
+            }
+        ]
         format_expected = 'application/json'
         output = status, [{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in json.loads(result)], format
         result_expected = [{k:set(v.split('; ')) if k in {'author', 'editor'} else sorted(v.split()) if k == 'id' else v for k,v in el.items()} for el in result_expected]
