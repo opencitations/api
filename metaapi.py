@@ -56,7 +56,7 @@ def generate_id_search(ids:str) -> Tuple[str]:
         scheme = scheme_literal_value[0].lower()
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
-        if scheme == 'meta':
+        if scheme == 'omid':
             id_searches.append('''{{?res a fabio:Expression. BIND(<https://w3id.org/oc/meta/{0}> AS ?res)}}'''.format(literal_value))
         elif scheme in {'doi', 'issn', 'isbn', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
             id_searches.append('''
@@ -75,7 +75,7 @@ def generate_ra_search(identifier:str) -> Tuple[str]:
     else:
         scheme = 'orcid'
         literal_value = scheme_literal_value[0]
-    if scheme == 'meta':
+    if scheme == 'omid':
         return '<https://w3id.org/oc/meta/{0}> ^pro:isHeldBy ?knownRole.'.format(literal_value),
     else:
         return '''
