@@ -25,27 +25,27 @@ from urllib.parse import quote
 PUBLISHERS = list()
 
 URI_TYPE_DICT = {
-    'http://purl.org/spar/fabio/ArchivalDocument': 'archival document', 
-    'http://purl.org/spar/fabio/Book': 'book', 
-    'http://purl.org/spar/fabio/BookChapter': 'book chapter', 
-    'http://purl.org/spar/doco/Part': 'book part', 
-    'http://purl.org/spar/fabio/ExpressionCollection': 'book section', 
-    'http://purl.org/spar/fabio/BookSeries': 'book series', 
-    'http://purl.org/spar/fabio/BookSet': 'book set', 
-    'http://purl.org/spar/fabio/DataFile': 'dataset', 
-    'http://purl.org/spar/fabio/Thesis': 'dissertation', 
-    'http://purl.org/spar/fabio/Journal': 'journal', 
-    'http://purl.org/spar/fabio/JournalArticle': 'journal article', 
-    'http://purl.org/spar/fabio/JournalIssue': 'journal issue', 
-    'http://purl.org/spar/fabio/JournalVolume': 'journal volume', 
-    'http://purl.org/spar/fr/ReviewVersion': 'peer_review', 
-    'http://purl.org/spar/fabio/AcademicProceedings': 'proceedings', 
-    'http://purl.org/spar/fabio/ProceedingsPaper': 'proceedings article', 
-    'http://purl.org/spar/fabio/ReferenceBook': 'reference book', 
-    'http://purl.org/spar/fabio/ReferenceEntry': 'reference entry', 
-    'http://purl.org/spar/fabio/ReportDocument': 'report', 
-    'http://purl.org/spar/fabio/Series': 'series', 
-    'http://purl.org/spar/fabio/SpecificationDocument': 'standard', 
+    'http://purl.org/spar/fabio/ArchivalDocument': 'archival document',
+    'http://purl.org/spar/fabio/Book': 'book',
+    'http://purl.org/spar/fabio/BookChapter': 'book chapter',
+    'http://purl.org/spar/doco/Part': 'book part',
+    'http://purl.org/spar/fabio/ExpressionCollection': 'book section',
+    'http://purl.org/spar/fabio/BookSeries': 'book series',
+    'http://purl.org/spar/fabio/BookSet': 'book set',
+    'http://purl.org/spar/fabio/DataFile': 'dataset',
+    'http://purl.org/spar/fabio/Thesis': 'dissertation',
+    'http://purl.org/spar/fabio/Journal': 'journal',
+    'http://purl.org/spar/fabio/JournalArticle': 'journal article',
+    'http://purl.org/spar/fabio/JournalIssue': 'journal issue',
+    'http://purl.org/spar/fabio/JournalVolume': 'journal volume',
+    'http://purl.org/spar/fr/ReviewVersion': 'peer_review',
+    'http://purl.org/spar/fabio/AcademicProceedings': 'proceedings',
+    'http://purl.org/spar/fabio/ProceedingsPaper': 'proceedings article',
+    'http://purl.org/spar/fabio/ReferenceBook': 'reference book',
+    'http://purl.org/spar/fabio/ReferenceEntry': 'reference entry',
+    'http://purl.org/spar/fabio/ReportDocument': 'report',
+    'http://purl.org/spar/fabio/Series': 'series',
+    'http://purl.org/spar/fabio/SpecificationDocument': 'standard',
     'http://purl.org/spar/fabio/WebContent': 'web content'}
 
 
@@ -56,7 +56,7 @@ def generate_id_search(ids:str) -> Tuple[str]:
         scheme = scheme_literal_value[0].lower()
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
-        if scheme == 'meta':
+        if scheme == 'omid':
             id_searches.append('''{{?res a fabio:Expression. BIND(<https://w3id.org/oc/meta/{0}> AS ?res)}}'''.format(literal_value))
         elif scheme in {'doi', 'issn', 'isbn', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
             id_searches.append('''
@@ -75,7 +75,7 @@ def generate_ra_search(identifier:str) -> Tuple[str]:
     else:
         scheme = 'orcid'
         literal_value = scheme_literal_value[0]
-    if scheme == 'meta':
+    if scheme == 'omid':
         return '<https://w3id.org/oc/meta/{0}> ^pro:isHeldBy ?knownRole.'.format(literal_value),
     else:
         return '''
@@ -156,14 +156,14 @@ def clean_title(title: str) -> str:
 #             ?res datacite:hasIdentifier ?tsIdentifier{ts_index};
 #                 a fabio:Expression.
 #         '''
-    
+
 #     def get_text_search_on_title(self, ts_index:bool) -> str:
 #         return f'''
 #             {self.__gen_text_search(f'tsTitle{ts_index}', self.text, False, ts_index)}
 #             ?res dcterm:title ?tsTitle{ts_index};
 #                 a fabio:Expression.
 #         '''
-    
+
 #     def get_text_search_on_person(self, role:str, ts_index:bool) -> str:
 #         family_name = None
 #         given_name = None
@@ -213,7 +213,7 @@ def clean_title(title: str) -> str:
 #                 ?tsPublisher{ts_index} pro:isHeldBy ?tsPublisherRa{ts_index};
 #                                     pro:withRole pro:publisher.
 #                 ?res pro:isDocumentContextFor ?tsPublisher{ts_index};
-#                     a fabio:Expression.            
+#                     a fabio:Expression.
 #             '''
 #         else:
 #             text_search_on_publisher = f'''
@@ -222,10 +222,10 @@ def clean_title(title: str) -> str:
 #                 ?tsPublisher{ts_index} pro:isHeldBy ?tsPublisherRa{ts_index};
 #                                     pro:withRole pro:publisher.
 #                 ?res pro:isDocumentContextFor ?tsPublisher{ts_index};
-#                     a fabio:Expression.            
+#                     a fabio:Expression.
 #             '''
 #         return text_search_on_publisher
-        
+
 #     def get_text_search_on_vi(self, vi:str, ts_index:bool) -> str:
 #         v_or_i = vi.title()
 #         return f'''
@@ -235,7 +235,7 @@ def clean_title(title: str) -> str:
 #             ?res frbr:partOf+ ?ts{v_or_i}{ts_index};
 #                 a fabio:Expression.
 #         '''
-    
+
 #     def get_text_search_on_venue(self, ts_index:bool) -> str:
 #         return f'''
 #             {self.__gen_text_search(f'tsVenueTitle{ts_index}', self.text, False, ts_index)}

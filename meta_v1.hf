@@ -12,7 +12,7 @@
 
 #url /metadata/{ids}
 #type operation
-#ids str((doi|issn|isbn|meta):.+?(__(doi|issn|isbn|meta):.+?)*$)
+#ids str((doi|issn|isbn|omid):.+?(__(doi|issn|isbn|omid):.+?)*$)
 #preprocess generate_id_search(ids)
 #postprocess create_metadata_output()
 #method get
@@ -20,7 +20,7 @@
 
 Each ID is built as follows: ID abbreviation + ":" = ID value. For example, For example "doi:10.3233/ds-170012" indicates a DOI identifier with value "10.3233/ds-170012"
 
-The ID abbreviations currently supported in this operation are "doi", "issn", "isbn", and "meta"
+The ID abbreviations currently supported in this operation are "doi", "issn", "isbn", and "omid"
 
 It is possible to specify one or more IDs as input of this operation. In this case, the IDs should be separated with a double underscore ("\_\_") – e.g. "doi:10.1108/jd-12-2013-0166\_\_doi:10.1016/j.websem.2012.08.001". The fields returned by this operation are:
 
@@ -37,7 +37,7 @@ It is possible to specify one or more IDs as input of this operation. In this ca
 #field_type str(id) str(title) str(author) datetime(pub_date) str(issue) str(volume) str(venue) str(page) str(type) str(publisher) str(editor)
 #output_json [
     {
-        "id": "doi:10.1007/978-1-4020-9632-7 meta:br/062050946 isbn:9781402096327 isbn:9789048127108",
+        "id": "doi:10.1007/978-1-4020-9632-7 omid:br/062050946 isbn:9781402096327 isbn:9789048127108",
         "title": "Adaptive Environmental Management",
         "author": "",
         "pub_date": "2009",
@@ -62,7 +62,7 @@ PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (GROUP_CONCAT(DISTINCT ?title_) AS ?title)
-(GROUP_CONCAT(DISTINCT ?author_) AS ?author)
+(GROUP_CONCAT(DISTINCT ?author_; SEPARATOR="; ") AS ?author)
 (GROUP_CONCAT(DISTINCT ?date_) AS ?pub_date)
 (GROUP_CONCAT(DISTINCT ?page_) AS ?page)
 (GROUP_CONCAT(DISTINCT ?issue_) AS ?issue)
@@ -70,7 +70,7 @@ SELECT DISTINCT
 (GROUP_CONCAT(DISTINCT ?venue_) AS ?venue)
 (GROUP_CONCAT(DISTINCT ?type_) AS ?type)
 (GROUP_CONCAT(DISTINCT ?publisher_; separator=' ') AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_) AS ?editor)
+(GROUP_CONCAT(DISTINCT ?editor_; SEPARATOR="; ") AS ?editor)
 WITH {
   SELECT DISTINCT ?res
   WHERE {
@@ -78,7 +78,7 @@ WITH {
   } LIMIT 1000
 } AS %results
 WHERE {
-  {SELECT DISTINCT ?res
+  {SELECT DISTINCT ?res ?author_ ?editor_
   (GROUP_CONCAT(DISTINCT ?title__) AS ?title_)
   (GROUP_CONCAT(DISTINCT ?venueName_) AS ?venueName)
   (GROUP_CONCAT(DISTINCT ?venueMetaid_) AS ?venueMetaid)
@@ -88,11 +88,7 @@ WHERE {
   (GROUP_CONCAT(DISTINCT ?issue__) AS ?issue_)
   (GROUP_CONCAT(DISTINCT ?volume__) AS ?volume_)
   (GROUP_CONCAT(DISTINCT ?type__) AS ?type_)
-  (GROUP_CONCAT(DISTINCT ?authorName_; SEPARATOR='; ') AS ?authorName)
-  (GROUP_CONCAT(DISTINCT ?editorName_; SEPARATOR='; ') AS ?editorName)
   (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' ') AS ?ids)
-  (GROUP_CONCAT(DISTINCT ?author__; SEPARATOR='; ') AS ?author_)
-  (GROUP_CONCAT(DISTINCT ?editor__; SEPARATOR='; ') AS ?editor_)
   (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
   (GROUP_CONCAT(DISTINCT ?publisher_ids_; SEPARATOR=' ') AS ?publisher_ids)
   (GROUP_CONCAT(DISTINCT ?publisherMetaid_) AS ?publisherMetaid)
@@ -116,7 +112,7 @@ WHERE {
         ?res frbr:partOf ?journal.
       }
       ?journal dcterm:title ?venueName_.
-      BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
+      BIND(CONCAT("omid:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
           ?journal datacite:hasIdentifier ?journalIdentifier__.
           ?journalIdentifier__ datacite:usesIdentifierScheme ?journalIdScheme;
@@ -129,7 +125,7 @@ WHERE {
       ?arPublisher pro:withRole pro:publisher;
                   pro:isHeldBy ?raPublisher.
       ?raPublisher foaf:name ?publisherName_.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisherMetaid_)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisherMetaid_)
       OPTIONAL {
         ?raPublisher datacite:hasIdentifier ?publisherIdentifier__.
         ?publisherIdentifier__ datacite:usesIdentifierScheme ?publisherIdSchema;
@@ -142,7 +138,7 @@ WHERE {
       OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
       ?arAuthor pro:withRole pro:author;
                 pro:isHeldBy ?raAuthor.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
       {?raAuthor foaf:familyName ?familyName.} UNION {?raAuthor foaf:name ?name.}
       OPTIONAL {
         ?raAuthor datacite:hasIdentifier ?authorIdentifier.
@@ -161,14 +157,14 @@ WHERE {
         COALESCE(
           CONCAT(?authorName, " [", ?author_id, " ", ?author_metaid, "]"),
           CONCAT(?authorName, " [", ?author_metaid, "]"))
-        AS ?author__)
+        AS ?author_)
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arEditor.
       OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
       ?arEditor pro:withRole pro:editor;
                 pro:isHeldBy ?raEditor.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
       {?raEditor foaf:familyName ?editorFamilyName.} UNION {?raEditor foaf:name ?editor_name.}
       OPTIONAL {
         ?raEditor datacite:hasIdentifier ?editorIdentifier.
@@ -187,7 +183,7 @@ WHERE {
         COALESCE(
           CONCAT(?editorName, " [", ?editor_id, " ", ?editor_metaid, "]"),
           CONCAT(?editorName, " [", ?editor_metaid, "]"))
-        AS ?editor__)
+        AS ?editor_)
     }
     OPTIONAL {?res dcterm:title ?title__.}
     OPTIONAL {?res prism:publicationDate ?date__.}
@@ -206,8 +202,8 @@ WHERE {
       ?resVolume a fabio:JournalVolume;
                 fabio:hasSequenceIdentifier ?volume__.
     }
-  } GROUP BY ?res ORDER BY DESC(?totAuthor) DESC(?totEditor)}
-  BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "meta:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
+  } GROUP BY ?res ?author_ ?editor_ ORDER BY DESC(?totAuthor) DESC(?totEditor)}
+  BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
   BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
   BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
   BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue_)
@@ -217,13 +213,13 @@ GROUP BY ?id
 
 #url /author/{id}
 #type operation
-#id str(((orcid:)?([0-9]{4}-){3}[0-9]{3}[0-9X])|(meta:ra\/06[1-9]*0\d+))
+#id str(((orcid:)?([0-9]{4}-){3}[0-9]{3}[0-9X])|(omid:ra\/06[1-9]*0\d+))
 #preprocess generate_ra_search(id)
 #postprocess create_metadata_output()
 #method get
 #description This operation retrieves the bibliographic metadata for each bibliographic entity authored by the person identified by the given ORCID or OpenCitations Meta Identifier.
 
-Both ORCID and OMID must be specified preceded by a prefix that makes explicit the identifier scheme, i.e. <code>orcid:</code> for ORCID (e.g., <code>orcid:0000-0003-1572-6747</code>) and <code>meta:</code> for OMID (e.g., <code>meta:ra/0601</code>).
+Both ORCID and OMID must be specified preceded by a prefix that makes explicit the identifier scheme, i.e. <code>orcid:</code> for ORCID (e.g., <code>orcid:0000-0003-1572-6747</code>) and <code>omid:</code> for OMID (e.g., <code>omid:ra/0601</code>).
 
 The fields returned by this operation are:
 
@@ -250,7 +246,7 @@ The fields returned by this operation are:
         "venue": "Scientometrics [issn:1588-2861 issn:0138-9130]",
         "volume": "127",
         "author": "Peroni, Silvio [orcid:0000-0003-0530-4305]; Santini, Cristian [orcid:0000-0001-7363-6737]; Shahidzadeh, Nooshin [orcid:0000-0003-4114-074X]; Massari, Arcangelo [orcid:0000-0002-8420-0696]; Cioffi, Alessia [orcid:0000-0002-9812-4065]; Coppini, Sara [orcid:0000-0002-6279-3830]; Moretti, Arianna [orcid:0000-0001-5486-7070]",
-        "id": "doi:10.1007/s11192-022-04367-w meta:br/061202127149"
+        "id": "doi:10.1007/s11192-022-04367-w omid:br/061202127149"
     },
     {
         "page": "379-385",
@@ -263,7 +259,7 @@ The fields returned by this operation are:
         "venue": "Linking Theory And Practice Of Digital Libraries [isbn:9783031168017 isbn:9783031168024]",
         "volume": "",
         "author": "Peroni, Silvio [orcid:0000-0003-0530-4305]; Heibi, Ivan [orcid:0000-0001-5366-5194]; Massari, Arcangelo [orcid:0000-0002-8420-0696]; Moretti, Arianna [orcid:0000-0001-5486-7070]; Grieco, Giuseppe [orcid:0000-0001-5439-4576]",
-        "id": "doi:10.1007/978-3-031-16802-4_36 meta:br/061603442625"
+        "id": "doi:10.1007/978-3-031-16802-4_36 omid:br/061603442625"
     },
     {
         "page": "",
@@ -276,7 +272,7 @@ The fields returned by this operation are:
         "venue": "",
         "volume": "",
         "author": "Santini, Cristian [orcid:0000-0001-7363-6737]; Massari, Arcangelo [orcid:0000-0002-8420-0696]; Boente, Ricarda [orcid:0000-0002-2133-8735]; Tural, Deniz [orcid:0000-0002-6391-4198]",
-        "id": "doi:10.17504/protocols.io.buuknwuw meta:br/06903005993"
+        "id": "doi:10.17504/protocols.io.buuknwuw omid:br/06903005993"
     }
 ]
 #sparql PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -310,7 +306,7 @@ WITH {
   } LIMIT 1000
 } AS %results
 WHERE {
-  {SELECT DISTINCT ?res
+  {SELECT DISTINCT ?res ?author_ ?editor_
   (GROUP_CONCAT(DISTINCT ?title__) AS ?title_)
   (GROUP_CONCAT(DISTINCT ?venueName_) AS ?venueName)
   (GROUP_CONCAT(DISTINCT ?venueMetaid_) AS ?venueMetaid)
@@ -321,8 +317,6 @@ WHERE {
   (GROUP_CONCAT(DISTINCT ?issue__) AS ?issue_)
   (GROUP_CONCAT(DISTINCT ?volume__) AS ?volume_)
   (GROUP_CONCAT(DISTINCT ?type__) AS ?type_)
-  (GROUP_CONCAT(DISTINCT ?author__; SEPARATOR='; ') AS ?author_)
-  (GROUP_CONCAT(DISTINCT ?editor__; SEPARATOR='; ') AS ?editor_)
   (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' ') AS ?ids)
   (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
   (GROUP_CONCAT(DISTINCT ?publisher_ids_; SEPARATOR=' ') AS ?publisher_ids)
@@ -346,7 +340,7 @@ WHERE {
         ?res frbr:partOf ?journal.
       }
       ?journal dcterm:title ?venueName_.
-      BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
+      BIND(CONCAT("omid:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
           ?journal datacite:hasIdentifier ?journalIdentifier__.
           ?journalIdentifier__ datacite:usesIdentifierScheme ?journalIdScheme;
@@ -359,7 +353,7 @@ WHERE {
       ?arPublisher pro:withRole pro:publisher;
                   pro:isHeldBy ?raPublisher.
       ?raPublisher foaf:name ?publisherName_.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisherMetaid_)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisherMetaid_)
       OPTIONAL {
         ?raPublisher datacite:hasIdentifier ?publisherIdentifier__.
         ?publisherIdentifier__ datacite:usesIdentifierScheme ?publisherIdSchema;
@@ -372,7 +366,7 @@ WHERE {
       OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
       ?arAuthor pro:withRole pro:author;
                 pro:isHeldBy ?raAuthor.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
       {?raAuthor foaf:familyName ?familyName.} UNION {?raAuthor foaf:name ?name.}
       OPTIONAL {
         ?raAuthor datacite:hasIdentifier ?authorIdentifier.
@@ -391,14 +385,14 @@ WHERE {
         COALESCE(
           CONCAT(?authorName, " [", ?author_id, " ", ?author_metaid, "]"),
           CONCAT(?authorName, " [", ?author_metaid, "]"))
-        AS ?author__)
+        AS ?author_)
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arEditor.
       OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
       ?arEditor pro:withRole pro:editor;
                 pro:isHeldBy ?raEditor.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
       {?raEditor foaf:familyName ?editorFamilyName.} UNION {?raEditor foaf:name ?editor_name.}
       OPTIONAL {
         ?raEditor datacite:hasIdentifier ?editorIdentifier.
@@ -417,7 +411,7 @@ WHERE {
         COALESCE(
           CONCAT(?editorName, " [", ?editor_id, " ", ?editor_metaid, "]"),
           CONCAT(?editorName, " [", ?editor_metaid, "]"))
-        AS ?editor__)
+        AS ?editor_)
     }
     OPTIONAL {?res dcterm:title ?title__.}
     OPTIONAL {?res prism:publicationDate ?date__.}
@@ -436,8 +430,8 @@ WHERE {
       ?resVolume a fabio:JournalVolume;
                 fabio:hasSequenceIdentifier ?volume__.
     }
-  } GROUP BY ?res ORDER BY DESC(?totAuthor) DESC(?totEditor)}
-  BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "meta:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
+  } GROUP BY ?res ?author_ ?editor_ ORDER BY DESC(?totAuthor) DESC(?totEditor)}
+  BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
   BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
   BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
   BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue_)
@@ -447,13 +441,13 @@ GROUP BY ?id
 
 #url /editor/{id}
 #type operation
-#id str(((orcid:)?([0-9]{4}-){3}[0-9]{3}[0-9X])|(meta:ra\/06[1-9]*0\d+))
+#id str(((orcid:)?([0-9]{4}-){3}[0-9]{3}[0-9X])|(omid:ra\/06[1-9]*0\d+))
 #preprocess generate_ra_search(id)
 #postprocess create_metadata_output()
 #method get
 #description This operation retrieves the bibliographic metadata for each bibliographic entity edited by the person identified by the given ORCID or OpenCitations Meta Identifier.
 
-Both ORCID and OMID must be specified preceded by a prefix that makes explicit the identifier scheme, i.e. <code>orcid:</code> for ORCID (e.g., <code>orcid:0000-0003-1572-6747</code>) and <code>meta:</code> for OMID (e.g., <code>meta:ra/0601</code>).
+Both ORCID and OMID must be specified preceded by a prefix that makes explicit the identifier scheme, i.e. <code>orcid:</code> for ORCID (e.g., <code>orcid:0000-0003-1572-6747</code>) and <code>omid:</code> for OMID (e.g., <code>omid:ra/0601</code>).
 
 The fields returned by this operation are:
 
@@ -470,7 +464,7 @@ The fields returned by this operation are:
 #field_type str(id) str(title) str(author) datetime(pub_date) str(issue) str(volume) str(venue) str(page) str(type) str(publisher) str(editor)
 #output_json [
   {
-      "id": "doi:10.1007/978-1-4020-9632-7 meta:br/0601 isbn:9789048127108 isbn:9781402096327",
+      "id": "doi:10.1007/978-1-4020-9632-7 omid:br/0601 isbn:9789048127108 isbn:9781402096327",
       "title": "Adaptive Environmental Management",
       "author": "",
       "pub_date": "2009",
@@ -495,7 +489,7 @@ PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (GROUP_CONCAT(DISTINCT ?title_) AS ?title)
-(GROUP_CONCAT(DISTINCT ?author_) AS ?author)
+(GROUP_CONCAT(DISTINCT ?author_; SEPARATOR="; ") AS ?author)
 (GROUP_CONCAT(DISTINCT ?date_) AS ?pub_date)
 (GROUP_CONCAT(DISTINCT ?page_) AS ?page)
 (GROUP_CONCAT(DISTINCT ?issue_) AS ?issue)
@@ -503,7 +497,7 @@ SELECT DISTINCT
 (GROUP_CONCAT(DISTINCT ?venue_) AS ?venue)
 (GROUP_CONCAT(DISTINCT ?type_) AS ?type)
 (GROUP_CONCAT(DISTINCT ?publisher_; separator=' ') AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_) AS ?editor)
+(GROUP_CONCAT(DISTINCT ?editor_; SEPARATOR="; ") AS ?editor)
 WITH {
   SELECT DISTINCT ?res
   WHERE {
@@ -514,7 +508,7 @@ WITH {
   } LIMIT 1000
 } AS %results
 WHERE {
-  {SELECT DISTINCT ?res
+  {SELECT DISTINCT ?res ?author_ ?editor_
   (GROUP_CONCAT(DISTINCT ?title__) AS ?title_)
   (GROUP_CONCAT(DISTINCT ?venueName_) AS ?venueName)
   (GROUP_CONCAT(DISTINCT ?venueMetaid_) AS ?venueMetaid)
@@ -525,8 +519,6 @@ WHERE {
   (GROUP_CONCAT(DISTINCT ?issue__) AS ?issue_)
   (GROUP_CONCAT(DISTINCT ?volume__) AS ?volume_)
   (GROUP_CONCAT(DISTINCT ?type__) AS ?type_)
-  (GROUP_CONCAT(DISTINCT ?author__; SEPARATOR='; ') AS ?author_)
-  (GROUP_CONCAT(DISTINCT ?editor__; SEPARATOR='; ') AS ?editor_)
   (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' ') AS ?ids)
   (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
   (GROUP_CONCAT(DISTINCT ?publisher_ids_; SEPARATOR=' ') AS ?publisher_ids)
@@ -550,7 +542,7 @@ WHERE {
         ?res frbr:partOf ?journal.
       }
       ?journal dcterm:title ?venueName_.
-      BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
+      BIND(CONCAT("omid:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
       OPTIONAL {
           ?journal datacite:hasIdentifier ?journalIdentifier__.
           ?journalIdentifier__ datacite:usesIdentifierScheme ?journalIdScheme;
@@ -563,7 +555,7 @@ WHERE {
       ?arPublisher pro:withRole pro:publisher;
                   pro:isHeldBy ?raPublisher.
       ?raPublisher foaf:name ?publisherName_.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisherMetaid_)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisherMetaid_)
       OPTIONAL {
         ?raPublisher datacite:hasIdentifier ?publisherIdentifier__.
         ?publisherIdentifier__ datacite:usesIdentifierScheme ?publisherIdSchema;
@@ -576,7 +568,7 @@ WHERE {
       OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
       ?arAuthor pro:withRole pro:author;
                 pro:isHeldBy ?raAuthor.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
       {?raAuthor foaf:familyName ?familyName.} UNION {?raAuthor foaf:name ?name.}
       OPTIONAL {
         ?raAuthor datacite:hasIdentifier ?authorIdentifier.
@@ -595,14 +587,14 @@ WHERE {
         COALESCE(
           CONCAT(?authorName, " [", ?author_id, " ", ?author_metaid, "]"),
           CONCAT(?authorName, " [", ?author_metaid, "]"))
-        AS ?author__)
+        AS ?author_)
     }
     OPTIONAL {
       ?res pro:isDocumentContextFor ?arEditor.
       OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
       ?arEditor pro:withRole pro:editor;
                 pro:isHeldBy ?raEditor.
-      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
+      BIND(CONCAT("omid:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
       {?raEditor foaf:familyName ?editorFamilyName.} UNION {?raEditor foaf:name ?editor_name.}
       OPTIONAL {
         ?raEditor datacite:hasIdentifier ?editorIdentifier.
@@ -621,7 +613,7 @@ WHERE {
         COALESCE(
           CONCAT(?editorName, " [", ?editor_id, " ", ?editor_metaid, "]"),
           CONCAT(?editorName, " [", ?editor_metaid, "]"))
-        AS ?editor__)
+        AS ?editor_)
     }
     OPTIONAL {?res dcterm:title ?title__.}
     OPTIONAL {?res prism:publicationDate ?date__.}
@@ -640,8 +632,8 @@ WHERE {
       ?resVolume a fabio:JournalVolume;
                 fabio:hasSequenceIdentifier ?volume__.
     }
-  } GROUP BY ?res ORDER BY DESC(?totAuthor) DESC(?totEditor)}
-  BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "meta:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
+  } GROUP BY ?res ?author_ ?editor_ ORDER BY DESC(?totAuthor) DESC(?totEditor)}
+  BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
   BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
   BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
   BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue_)
