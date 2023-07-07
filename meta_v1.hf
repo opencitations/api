@@ -78,7 +78,7 @@ WITH {
   } LIMIT 1000
 } AS %results
 WHERE {
-  {SELECT DISTINCT ?res ?author_ ?editor_ 
+  {SELECT DISTINCT ?res ?author_ ?editor_
   (GROUP_CONCAT(DISTINCT ?title__) AS ?title_)
   (GROUP_CONCAT(DISTINCT ?venueName_) AS ?venueName)
   (GROUP_CONCAT(DISTINCT ?venueMetaid_) AS ?venueMetaid)
@@ -306,7 +306,7 @@ WITH {
   } LIMIT 1000
 } AS %results
 WHERE {
-  {SELECT DISTINCT ?res ?author_ ?editor_      
+  {SELECT DISTINCT ?res ?author_ ?editor_
   (GROUP_CONCAT(DISTINCT ?title__) AS ?title_)
   (GROUP_CONCAT(DISTINCT ?venueName_) AS ?venueName)
   (GROUP_CONCAT(DISTINCT ?venueMetaid_) AS ?venueMetaid)
@@ -508,7 +508,7 @@ WITH {
   } LIMIT 1000
 } AS %results
 WHERE {
-  {SELECT DISTINCT ?res ?author_ ?editor_       
+  {SELECT DISTINCT ?res ?author_ ?editor_
   (GROUP_CONCAT(DISTINCT ?title__) AS ?title_)
   (GROUP_CONCAT(DISTINCT ?venueName_) AS ?venueName)
   (GROUP_CONCAT(DISTINCT ?venueMetaid_) AS ?venueMetaid)
@@ -634,6 +634,231 @@ WHERE {
     }
   } GROUP BY ?res ?author_ ?editor_ ORDER BY DESC(?totAuthor) DESC(?totEditor)}
   BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
+  BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
+  BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
+  BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue_)
+  BIND(CONCAT(?publisherName, ?publisherIdentifiers) AS ?publisher_)
+}
+GROUP BY ?id
+
+#url /search/{text_search}
+#type operation
+#text_search str((id|editor|author|title|venue|publisher|volume|issue)=((?!&&|\|\|).)+((&&|\|\|)(id|editor|author|title|venue|publisher|volume|issue)=((?!&&|\|\|).)+)*)
+#preprocess generate_text_search(text_search)
+#postprocess create_metadata_output()
+#method get
+#description This operation retrieves the bibliographic metadata for each bibliographic entity whose specified fields contain the given text
+
+The textual search is supported on the following fields: id, title, author, editor, venue, and publisher. You can also search for a specific volume or issue as long as you also specify the venue. The field and value to be searched must be separated by a <code>=</code> sign, e.g. <code>/search/author=Peroni,Silvio</code>.
+
+Different textual queries can be concatenated using the Boolean operators <code>&&</code> (AND) and <code>||</code> (OR), e.g. <code>author=Peroni,Silvio&&author=Shotton,David||title=OpenCitations,+an+infrastructure+organization+for+open+scholarship</code>
+
+The fields returned by this operation are:
+
+* *id*: the IDs of the bibliographic entity
+* *title*: the title of the bibliographic entity
+* *author*: the semicolon-separated list of authors of the bibliographic entity
+* *pub_date*: the date of publication of the bibliographic entity
+* *venue*: the title of the venue where the bibliographic entity has been published, followed by the list of identifiers referring that venue
+* *volume*: the number of the volume in which the bibliographic entity has been published
+* *issue*: the number of the issue in which the bibliographic entity has been published
+* *page*: the starting and ending pages of the bibliographic entity in the context of the venue where it has been published
+* *type*: the type of the bibliographic entity
+
+As for the **author** and **editor** fields, the text search should respect the syntax &lt;FAMILY_NAME&gt;&lt;COMMA&gt;&lt;GIVEN_NAME&gt; (e.g., Massari,Arcangelo). In the absence of comma (&lt;NAME&gt;), the search will be performed on both family names organizations (e.g., University Of New South Wales).
+The wildcard <code>*</code> can be used only for the given name, while the family name must be an exact match. Finally, given names with only one letter or with only one letter followed by a dot are treated as initials.
+
+Here is the list of all possible combinations to perform text search on authors and editors:
+
+<dl>
+  <dt><code>/search/author/massari,arcangelo</code></dt>
+  <dd>All the works of the authors whose given names are Arcangelo and family names are Massari</dd>
+  <dt><code>/search/author/peroni,s</code> or <code>/search/author/peroni,s.</code> or <code>/search/author/peroni,s*</code></dt>
+  <dd>All the works of the authors whose given names begin with S and family names are Peroni.</dd>
+  <dt><code>/search/author/massari,</code></dt>
+  <dd>All the works of the authors whose family names are Massari</dd>
+  <dt><code>/search/author/,arcangelo</code></dt>
+  <dd>All the works of the authors whose given names are Arcangelo</dd>
+  <dt><code>/search/author/research+centre+for+open+scholarly+metadata</code></dt>
+  <dd>All the works authored by the Research Centre for Open Scholarly Metadata</dd>
+</dl>
+#call /search/title=micro-chaos&&publisher=cold+spring+harbor+laboratory||title=micro-chaos&&publisher=springer
+#field_type str(id) str(title) str(author) datetime(pub_date) str(issue) str(volume) str(venue) str(page) str(type) str(publisher) str(editor)
+#output_json [
+    {
+        "id": "doi:10.1101/833772 meta:br/06150125995",
+        "title": "Using Chaos For Facile High-throughput Fabrication Of Ordered Multilayer Micro- And Nanostructures",
+        "author": "De Santiago, Grissel Trujillo-de [orcid:0000-0001-9230-4607]; Chávez-Madero, Carolina; De León-Derby, María Díaz; Samandari, Mohamadmahdi; Ceballos-González, Carlos Fernando; Bolívar-Monsalve, Edna Johana; Mendoza-Buenrostro, Christian Carlos; Holmberg, Sunshine; Garza-Flores, Norma Alicia; Almajhadi, Mohammad Ali; González-Gamboa, Ivonne; Yee-de León, Juan Felipe; Martínez-Chapa, Sergio Omar; Rodríguez, Ciro A.; Wickramasinghe, Hemantha Kumar; Madou, Marc; Khademhosseini, Ali; Zhang, Yu Shrike; Álvarez, Mario Moisés",
+        "pub_date": "2019-11-08",
+        "page": "",
+        "issue": "",
+        "volume": "",
+        "venue": "",
+        "type": "web content",
+        "publisher": "Cold Spring Harbor Laboratory [crossref:246]",
+        "editor": ""
+    },
+    {
+        "id": "doi:10.1007/bf02440161 meta:br/065072334",
+        "title": "Micro-chaos In Digital Control",
+        "author": "Haller, G.; Stépán, G.",
+        "pub_date": "1996-09",
+        "page": "415-448",
+        "issue": "5",
+        "volume": "6",
+        "venue": "Journal Of Nonlinear Science [issn:1432-1467 issn:0938-8974]",
+        "type": "journal article",
+        "publisher": "Springer Science And Business Media Llc [crossref:297]",
+        "editor": ""
+    }
+]
+#sparql PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX pro: <http://purl.org/spar/pro/>
+PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
+PREFIX datacite: <http://purl.org/spar/datacite/>
+PREFIX dcterm: <http://purl.org/dc/terms/>
+PREFIX frbr: <http://purl.org/vocab/frbr/core#>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+PREFIX prism: <http://prismstandard.org/namespaces/basic/2.0/>
+SELECT DISTINCT
+?id
+(GROUP_CONCAT(DISTINCT ?title_) AS ?title)
+(GROUP_CONCAT(DISTINCT ?author_) AS ?author)
+(GROUP_CONCAT(DISTINCT ?date_) AS ?pub_date)
+(GROUP_CONCAT(DISTINCT ?page_) AS ?page)
+(GROUP_CONCAT(DISTINCT ?issue_) AS ?issue)
+(GROUP_CONCAT(DISTINCT ?volume_) AS ?volume)
+(GROUP_CONCAT(DISTINCT ?venue_) AS ?venue)
+(GROUP_CONCAT(DISTINCT ?type_) AS ?type)
+(GROUP_CONCAT(DISTINCT ?publisher_; separator=' ') AS ?publisher)
+(GROUP_CONCAT(DISTINCT ?editor_) AS ?editor)
+WITH {
+  SELECT DISTINCT ?res
+  WHERE {
+    [[text_search]]
+  } LIMIT 1000
+} AS %results
+WHERE {
+  {SELECT DISTINCT ?res
+  (GROUP_CONCAT(DISTINCT ?title__) AS ?title_)
+  (GROUP_CONCAT(DISTINCT ?venueName_) AS ?venueName)
+  (GROUP_CONCAT(DISTINCT ?venueMetaid_) AS ?venueMetaid)
+  (GROUP_CONCAT(DISTINCT ?publisherName_) AS ?publisherName)
+  (GROUP_CONCAT(DISTINCT ?publisherMetaid_) AS ?publisherMetaid)
+  (GROUP_CONCAT(DISTINCT ?date__) AS ?date_)
+  (GROUP_CONCAT(DISTINCT ?page__) AS ?page_)
+  (GROUP_CONCAT(DISTINCT ?issue__) AS ?issue_)
+  (GROUP_CONCAT(DISTINCT ?volume__) AS ?volume_)
+  (GROUP_CONCAT(DISTINCT ?type__) AS ?type_)
+  (GROUP_CONCAT(DISTINCT ?author__; SEPARATOR='; ') AS ?author_)
+  (GROUP_CONCAT(DISTINCT ?editor__; SEPARATOR='; ') AS ?editor_)
+  (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' ') AS ?ids)
+  (GROUP_CONCAT(DISTINCT ?author_id; SEPARATOR=' ') AS ?author_ids)
+  (GROUP_CONCAT(DISTINCT ?editor_id; SEPARATOR=' ') AS ?editor_ids)
+  (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
+  (GROUP_CONCAT(DISTINCT ?publisher_ids_; SEPARATOR=' ') AS ?publisher_ids)
+  WHERE {
+    INCLUDE %results
+    OPTIONAL {?res a ?type__. FILTER (?type__ != fabio:Expression)}
+    OPTIONAL {
+      ?res datacite:hasIdentifier ?identifier.
+      ?identifier datacite:usesIdentifierScheme ?scheme;
+          literal:hasLiteralValue ?literalValue.
+      BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
+    }
+    OPTIONAL {
+      ?res frbr:partOf+ ?journal.
+      ?journal dcterm:title ?venueName_.
+      BIND(CONCAT("meta:br/", STRAFTER(STR(?journal), "/br/")) AS ?venueMetaid_)
+      OPTIONAL {
+          ?journal datacite:hasIdentifier ?journalIdentifier__.
+          ?journalIdentifier__ datacite:usesIdentifierScheme ?journalIdScheme;
+                      literal:hasLiteralValue ?journalIdLiteralValue.
+          BIND(CONCAT(STRAFTER(STR(?journalIdScheme), "http://purl.org/spar/datacite/"), ":", ?journalIdLiteralValue) AS ?venue_ids_)
+      }
+    }
+    OPTIONAL {
+      ?res pro:isDocumentContextFor ?arPublisher.
+      ?arPublisher pro:withRole pro:publisher;
+                  pro:isHeldBy ?raPublisher.
+      ?raPublisher foaf:name ?publisherName_.
+      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisherMetaid_)
+      OPTIONAL {
+        ?raPublisher datacite:hasIdentifier ?publisherIdentifier__.
+        ?publisherIdentifier__ datacite:usesIdentifierScheme ?publisherIdSchema;
+                               literal:hasLiteralValue ?publisherIdLiteralValue.
+        BIND(CONCAT(STRAFTER(STR(?publisherIdSchema), "http://purl.org/spar/datacite/"), ":", ?publisherIdLiteralValue) AS ?publisher_ids_)
+      }
+    }
+    OPTIONAL {
+      ?res pro:isDocumentContextFor ?arAuthor.
+      ?arAuthor pro:withRole pro:author;
+                pro:isHeldBy ?raAuthor.
+      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
+      {?raAuthor foaf:familyName ?familyName.} UNION {?raAuthor foaf:name ?name.}
+      OPTIONAL {
+        ?raAuthor datacite:hasIdentifier ?authorIdentifier.
+        ?authorIdentifier datacite:usesIdentifierScheme ?authorIdSchema;
+                          literal:hasLiteralValue ?authorIdLiteralValue.
+        BIND(CONCAT(STRAFTER(STR(?authorIdSchema), "http://purl.org/spar/datacite/"), ":", ?authorIdLiteralValue) AS ?author_id)
+      }
+      OPTIONAL {?raAuthor foaf:givenName ?givenName.}
+      BIND(
+        COALESCE(
+          CONCAT(?familyName, ", ", ?givenName),
+          CONCAT(?familyName, ","),
+          ?name)
+        AS ?authorName)
+      BIND(
+        COALESCE(
+          CONCAT(?authorName, " [", ?author_id, " ", ?author_metaid, "]"),
+          CONCAT(?authorName, " [", ?author_metaid, "]"))
+        AS ?author__)
+    }
+    OPTIONAL {
+      ?res pro:isDocumentContextFor ?arEditor.
+      ?arEditor pro:withRole pro:editor;
+                pro:isHeldBy ?raEditor.
+      BIND(CONCAT("meta:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
+      {?raEditor foaf:familyName ?editorFamilyName.} UNION {?raEditor foaf:name ?editor_name.}
+      OPTIONAL {
+        ?raEditor datacite:hasIdentifier ?editorIdentifier.
+        ?editorIdentifier datacite:usesIdentifierScheme ?editorIdSchema;
+                          literal:hasLiteralValue ?editorIdLiteralValue.
+        BIND(CONCAT(STRAFTER(STR(?editorIdSchema), "http://purl.org/spar/datacite/"), ":", ?editorIdLiteralValue) AS ?editor_id)
+      }
+      OPTIONAL {?raEditor foaf:givenName ?editorGivenName.}
+      BIND(
+        COALESCE(
+          CONCAT(?editorFamilyName, ", ", ?editorGivenName),
+          CONCAT(?editorFamilyName, ","),
+          ?editor_name)
+        AS ?editorName)
+      BIND(
+        COALESCE(
+          CONCAT(?editorName, " [", ?editor_id, " ", ?editor_metaid, "]"),
+          CONCAT(?editorName, " [", ?editor_metaid, "]"))
+        AS ?editor__)
+    }
+    OPTIONAL {?res dcterm:title ?title__.}
+    OPTIONAL {?res prism:publicationDate ?date__.}
+    OPTIONAL {
+      ?res frbr:embodiment ?re.
+      ?re prism:startingPage ?startingPage;
+        prism:endingPage ?endingPage.
+      BIND(IF(STR(?startingPage) = STR(?endingPage), STR(?startingPage), CONCAT(?startingPage, '-', ?endingPage)) AS ?page__)}
+    OPTIONAL {
+      ?res frbr:partOf ?resIssue.
+      ?resIssue a fabio:JournalIssue;
+                fabio:hasSequenceIdentifier ?issue__.
+    }
+    OPTIONAL {
+          ?res frbr:partOf+ ?resVolume.
+      ?resVolume a fabio:JournalVolume;
+                fabio:hasSequenceIdentifier ?volume__.
+    }
+  } GROUP BY ?res}
+  BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "meta:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
   BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
   BIND(IF(STR(?publisher_ids) != "", CONCAT(" [", ?publisher_ids, " ", ?publisherMetaid, "]"), "") AS ?publisherIdentifiers)
   BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue_)
