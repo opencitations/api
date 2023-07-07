@@ -97,14 +97,6 @@ def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
 
 
-def split_dois_with_url(s):
-    dois_url = []
-    for doi in s.split("__"):
-        dois_url.append("http://dx.doi.org/"+doi)
-        dois_url.append("https://doi.org/"+doi)
-    return "\"%s\"" % "\" \"".join(dois_url),
-
-
 def metadata(res, *args):
     # doi, reference, citation_count
     header = res[0]
