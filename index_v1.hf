@@ -411,27 +411,50 @@ WHERE {
     ?oci cito:hasCitedEntity ?cited .
 }
 
+#url /citation-count-uniindex/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> get_omid_of_doi(doi)
+#method get
+#description This operation retrieves the number of outgoing citations f>
+
+The field returned by this operation is:
+
+* *count*: the number of outgoing citations from the input bibliographic>
+#call /citation-count-uniindex/10.1142/9789812701527_0009
+#field_type int(count)
+#output_json [
+    {
+        "count": "32"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?citing) as ?count)
+WHERE {
+    ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[doi]]> .
+    ?oci cito:hasCitingEntity ?citing .
+}
 
 #url /reference-count-uniindex/{doi}
 #type operation
 #doi str(10\..+)
 #preprocess lower(doi) --> get_omid_of_doi(doi)
 #method get
-#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
+#description This operation retrieves the number of outgoing citations f>
 
 The field returned by this operation is:
 
-* *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/10.1016/j.websem.2012.08.001
+* *count*: the number of outgoing citations from the input bibliographic>
+#call /reference-count-uniindex/10.1186/1756-8722-6-59
 #field_type int(count)
 #output_json [
     {
-        "count": "13"
+        "count": "75"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(?cited) as ?count)
 WHERE {
-    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/[[doi]]> .
+    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[doi]]> .
     ?oci cito:hasCitedEntity ?cited .
 }
