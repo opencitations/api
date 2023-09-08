@@ -101,7 +101,7 @@ def get_omid_of_doi(s):
     api = "https://test.opencitations.net/meta/api/v1/metadata/doi:%s"
     try:
         r = get(api % s,
-                headers={"User-Agent": "INDEX REST API (via OpenCitation>
+                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
         if r.status_code == 200:
             json_res = loads(r.text)
             if len(json_res) > 0:
