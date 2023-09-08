@@ -1,6 +1,6 @@
 #url /api/v1
 #type api
-#base https://w3id.org/oc/index
+#base https://test.opencitations.org/index
 #title The unifying REST API for all the OpenCitations Indexes
 #description This document describe the REST API for accessing the data stored in all the [OpenCitations Indexes](https://w3id.org/oc/index) hosted by [OpenCitations](http://opencitations.net). This API implements operations to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
@@ -385,4 +385,53 @@ WHERE {
     VALUES ?citing {<https://doi.org/[[doi]]> <http://dx.doi.org/[[doi]]>} .
     ?citing ^cito:hasCitingEntity/cito:hasCitedEntity ?cited .
     BIND(STRAFTER(str(?cited), ".org/") as ?cited_id)
+}
+
+#url /test/{omid}
+#type operation
+#omid str(br\/.+)
+#preprocess lower(omid) --> encode(omid)
+#method get
+#description This operation retrieves the number of outgoing citations f>
+
+The field returned by this operation is:
+
+* *count*: the number of outgoing citations from the input bibliographic>
+#call /test/br/0601000
+#field_type int(count)
+#output_json [
+    {
+        "count": "13"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?cited) as ?count)
+WHERE {
+    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/[[omid]]> .
+    ?oci cito:hasCitedEntity ?cited .
+}
+
+
+#url /reference-count-uniindex/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> get_omid_of_doi(doi)
+#method get
+#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
+
+The field returned by this operation is:
+
+* *count*: the number of outgoing citations from the input bibliographic entity.
+#call /reference-count/10.1016/j.websem.2012.08.001
+#field_type int(count)
+#output_json [
+    {
+        "count": "13"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?cited) as ?count)
+WHERE {
+    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/[[doi]]> .
+    ?oci cito:hasCitedEntity ?cited .
 }

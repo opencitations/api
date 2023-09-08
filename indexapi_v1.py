@@ -97,6 +97,25 @@ def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
 
 
+def get_omid_of_doi(s_id):
+    api = "https://test.opencitations.net/meta/api/v1/metadata/doi:%s"
+    try:
+        r = get(api % s_id,
+                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
+        if r.status_code == 200:
+            json_res = loads(r.text)
+            if len(json_res) > 0:
+                #take the one and only result given back by META
+                body = json_res[0]
+                matches = findall(r'omid:br/[\dA-Za-z/]+', body["id"])
+                if matches:
+                    return matches[0].replace("omid:","")
+
+    except Exception as e:
+        return ""
+    return ""
+
+
 def metadata(res, *args):
     # doi, reference, citation_count
     header = res[0]
