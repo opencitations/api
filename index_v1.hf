@@ -529,7 +529,7 @@ SELECT ?val (count(?oci) as ?citation_count) (GROUP_CONCAT(?citing; separator=";
 #type operation
 #doi str(10\..+)
 #preprocess lower(doi) --> doi2omid(doi)
-#postprocess metadata(cited)
+#postprocess citations_info(citing,cited)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
 

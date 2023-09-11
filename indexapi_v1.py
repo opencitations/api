@@ -154,6 +154,36 @@ def metadata(res, *args):
 
     return res, True
 
+# args must contain the [[citing]] and [[cited]]
+def citations_info(res, *args):
+    header = res[0]
+    fields = {"citing":header.index(args[0]), "cited": header.index(args[1])}
+    index_meta = {}
+
+    additional_fields = ["creation", "timespan", "journal_sc","author_sc"]
+    header.extend(additional_fields)
+
+    for row in res[1:]:
+        entities_data = {"citing":[],"cited":[]}
+        for f in fields:
+
+            f_col = field_idx[fields[f]]
+            # org value: <https://w3id.org/oc/meta/br/06NNNNNN>
+            entity = row[f_col][1].split("oc/meta/")[1][:-1]
+
+            if not entity in index_meta:
+                r = __ocmeta_parser(entity,"omid")
+                if r is None or all([i in ("", None) for i in r]):
+                    r = ["" for i in r]
+                index_meta[entity] = r
+
+            entities_data[f] = r
+
+        # process and elaborate additional fields
+        row.extend([entities_data["citing"]["year"],"","",""])
+
+    return res, True
+
 
 def __get_issn(body):
     cur_id = ""
@@ -245,7 +275,9 @@ def __ocmeta_parser(doi,pre="doi"):
                         source_title = source_title_string
 
                 year = ""
+                pub_date = ""
                 if "pub_date" in body:
+                    pub_date = __normalise(body["pub_date"])
                     if len(body["pub_date"]) >= 4:
                         year = __normalise(body["pub_date"][:4])
 
@@ -265,10 +297,30 @@ def __ocmeta_parser(doi,pre="doi"):
                 if "page" in body:
                     page = __normalise(body["page"])
 
-                return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
+                return {
+                    "author": "; ".join(authors),
+                    "year": year,
+                    "pub_date": pub_date,
+                    "title": title,
+                    "source_title": source_title,
+                    "source_id": source_id,
+                    "volume": volume,
+                    "issue": issue,
+                    "page": pages
+                }
 
     except Exception as e:
-        return ["", "", "", "", "", "", "", ""]
+        return {
+            "author": "",
+            "year": "",
+            "pub_date": "",
+            "title": "",
+            "source_title": "",
+            "source_id": "",
+            "volume": "",
+            "issue": "",
+            "page": ""
+        }
 
 def __crossref_parser(doi):
     api = "https://api.crossref.org/works/%s"
