@@ -130,7 +130,7 @@ def metadata(res, *args):
         for field in args:
             field_idx.append(header.index(field))
 
-    additional_fields = ["author", "year", "title",
+    additional_fields = ["author", "year", "pub_date", "title",
                          "source_title", "volume", "issue", "page", "source_id"]
 
     header.extend(additional_fields)
@@ -149,7 +149,7 @@ def metadata(res, *args):
                 rows_to_remove.append(row)
             else:
                 # remove "pub_date"
-                r = r[:1] + r[2:]
+                #r = r[:1] + r[2:]
                 row.extend(r)
 
     for row in rows_to_remove:
