@@ -524,3 +524,61 @@ SELECT ?val (count(?oci) as ?citation_count) (GROUP_CONCAT(?citing; separator=";
           ?oci cito:hasCitedEntity ?val .
           ?oci cito:hasCitingEntity ?citing .
 } GROUP BY ?val
+
+#url /citations-uniindex/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> doi2omid(doi)
+#method get
+#description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
+
+The fields returned by this operation are:
+
+* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *citing*: the DOI of the citing entity;
+* *cited*: the DOI of the cited entity;
+* *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
+* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
+* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
+
+The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
+#call /citations/10.1002/adfm.201505328
+#output_json [
+    {
+        "oci": "0200100030836231029271431221029283702000106370908-02001000002361013152237020001050005030208",
+        "citing": "10.1038/natrevmats.2016.98",
+        "cited": "10.1002/adfm.201505328",
+        "creation": coci/"2017-01-17",
+        "timespan": "P11M"
+        "journal_sc": "no",
+        "author_sc": "no"
+    },
+    {
+        "oci": "02001000002361013221037020001070002060708-02001000002361013152237020001050005030208",
+        "citing": "10.1002/adma.201702678",
+        "cited": "10.1002/adfm.201505328",
+        "creation": "2017-07-25",
+        "timespan": "P1Y5M8D"
+        "journal_sc": "no",
+        "author_sc": "no"
+    },
+    {
+        "oci": "020010003083623142314271634370200010737010005-02001000002361013152237020001050005030208",
+        "citing": "10.1038/nenergy.2017.105",
+        "cited": "10.1002/adfm.201505328",
+        "creation": "2017-07-10",
+        "timespan": "P1Y4M23D"
+        "journal_sc": "no",
+        "author_sc": "no"
+    }
+]
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?oci ?citing ?cited
+WHERE {
+      ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[doi]]> .
+      ?oci cito:hasCitingEntity ?citing .
+      BIND(<https://w3id.org/oc/meta/br/[[doi]]> as ?cited) .
+}
+LIMIT 50000
