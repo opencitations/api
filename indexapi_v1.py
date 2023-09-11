@@ -175,11 +175,10 @@ def citations_info(res, *args):
             if f == "cited":
                 continue
 
-            r = {}
-            if not entity in index_meta:
-                # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-                r = __ocmeta_parser(entity,"omid")
-                index_meta[entity] = r
+
+            # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
+            r = __ocmeta_parser(entity,"omid")
+            index_meta[entity] = r
 
             entities_data[f] = r
 
