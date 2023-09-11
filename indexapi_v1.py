@@ -143,6 +143,7 @@ def metadata(res, *args):
             # org value: <https://w3id.org/oc/meta/br/06NNNNNN>
             entity = row[f][1].split("oc/meta/")[1][:-1]
 
+            # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
             r = __ocmeta_parser(entity,"omid")
             if r is None or all([i in ("", None) for i in r]):
                 rows_to_remove.append(row)
@@ -164,7 +165,7 @@ def citations_info(res, *args):
     header.extend(additional_fields)
 
     for row in res[1:]:
-        entities_data = {"citing":[],"cited":[]}
+        entities_data = {"citing":None,"cited":None}
         for f in fields:
 
             f_col = fields[f]
@@ -176,15 +177,14 @@ def citations_info(res, *args):
 
             r = {}
             if not entity in index_meta:
+                # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
                 r = __ocmeta_parser(entity,"omid")
                 index_meta[entity] = r
 
             entities_data[f] = r
 
         # process and elaborate additional fields
-        creation = ""
-        if "year" in entities_data["citing"]:
-            creation = entities_data["citing"]["year"]
+        creation = entities_data["citing"][1]
 
         row.extend([
             creation,
@@ -310,30 +310,12 @@ def __ocmeta_parser(doi,pre="doi"):
                 if "page" in body:
                     page = __normalise(body["page"])
 
-                return {
-                    "author": "; ".join(authors),
-                    "year": year,
-                    "pub_date": pub_date,
-                    "title": title,
-                    "source_title": source_title,
-                    "source_id": source_id,
-                    "volume": volume,
-                    "issue": issue,
-                    "page": pages
-                }
+                # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
+                return ["; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,pages]
 
     except Exception as e:
-        return {
-            "author": "",
-            "year": "",
-            "pub_date": "",
-            "title": "",
-            "source_title": "",
-            "source_id": "",
-            "volume": "",
-            "issue": "",
-            "page": ""
-        }
+        # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
+        return ["","","","","","","","",""]
 
 def __crossref_parser(doi):
     api = "https://api.crossref.org/works/%s"
