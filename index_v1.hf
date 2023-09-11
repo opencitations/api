@@ -462,7 +462,7 @@ WHERE {
 #url /metadata-uniindex/{dois}
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
-#preprocess lower(dois) --> encode(dois) --> split_dois2omids(dois)
+#preprocess lower(dois) --> split_dois2omids(dois)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 
@@ -483,7 +483,7 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 * *oa_link*: the link to the Open Access version of the bibliographic entity, if available.
 
 Note: this operation strictly depends on external services (i.e. doi.org and associate applications) for gathering all the metadata of the articles requested. In fact, these metadata are not stored in COCI and are retrieved dynamically upon request.
-#call /metadata/10.1108/jd-12-2013-0166__10.1007/s11192-019-03217-6
+#call /metadata-uniindex/10.1108/jd-12-2013-0166__10.1007/s11192-019-03217-6
 #field_type str(author) datetime(year) str(title) str(source_title) str(source_id) str(volume) str(issue) str(page) str(doi) str(reference) str(citation) int(citation_count) str(oa_link)
 #output_json [
     {
