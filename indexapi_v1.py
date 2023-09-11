@@ -172,22 +172,21 @@ def citations_info(res, *args):
     if len(res) > 1:
         for row in res[1:]:
             for f in fields:
-                continue
-            #entity = row[f][1].split("oc/meta/")[1][:-1]
-            #all_entities.add(entity)
+                entity = row[f][1].split("oc/meta/")[1][:-1]
+                all_entities.add(entity)
 
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
     #r = __ocmeta_parser(list(all_entities),"omid")
 
     # process and elaborate additional fields
     #creation = entities_data["citing"][1]
-
-            row.extend([
-                "",
-                "",
-                "",
-                ""
-            ])
+    for row in res[1:]:
+        row.extend([
+            " ".join(list(all_entities)),
+            "",
+            "",
+            ""
+        ])
 
         #row.extend(["","","",""])
 
