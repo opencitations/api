@@ -463,7 +463,7 @@ WHERE {
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> split_dois2omids(dois)
-#postprocess metadata()
+#postprocess metadata(val)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 
@@ -529,6 +529,7 @@ SELECT ?val (count(?oci) as ?citation_count) (GROUP_CONCAT(?citing; separator=";
 #type operation
 #doi str(10\..+)
 #preprocess lower(doi) --> doi2omid(doi)
+#postprocess metadata(cited)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
 
