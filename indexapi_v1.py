@@ -176,13 +176,13 @@ def citations_info(res, *args):
             all_entities.add(entity)
 
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-    r = __ocmeta_parser(list(all_entities),"omid")
+    #r = __ocmeta_parser(list(all_entities),"omid")
 
     # process and elaborate additional fields
     #creation = entities_data["citing"][1]
 
     row.extend([
-        "",
+        " ".join(list(all_entities)),
         "",
         "",
         ""
