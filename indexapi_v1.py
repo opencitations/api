@@ -169,9 +169,10 @@ def citations_info(res, *args):
     header.extend(additional_fields)
 
     all_entities = set()
-    #for row in res[1:]:
-    #    for f in fields:
-    #        continue
+    if len(res) > 1:
+        for row in res[1:]:
+            for f in fields:
+                continue
             #entity = row[f][1].split("oc/meta/")[1][:-1]
             #all_entities.add(entity)
 
@@ -181,12 +182,12 @@ def citations_info(res, *args):
     # process and elaborate additional fields
     #creation = entities_data["citing"][1]
 
-    row.extend([
-        "",
-        "",
-        "",
-        ""
-    ])
+            row.extend([
+                "",
+                "",
+                "",
+                ""
+            ])
 
         #row.extend(["","","",""])
 
