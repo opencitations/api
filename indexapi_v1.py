@@ -173,7 +173,7 @@ def citations_info(res, *args):
         for f in fields:
             f_col = fields[f]
             entity = row[f_col][1].split("oc/meta/")[1][:-1]
-            all_entities.add()
+            all_entities.add(entity)
 
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
     r = __ocmeta_parser(list(all_entities),"omid")
@@ -182,7 +182,7 @@ def citations_info(res, *args):
     #creation = entities_data["citing"][1]
 
     row.extend([
-        r[0][2],
+        "",
         "",
         "",
         ""
@@ -244,7 +244,7 @@ def __ocmeta_parser(dois,pre="doi"):
     api = "http://127.0.0.1/meta/api/v1/metadata/%s"
 
     try:
-        r = get(api % " ".join([pre+":" + d for d in dois]),
+        r = get(api % "__".join([pre+":" + d for d in dois]),
                 headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
 
         f_res = []
