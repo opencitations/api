@@ -182,7 +182,7 @@ def citations_info(res, *args):
     #creation = entities_data["citing"][1]
     for row in res[1:]:
         row.extend([
-            e_meta_row[0],
+            "__".join(r.keys()),
             "",
             "",
             ""
