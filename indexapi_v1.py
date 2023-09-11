@@ -171,7 +171,8 @@ def citations_info(res, *args):
     all_entities = set()
     for row in res[1:]:
         for f in fields:
-            entity = row[f][1].split("oc/meta/")[1][:-1]
+            continue
+            #entity = row[f][1].split("oc/meta/")[1][:-1]
             #all_entities.add(entity)
 
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
