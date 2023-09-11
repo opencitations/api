@@ -162,7 +162,7 @@ def metadata(res, *args):
 # args must contain the [[citing]] and [[cited]]
 def citations_info(res, *args):
     header = res[0]
-    fields = {"citing":header.index(args[0]), "cited": header.index(args[1])}
+    fields = [header.index(args[0]), header.index(args[1])]
     index_meta = {}
 
     additional_fields = ["creation", "timespan", "journal_sc","author_sc"]
@@ -171,11 +171,8 @@ def citations_info(res, *args):
     all_entities = set()
     for row in res[1:]:
         for f in fields:
-            f_col = fields[f]
-            if f_col in row and len(row[f_col]) > 1:    
-                if row[f_col][1].strip() != "" and row[f_col][1] != None:
-                    entity = row[f_col][1].split("oc/meta/")[1][:-1]
-                    all_entities.add(entity)
+            entity = row[f][1].split("oc/meta/")[1][:-1]
+            #all_entities.add(entity)
 
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
     #r = __ocmeta_parser(list(all_entities),"omid")
@@ -184,7 +181,7 @@ def citations_info(res, *args):
     #creation = entities_data["citing"][1]
 
     row.extend([
-        " ".join(list(all_entities)),
+        "",
         "",
         "",
         ""
