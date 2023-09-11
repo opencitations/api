@@ -174,16 +174,17 @@ def citations_info(res, *args):
             if f == "cited":
                 continue
 
-            if not entity in index_meta:
-                r = __ocmeta_parser(entity,"omid")
-                if r is None or all([i in ("", None) for i in r]):
-                    r = ["" for i in r]
-                index_meta[entity] = r
-
-            entities_data[f] = r
+            # if not entity in index_meta:
+            #     r = __ocmeta_parser(entity,"omid")
+            #     if r is None or all([i in ("", None) for i in r]):
+            #         r = ["" for i in r]
+            #     index_meta[entity] = r
+            #
+            # entities_data[f] = r
 
         # process and elaborate additional fields
-        row.extend([entities_data["citing"]["year"],"","",""])
+        #row.extend([entities_data["citing"]["year"],"","",""])
+        row.extend(["","","",""])
 
     return res, True
 
