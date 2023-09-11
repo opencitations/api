@@ -256,9 +256,9 @@ def __ocmeta_parser(dois,pre="doi"):
 
                 id = ""
                 if "id" in body:
-                    for p_id in  body["id"].split(" "):
-                        if p_id.startswith(pre):
-                            id = p_id
+                    for p_id in body["id"].split(" "):
+                        if str(p_id).startswith(pre):
+                            id = str(p_id)
                             break
 
                 authors = []
