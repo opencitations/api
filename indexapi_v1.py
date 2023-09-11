@@ -177,8 +177,6 @@ def citations_info(res, *args):
             r = {}
             if not entity in index_meta:
                 r = __ocmeta_parser(entity,"omid")
-                if r is None or all([i in ("", None) for i in r]):
-                    r = ["" for i in r]
                 index_meta[entity] = r
 
             entities_data[f] = r
