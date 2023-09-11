@@ -132,7 +132,7 @@ def metadata(res, *args):
 
     field_idx = [header.index("val")]
 
-    additional_fields = ["author", "year", "pub_date", "title",
+    additional_fields = ["author", "year", "title",
                          "source_title", "volume", "issue", "page", "source_id"]
 
     header.extend(additional_fields)
@@ -143,7 +143,7 @@ def metadata(res, *args):
 
         for f in field_idx:
             # org value: <https://w3id.org/oc/meta/br/06NNNNNN>
-            entity = row[f][1].split("oc/meta/")[1]
+            entity = row[f][1].split("oc/meta/")[1][:-1]
 
             # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
             r = __ocmeta_parser(entity,"omid")
@@ -291,9 +291,9 @@ def __ocmeta_parser(doi,pre="doi"):
                         source_title = source_title_string
 
                 year = ""
-                pub_date = ""
+                #pub_date = ""
                 if "pub_date" in body:
-                    pub_date = __normalise(body["pub_date"])
+                    #pub_date = __normalise(body["pub_date"])
                     if len(body["pub_date"]) >= 4:
                         year = __normalise(body["pub_date"][:4])
 
@@ -314,11 +314,11 @@ def __ocmeta_parser(doi,pre="doi"):
                     page = __normalise(body["page"])
 
                 # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-                return ["; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,pages]
+                return ["; ".join(authors),year,title,source_title,source_id,volume,issue,pages]
 
     except Exception as e:
         # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-        return ["","","","","","","","",""]
+        return ["","","","","","",""]
 
 def __crossref_parser(doi):
     api = "https://api.crossref.org/works/%s"
