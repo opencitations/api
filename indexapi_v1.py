@@ -246,16 +246,19 @@ def __ocmeta_parser(dois,pre="doi"):
 
     r = get(api + str_dois, headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
 
-    f_res = []
+    f_res = {}
     if r.status_code == 200:
         json_res = loads(r.text)
         if len(json_res) > 0:
 
             for body in json_res:
 
-                ids = []
+                id = ""
                 if "id" in body:
-                    ids = body["id"].split(" ")
+                    for p_id in  body["id"].split(" "):
+                        if p_id.startwith(pre):
+                            id = p_id
+                            break
 
                 authors = []
                 if "author" in body:
@@ -311,7 +314,7 @@ def __ocmeta_parser(dois,pre="doi"):
                     page = __normalise(body["page"])
 
                 # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-                f_res.append(["; ".join(ids),"; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,page])
+                f_res[id] = ["; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,page]
 
         return f_res
 
