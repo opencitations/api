@@ -167,7 +167,7 @@ def citations_info(res, *args):
         entities_data = {"citing":[],"cited":[]}
         for f in fields:
 
-            f_col = field_idx[fields[f]]
+            f_col = fields[f]
             # org value: <https://w3id.org/oc/meta/br/06NNNNNN>
             entity = row[f_col][1].split("oc/meta/")[1][:-1]
 
