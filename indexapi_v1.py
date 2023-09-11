@@ -244,9 +244,9 @@ def __normalise(o):
 def __ocmeta_parser(dois,pre="doi"):
     api = "http://127.0.0.1/meta/api/v1/metadata/%s"
 
+    str_dois = "__".join([pre+":" + d for d in dois])
 
-    r = get(api % "__".join([pre+":" + d for d in dois]),
-            headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
+    r = get(api + str_dois, headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
 
     f_res = []
     if r.status_code == 200:
