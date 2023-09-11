@@ -132,7 +132,7 @@ def metadata(res, *args):
 
     field_idx = [header.index("val")]
 
-    additional_fields = ["author", "year", "pub_date", "title",
+    additional_fields = ["author", "year", "title",
                          "source_title", "volume", "issue", "page", "source_id"]
 
     header.extend(additional_fields)
@@ -151,7 +151,7 @@ def metadata(res, *args):
                 rows_to_remove.append(row)
             else:
                 # remove "pub_date"
-                #r = r[:1] + r[2:]
+                r = r[:1] + r[2:]
                 row.extend(r)
 
     for row in rows_to_remove:
@@ -251,74 +251,74 @@ def __normalise(o):
 def __ocmeta_parser(doi,pre="doi"):
     api = "http://127.0.0.1/meta/api/v1/metadata/"+pre+":%s"
 
+    try:
+        r = get(api % doi,
+                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
+        if r.status_code == 200:
+            json_res = loads(r.text)
+            if len(json_res) > 0:
+                #take the one and only result given back by META
+                body = json_res[0]
 
-    r = get(api % doi,
-            headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
-    if r.status_code == 200:
-        json_res = loads(r.text)
-        if len(json_res) > 0:
-            #take the one and only result given back by META
-            body = json_res[0]
+                authors = []
+                if "author" in body:
+                    if body["author"] != "":
+                        for author in body["author"].split(";"):
+                            author_string = author
+                            author_orcid = findall(r"orcid\:([\d\-^\]]{1,})",author)
+                            author_ids = findall(r"\[.{1,}\]",author)
+                            if len(author_ids) > 0:
+                                author_string = author.replace(author_ids[0],"").strip()
+                                if len(author_orcid) > 0:
+                                    author_string = author_string+", "+author_orcid[0].strip()
+                            if author_string is not None:
+                                authors.append(__normalise(author_string))
 
-            authors = []
-            if "author" in body:
-                if body["author"] != "":
-                    for author in body["author"].split(";"):
-                        author_string = author
-                        author_orcid = findall(r"orcid\:([\d\-^\]]{1,})",author)
-                        author_ids = findall(r"\[.{1,}\]",author)
-                        if len(author_ids) > 0:
-                            author_string = author.replace(author_ids[0],"").strip()
-                            if len(author_orcid) > 0:
-                                author_string = author_string+", "+author_orcid[0].strip()
-                        if author_string is not None:
-                            authors.append(__normalise(author_string))
+                source_title = ""
+                source_id = ""
+                if "venue" in body:
+                    if body["venue"] != "":
+                        source_title_string = body["venue"]
+                        source_issn = findall(r"(issn\:[\d\-^\]]{1,})",source_title_string)
+                        source_isbn = findall(r"(isbn\:[\d\-^\]]{1,})",source_title_string)
+                        source_ids = findall(r"\[.{1,}\]",source_title_string)
+                        if len(source_ids) > 0:
+                            source_title_string = source_title_string.replace(source_ids[0],"").strip()
+                        if len(source_issn) > 0:
+                            source_id = source_issn[0]
+                        elif len(source_isbn) > 0:
+                            source_id = source_isbn[0]
+                        source_title = source_title_string
 
-            source_title = ""
-            source_id = ""
-            if "venue" in body:
-                if body["venue"] != "":
-                    source_title_string = body["venue"]
-                    source_issn = findall(r"(issn\:[\d\-^\]]{1,})",source_title_string)
-                    source_isbn = findall(r"(isbn\:[\d\-^\]]{1,})",source_title_string)
-                    source_ids = findall(r"\[.{1,}\]",source_title_string)
-                    if len(source_ids) > 0:
-                        source_title_string = source_title_string.replace(source_ids[0],"").strip()
-                    if len(source_issn) > 0:
-                        source_id = source_issn[0]
-                    elif len(source_isbn) > 0:
-                        source_id = source_isbn[0]
-                    source_title = source_title_string
+                year = ""
+                pub_date = ""
+                if "pub_date" in body:
+                    pub_date = __normalise(body["pub_date"])
+                    if len(body["pub_date"]) >= 4:
+                        year = __normalise(body["pub_date"][:4])
 
-            year = ""
-            pub_date = ""
-            if "pub_date" in body:
-                pub_date = __normalise(body["pub_date"])
-                if len(body["pub_date"]) >= 4:
-                    year = __normalise(body["pub_date"][:4])
+                title = ""
+                if "title" in body:
+                    title = body["title"]
 
-            title = ""
-            if "title" in body:
-                title = body["title"]
+                volume = ""
+                if "volume" in body:
+                    volume = __normalise(body["volume"])
 
-            volume = ""
-            if "volume" in body:
-                volume = __normalise(body["volume"])
+                issue = ""
+                if "issue" in body:
+                    issue = __normalise(body["issue"])
 
-            issue = ""
-            if "issue" in body:
-                issue = __normalise(body["issue"])
+                page = ""
+                if "page" in body:
+                    page = __normalise(body["page"])
 
-            page = ""
-            if "page" in body:
-                page = __normalise(body["page"])
+                # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
+                return ["; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,page]
 
-            # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-            return ["; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,page]
-
-
-    # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-    return ["","","","","","","","",""]
+    except Exception as e:
+        # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
+        return ["","","","","","","","",""]
 
 def __crossref_parser(doi):
     api = "https://api.crossref.org/works/%s"
