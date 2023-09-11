@@ -126,7 +126,7 @@ def __get_omid_of_doi(s):
 def metadata(res, *args):
     # doi, reference, citation_count
     header = res[0]
-    doi_field = header.index("doi")
+    entity_val = header.index("val")
     additional_fields = ["author", "year", "title",
                          "source_title", "volume", "issue", "page", "source_id"]
 
@@ -135,14 +135,9 @@ def metadata(res, *args):
     rows_to_remove = []
 
     for row in res[1:]:
-        citing_doi = row[doi_field][1]
+        entity = "br/"+row[entity_val][1]
 
-        # r = None
-        # for p in (__crossref_parser,__datacite_parser):
-        #     if r is None:
-        #         r = p(citing_doi)
-
-        r = __ocmeta_parser(citing_doi)
+        r = __ocmeta_parser(entity,"omid")
         if r is None or all([i in ("", None) for i in r]):
             rows_to_remove.append(row)
         else:
@@ -201,8 +196,8 @@ def __normalise(o):
         s = str(o)
     return sub("\s+", " ", s).strip()
 
-def __ocmeta_parser(doi):
-    api = "http://127.0.0.1/meta/api/v1/metadata/doi:%s"
+def __ocmeta_parser(doi,pre="doi"):
+    api = "http://127.0.0.1/meta/api/v1/metadata/"+pre+":%s"
 
     try:
         r = get(api % doi,
