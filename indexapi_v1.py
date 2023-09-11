@@ -97,7 +97,10 @@ def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
 
 def split_dois2omids(s):
-    return "\"%s\"" % "\" \"".join([__get_omid_of_doi(d) for d in s.split("__")]),
+    #return "\"%s\"" % "\" \"".join([__get_omid_of_doi(d) for d in s.split("__")]),
+    return " ".join(["<https://w3id.org/oc/meta/br/"+str(__get_omid_of_doi(d))+">" for d in s.split("__")]),
+
+
 
 def doi2omid(s):
     return __get_omid_of_doi(s),

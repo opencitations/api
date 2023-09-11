@@ -518,11 +518,8 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?doi (count(?oci) as ?citation_count) (GROUP_CONCAT(?citing; separator="; ") as ?citation) {
-        VALUES ?doi { [[dois]] }
-        BIND(IRI(CONCAT("https://w3id.org/oc/meta/br/", ?doi)) as ?val)
-	  	  OPTIONAL{
-            ?oci cito:hasCitedEntity ?val .
-            ?oci cito:hasCitingEntity ?citing .
-  		  }
-} GROUP BY ?doi
+SELECT ?val (count(?oci) as ?citation_count) (GROUP_CONCAT(?citing; separator="; ") as ?citation) {
+          VALUES ?val { [[dois]] }
+          ?oci cito:hasCitedEntity ?val .
+          ?oci cito:hasCitingEntity ?citing .
+} GROUP BY ?val
