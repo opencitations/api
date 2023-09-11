@@ -414,7 +414,7 @@ WHERE {
 #url /citation-count-uniindex/{doi}
 #type operation
 #doi str(10\..+)
-#preprocess lower(doi) --> get_omid_of_doi(doi)
+#preprocess lower(doi) --> doi2omid(doi)
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
 
@@ -438,7 +438,7 @@ WHERE {
 #url /reference-count-uniindex/{doi}
 #type operation
 #doi str(10\..+)
-#preprocess lower(doi) --> get_omid_of_doi(doi)
+#preprocess lower(doi) --> doi2omid(doi)
 #method get
 #description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
 
@@ -458,3 +458,71 @@ WHERE {
     ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[doi]]> .
     ?oci cito:hasCitedEntity ?cited .
 }
+
+#url /metadata-uniindex/{dois}
+#type operation
+#dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
+#preprocess lower(dois) --> encode(dois) --> split_dois2omids(dois)
+#method get
+#description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
+
+It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...". The fields returned by this operation are:
+
+* *author*: the semicolon-separated list of authors of the bibliographic entity;
+* *year*: the year of publication of the bibliographic entity;
+* *title*: the title of the bibliographic entity;
+* *source_title*: the title of the venue where the bibliographic entity has been published;
+* *source_id*: the semicolon-separated list of identifiers referring to the source where the bibliographic entity has been published;
+* *volume*: the number of the volume in which the bibliographic entity has been published;
+* *issue*: the number of the issue in which the bibliographic entity has been published;
+* *page*: the starting and ending pages of the bibliographic entity in the context of the venue where it has been published;
+* *doi*: the DOI of the bibliographic entity;
+* *reference*: the semicolon-separated DOIs of all the entities cited by the bibliographic entity, according to the citation data available in all the OpenCitations Indexes;
+* *citation*: the semicolon-separated DOIs of all the entities that cite the bibliographic entity, according to the citation data available in all the OpenCitations Indexes;
+* *citation_count*: the number of citations received by the bibliographic entity;
+* *oa_link*: the link to the Open Access version of the bibliographic entity, if available.
+
+Note: this operation strictly depends on external services (i.e. doi.org and associate applications) for gathering all the metadata of the articles requested. In fact, these metadata are not stored in COCI and are retrieved dynamically upon request.
+#call /metadata/10.1108/jd-12-2013-0166__10.1007/s11192-019-03217-6
+#field_type str(author) datetime(year) str(title) str(source_title) str(source_id) str(volume) str(issue) str(page) str(doi) str(reference) str(citation) int(citation_count) str(oa_link)
+#output_json [
+    {
+        "citation": "10.1177/0961000615616450; 10.7554/elife.32822; 10.1145/3197026.3197050; 10.1093/bib/bbx057; 10.1007/978-3-319-68204-4_19; 10.3346/jkms.2015.30.11.1545; 10.1007/978-3-319-73165-0_24; 10.3233/sw-160224; 10.3233/sw-180307; 10.1007/978-3-319-90548-8_7; 10.1142/s021964921850034x; 10.1007/978-3-319-58694-6_23; 10.1057/s41275-017-0070-x",
+        "reference": "10.1001/jama.295.1.90; 10.1002/asi.4630240406; 10.1002/(sici)1097-4571(198909)40:5<342::aid-asi7>3.0.co;2-u; 10.1007/bf02457980; 10.1007/s10579-012-9211-2; 10.1007/s11192-009-0021-2; 10.1016/j.websem.2012.08.001; 10.1016/j.websem.2013.05.001; 10.1023/a:1021919228368; 10.1038/35079151; 10.1038/495437a; 10.1038/502295a; 10.1038/502298a; 10.1042/bj20091474; 10.1073/pnas.0407743101; 10.1087/2009202; 10.1093/bioinformatics; 10.1101/sqb.1972.036.01.015; 10.1108/eum0000000007123; 10.1108/jd-07-2012-0082; 10.1126/science.149.3683.510; 10.1136/bmj.a568; 10.1136/bmj.b2680; 10.1145/1498765.1498780; 10.1177/030631277400400102; 10.1177/030631277500500106; 10.1371/journal.pcbi.0010034; 10.1371/journal.pcbi.1000361; 10.1371/journal.pntd.0000228; 10.1371/journal.pone.0000308; 10.1523/jneurosci.0003-08.2008; 10.1525/bio.2010.60.5.2; 10.3115/1610075.1610091; 10.5210/fm.v2i4.522; 10.5539/ass.v9n5p18; 10.7717/peerj.175",
+        "author": "Peroni, Silvio; Dutton, Alexander; Gray, Tanya; Shotton, David",
+        "volume": "71",
+        "page": "253-277",
+        "citation_count": "13",
+        "source_id": "issn:0022-0418",
+        "source_title": "Journal Of Documentation",
+        "year": "2015",
+        "oa_link": "",
+        "doi": "10.1108/jd-12-2013-0166",
+        "title": "Setting Our Bibliographic References Free: Towards Open Citation Data",
+        "issue": "2"
+    },
+    {
+        "citation": "10.2964/jsik_2020_003; 10.1007/s11192-019-03311-9; 10.1162/qss_a_00023; 10.1007/s11192-020-03690-4; 10.5712/rbmfc15(42)2671; 10.1007/978-3-030-62466-8_28; 10.7717/peerj-cs.421; 10.1111/cts.13067; 10.3897/rio.7.e66264; 10.1162/qss_a_00112; 10.1093/gigascience/giab003; 10.3233/sw-210439; 10.3989/arbor.2021.799007; 10.1007/s11192-021-04097-5; 10.1016/b978-0-12-823723-6.00001-x; 10.3145/thinkepi.2021.e15e04; 10.1007/s11192-021-04191-8; 10.1007/978-3-030-96957-8_9; 10.1093/llc/fqac016; 10.1007/978-3-031-06981-9_18; 10.1371/journal.pone.0270872; 10.1007/s11192-022-04367-w; 10.7717/peerj.13712; 10.1145/3529372.3530953; 10.1162/qss_a_00203; 10.1007/s11192-022-04581-6; 10.1145/3540250.3549172; 10.1186/s12916-022-02644-2; 10.1093/reseval/rvac037",
+        "reference": "10.1007/978-3-030-00668-6_8; 10.1007/978-3-319-11955-7_42; 10.1007/978-3-319-11964-9_4; 10.1007/978-3-319-17966-7_10; 10.1007/978-3-319-46547-0_16; 10.1007/978-3-319-53637-8_6; 10.1007/978-3-319-68204-4_19; 10.1007/s11192-009-0146-3; 10.1016/j.websem.2012.08.001; 10.1038/nature.2017.21800; 10.1038/sdata.2016.18; 10.3233/ds-190016; 10.3233/sw-150197; 10.4103/0976-500x.85940; 10.6084/m9.figshare.3443876; 10.6084/m9.figshare.6683855; 10.6084/m9.figshare.7127816; 10.6084/m9.figshare.7873559; 10.7717/peerj.4201",
+        "author": "Shotton, D M, 0000-0001-5506-523; Peroni, Silvio, 0000-0003-0530-4305; Heibi, Ivan, 0000-0001-5366-5194",
+        "volume": "121",
+        "page": "1213-1228",
+        "citation_count": "29",
+        "source_id": "issn:1588-2861",
+        "source_title": "Scientometrics"
+        "year": "2019",
+        "oa_link": "",
+        "doi": "10.1007/s11192-019-03217-6",
+        "title": "Software Review: COCI, The OpenCitations Index Of Crossref Open DOI-to-DOI Citations",
+        "issue": "2"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?doi (count(?oci) as ?citation_count) (GROUP_CONCAT(?citing; separator="; ") as ?citation) {
+        VALUES ?doi { [[dois]] }
+        BIND(IRI(CONCAT("https://w3id.org/oc/meta/br/", ?doi)) as ?val)
+	  	  OPTIONAL{
+            ?oci cito:hasCitedEntity ?val .
+            ?oci cito:hasCitingEntity ?citing .
+  		  }
+} GROUP BY ?doi

@@ -96,8 +96,13 @@ def merge(res, *args):
 def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
 
+def split_dois2omids(s):
+    return "\"%s\"" % "\" \"".join([__get_omid_of_doi(d) for d in s.split("__")]),
 
-def get_omid_of_doi(s):
+def doi2omid(s):
+    return __get_omid_of_doi(s),
+
+def __get_omid_of_doi(s):
     api = "https://test.opencitations.net/meta/api/v1/metadata/doi:%s"
     try:
         r = get(api % s,
@@ -109,12 +114,11 @@ def get_omid_of_doi(s):
                 body = json_res[0]
                 matches = findall(r'omid:br/[\dA-Za-z/]+', body["id"])
                 if matches:
-                    return matches[0].replace("omid:br/",""),
+                    return matches[0].replace("omid:br/","")
 
     except Exception as e:
-        return "",
-    return "",
-
+        return ""
+    return ""
 
 def metadata(res, *args):
     # doi, reference, citation_count
