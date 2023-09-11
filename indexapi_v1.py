@@ -176,6 +176,7 @@ def citations_info(res, *args):
                 all_entities.add(str(entity))
 
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
+    all_entities = {"br/06101068294"}
     r = __ocmeta_parser(list(all_entities),"omid")
 
     # process and elaborate additional fields
