@@ -181,17 +181,12 @@ def citations_info(res, *args):
     # process and elaborate additional fields
     #creation = entities_data["citing"][1]
     for row in res[1:]:
-        for f in fields:
-            e_citing = row[0][1].split("oc/meta/")[1][:-1]
-            for e_meta_row in r:
-                if e_citing in e_meta_row[0]:
-                    row.extend([
-                        e_meta_row[0],
-                        "",
-                        "",
-                        ""
-                    ])
-                    break
+        row.extend([
+            e_meta_row[0],
+            "",
+            "",
+            ""
+        ])
 
         #row.extend(["","","",""])
 
