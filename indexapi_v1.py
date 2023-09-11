@@ -171,6 +171,9 @@ def citations_info(res, *args):
             # org value: <https://w3id.org/oc/meta/br/06NNNNNN>
             entity = row[f_col][1].split("oc/meta/")[1][:-1]
 
+            if f == "cited":
+                continue
+
             if not entity in index_meta:
                 r = __ocmeta_parser(entity,"omid")
                 if r is None or all([i in ("", None) for i in r]):
