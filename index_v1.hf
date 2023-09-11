@@ -463,6 +463,7 @@ WHERE {
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> split_dois2omids(dois)
+#postprocess metadata(val)
 #method get
 #description This operation retrieves the bibliographic metadata for each of the bibliographic entities identified by one or more input DOIs.
 

@@ -130,6 +130,8 @@ def metadata(res, *args):
         for field in args:
             field_idx.append(header.index(field))
 
+    field_idx = [header.index("val")]
+
     additional_fields = ["author", "year", "pub_date", "title",
                          "source_title", "volume", "issue", "page", "source_id"]
 
@@ -141,7 +143,7 @@ def metadata(res, *args):
 
         for f in field_idx:
             # org value: <https://w3id.org/oc/meta/br/06NNNNNN>
-            entity = row[f][1].split("oc/meta/")[1][:-1]
+            entity = row[f].split("oc/meta/")[1][:-1]
 
             # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
             r = __ocmeta_parser(entity,"omid")
