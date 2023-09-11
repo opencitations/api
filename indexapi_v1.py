@@ -175,7 +175,6 @@ def citations_info(res, *args):
                 entity = row[f][1].split("oc/meta/")[1][:-1]
                 all_entities.add(str(entity))
 
-    all_entities = {"br/061302130471"}
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
     r = __ocmeta_parser(list(all_entities),"omid")
 
@@ -183,7 +182,7 @@ def citations_info(res, *args):
     #creation = entities_data["citing"][1]
     for row in res[1:]:
         row.extend([
-            str(r),
+            "",
             "",
             "",
             ""
@@ -312,7 +311,7 @@ def __ocmeta_parser(dois,pre="doi"):
                     page = __normalise(body["page"])
 
                 # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-                f_res.append([";".join(ids),"; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,page])
+                f_res.append(["; ".join(ids),"; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,page])
 
         return f_res
 
