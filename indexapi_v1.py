@@ -314,7 +314,7 @@ def __ocmeta_parser(doi,pre="doi"):
                 page = __normalise(body["page"])
 
             # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
-            return ["; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,pages]
+            return ["; ".join(authors),year,pub_date,title,source_title,source_id,volume,issue,page]
 
 
     # ["author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
