@@ -148,6 +148,8 @@ def metadata(res, *args):
             if r is None or all([i in ("", None) for i in r]):
                 rows_to_remove.append(row)
             else:
+                # remove "pub_date"
+                r = r[:1] + r[2:]
                 row.extend(r)
 
     for row in rows_to_remove:
