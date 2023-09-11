@@ -172,8 +172,9 @@ def citations_info(res, *args):
     for row in res[1:]:
         for f in fields:
             f_col = fields[f]
-            entity = row[f_col][1].split("oc/meta/")[1][:-1]
-            all_entities.add(entity)
+            if row[f_col][1].strip() != "" and row[f_col][1] != None:
+                entity = row[f_col][1].split("oc/meta/")[1][:-1]
+                all_entities.add(entity)
 
     # ["id", "author", "year", "pub_date", "title", "source_title", "volume", "issue", "page", "source_id"]
     #r = __ocmeta_parser(list(all_entities),"omid")
@@ -182,7 +183,7 @@ def citations_info(res, *args):
     #creation = entities_data["citing"][1]
 
     row.extend([
-        " ",
+        " ".join(list(all_entities)),
         "",
         "",
         ""
