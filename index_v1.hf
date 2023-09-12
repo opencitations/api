@@ -529,7 +529,7 @@ SELECT ?val (count(?oci) as ?citation_count) (GROUP_CONCAT(?citing; separator=";
 #type operation
 #doi str(10\..+)
 #preprocess lower(doi) --> doi2omid(doi)
-#postprocess citations_info(citing,cited)
+#postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
 
@@ -581,5 +581,73 @@ WHERE {
       ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[doi]]> .
       ?oci cito:hasCitingEntity ?citing .
       BIND(<https://w3id.org/oc/meta/br/[[doi]]> as ?cited) .
+}
+LIMIT 50000
+
+#url /references-uniindex/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi) --> doi2omid(doi)
+#postprocess citations_info(oci,citing,cited)
+#method get
+#description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input DOI.
+
+The fields returned by this operation are:
+
+* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *citing*: the DOI of the citing entity;
+* *cited*: the DOI of the cited entity;
+* *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
+* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
+* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
+
+The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
+#call /references/10.1186/1756-8722-6-59
+#output_json [
+      {
+          "oci": "02001010806360107050663080702026306630509-0200101080636102703040309",
+          "citing": "10.1186/1756-8722-6-59",
+          "cited": "10.1186/ar3439",
+          "creation": "2013",
+          "timespan": "P2Y",
+          "journal_sc": "no",
+          "author_sc": "no"
+      },
+      {
+          "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
+          "citing": "10.1186/1756-8722-6-59",
+          "cited": "10.1186/ar4086",
+          "creation": "2013",
+          "timespan": "P1Y",
+          "journal_sc": "no",
+          "author_sc": "no"
+      },
+      {
+          "oci": "02001010806360107050663080702026306630509-020010200003619122437020001023704023707090006",
+          "citing": "10.1186/1756-8722-6-59",
+          "cited": "10.1200/jco.2012.42.7906",
+          "creation": "2013",
+          "timespan": "P0Y",
+          "journal_sc": "no",
+          "author_sc": "no"
+      },
+      {
+          "oci": "02001010806360107050663080702026306630509-02003010009360008080300010805370200010237060604070907",
+          "citing": "10.1186/1756-8722-6-59",
+          "cited": "10.3109/08830185.2012.664797",
+          "creation": "2013",
+          "timespan": "P0Y",
+          "journal_sc": "no",
+          "author_sc": "no"
+      }
+]
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?oci ?citing ?cited
+WHERE {
+      ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[doi]]> .
+      ?oci cito:hasCitedEntity ?cited .
+      BIND(<https://w3id.org/oc/meta/br/[[doi]]> as ?citing) .
 }
 LIMIT 50000
