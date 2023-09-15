@@ -27,6 +27,7 @@ get(API_CALL, headers=HTTP_HEADERS)
 #url /citation/{oci}
 #type operation
 #oci str([0-9]+-[0-9]+)
+#postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI).
 
