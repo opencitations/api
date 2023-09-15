@@ -45,19 +45,19 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citation/02001010806360107050663080702026306630509-0200101080636102704000806
+#call /citation/06101801781-06180334099
 #output_json [
     {
-        "oci": "coci => 02001010806360107050663080702026306630509-0200101080636102704000806",
-        "citing": "coci => 10.1186/1756-8722-6-59",
-        "cited": "coci => 10.1186/ar4086",
-        "creation": "coci => 2013",
-        "timespan": "coci => P1Y",
-        "journal_sc": "coci => no",
-        "author_sc": "coci => no"
+        "oci": "06101801781-06180334099",
+        "citing": "10.7717/peerj-cs.421",
+        "cited": "10.1108/jd-12-2013-0166",
+        "creation": "2021-03-10",
+        "timespan": "P6Y0M1D",
+        "journal_sc": "no",
+        "author_sc": "no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#field_type str(oci) str(citing) str(cited)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?oci ?citing ?cited
 WHERE {
