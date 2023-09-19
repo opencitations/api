@@ -203,6 +203,10 @@ def metadata(res, *args):
 
     return res, True
 
+def poci_citations_info(res, *args):
+    args.append(["pmid"])
+    citations_info(res, args)
+
 # args must contain the [[citing]] and [[cited]]
 def citations_info(res, *args):
 
