@@ -61,6 +61,7 @@ The fields returned by this operation are:
 SELECT ?oci ?citing ?cited
 WHERE {
       VALUES ?oci {<https://w3id.org/oc/index/ci/[[oci]]>} .
+      ?oci ?p <https://w3id.org/oc/index/poci/> .
       ?oci cito:hasCitingEntity ?citing .
       ?oci cito:hasCitedEntity ?cited .
 }
@@ -87,6 +88,7 @@ The field returned by this operation is:
 SELECT (count(?citing) as ?count)
 WHERE {
     ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+    ?oci ?p <https://w3id.org/oc/index/poci/> .
     ?oci cito:hasCitingEntity ?citing .
 }
 
@@ -111,6 +113,7 @@ The field returned by this operation is:
 SELECT (count(?cited) as ?count)
 WHERE {
     ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+    ?oci ?p <https://w3id.org/oc/index/poci/> .
     ?oci cito:hasCitedEntity ?cited .
 }
 
@@ -148,6 +151,7 @@ The fields returned by this operation are:
 SELECT ?oci ?citing ?cited
 WHERE {
       ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+      ?oci ?p <https://w3id.org/oc/index/poci/> .
       ?oci cito:hasCitingEntity ?citing .
       BIND(<https://w3id.org/oc/meta/br/[[pmid]]> as ?cited) .
 }
@@ -206,6 +210,7 @@ The fields returned by this operation are:
 SELECT ?oci ?citing ?cited
 WHERE {
       ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+      ?oci ?p <https://w3id.org/oc/index/poci/> .
       ?oci cito:hasCitedEntity ?cited .
       BIND(<https://w3id.org/oc/meta/br/[[pmid]]> as ?citing) .
 }
