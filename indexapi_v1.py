@@ -100,18 +100,18 @@ def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
 
 def split_dois2omids(s):
-    #return "\"%s\"" % "\" \"".join([__get_omid_of_doi(d) for d in s.split("__")]),
-    return " ".join(["<https://w3id.org/oc/meta/br/"+str(__get_omid_of_doi(d))+">" for d in s.split("__")]),
+    #return "\"%s\"" % "\" \"".join([__get_omid_of(d) for d in s.split("__")]),
+    return " ".join(["<https://w3id.org/oc/meta/br/"+str(__get_omid_of("doi:"+d))+">" for d in s.split("__")]),
 
 
 
 def doi2omid(s):
-    return __get_omid_of_doi("doi:"+s),
+    return __get_omid_of("doi:"+s),
 
 def pmid2omid(s):
-    return __get_omid_of_doi("pmid:"+s),
+    return __get_omid_of("pmid:"+s),
 
-def __get_omid_of_doi(s):
+def __get_omid_of(s):
     api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
     try:
         r = get(api % s,
