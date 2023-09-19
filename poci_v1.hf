@@ -28,7 +28,7 @@ get(API_CALL, headers=HTTP_HEADERS)
 #type operation
 #oci str([0-9]+-[0-9]+)
 #method get
-#postprocess decode_pmid(citing, cited)
+#postprocess citations_info(oci,citing,cited)
 #description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI).
 
 The Open Citation Identifier is a globally unique persistent identifier for bibliographic citations, which has a simple structure: the lower-case letters "oci" followed by a colon, followed by two numbers separated by a dash. For example, `oci:1-18` is a valid OCI.
@@ -44,14 +44,14 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citation/10414674
+#call /citation/0619099185-061602041405
 #output_json [
   {
-    "id": "oci:01600102060800080900-01600100040104060704",
-    "citing": "pmid:12680890",
-    "cited": "pmid:10414674",
-    "creation": "2003",
-    "timespan": "P4Y",
+    "oci": "0619099185-061602041405",
+    "citing": "10.1186/s40246-022-00378-z",
+    "cited": "10.1007/s40291-013-0028-5",
+    "creation": "2022-02-05",
+    "timespan": "P8Y9M20D",
     "journal_sc": "no",
     "author_sc": "no"
   }
