@@ -27,7 +27,7 @@ get(API_CALL, headers=HTTP_HEADERS)
 #url /citation/{oci}
 #type operation
 #oci str([0-9]+-[0-9]+)
-#postprocess citations_info(oci,citing,cited)
+#postprocess citations_info(oci,citing,cited,"doi")
 #method get
 #description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI).
 
@@ -200,7 +200,7 @@ SELECT ?val (GROUP_CONCAT(?citing; separator="; ") as ?citation) (GROUP_CONCAT(?
 #type operation
 #doi str(10\..+)
 #preprocess lower(doi) --> doi2omid(doi)
-#postprocess citations_info(oci,citing,cited)
+#postprocess citations_info(oci,citing,cited,"doi")
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
 
@@ -260,7 +260,7 @@ LIMIT 50000
 #type operation
 #doi str(10\..+)
 #preprocess lower(doi) --> doi2omid(doi)
-#postprocess citations_info(oci,citing,cited)
+#postprocess citations_info(oci,citing,cited,"doi")
 #method get
 #description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input DOI.
 
