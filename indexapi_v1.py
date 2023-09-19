@@ -106,10 +106,13 @@ def split_dois2omids(s):
 
 
 def doi2omid(s):
-    return __get_omid_of_doi(s),
+    return __get_omid_of_doi("doi:"+s),
+
+def pmid2omid(s):
+    return __get_omid_of_doi("pmid:"+s),
 
 def __get_omid_of_doi(s):
-    api = "https://test.opencitations.net/meta/api/v1/metadata/doi:%s"
+    api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
     try:
         r = get(api % s,
                 headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
