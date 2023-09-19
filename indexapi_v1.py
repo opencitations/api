@@ -253,8 +253,8 @@ def citations_info(res, *args):
 
             cited_id = ""
             duration = ""
-            journal_sc = "no"
-            author_sc = "no"
+            journal_sc = ""
+            author_sc = ""
             if citing_entity in r and cited_entity in r:
                 cited_id = __get_identifier(r[cited_entity])
                 duration = __cit_duration(__get_pub_date(r[citing_entity]),__get_pub_date(r[cited_entity]))
