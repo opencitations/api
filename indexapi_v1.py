@@ -204,7 +204,7 @@ def metadata(res, *args):
     return res, True
 
 def poci_citations_info(res, *args):
-    args.append(["pmid"])
+    args = args + (["pmid"],)
     citations_info(res, args)
 
 # args must contain the [[citing]] and [[cited]]
