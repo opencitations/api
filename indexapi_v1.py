@@ -244,25 +244,25 @@ def citations_info(res, *args):
             cited_entity = res_entities[idx][1]
 
             oci_val = __get_omid_str(citing_entity,True)+"-"+__get_omid_str(cited_entity,True)
-            if citing_entity in r and cited_entity in r:
-                row.extend([
-                    # oci value
-                    oci_val,
-                    # citing
-                    __get_identifier(r[citing_entity]),
-                    # cited
-                    __get_identifier(r[cited_entity]),
-                    # creation = citing[pub_date]
-                    __get_pub_date(r[citing_entity]),
-                    # timespan = citing[pub_date] - cited[pub_date]
-                    __cit_duration(__get_pub_date(r[citing_entity]),__get_pub_date(r[cited_entity])),
-                    # journal_sc = compare citing[source_id] and cited[source_id]
-                    __cit_journal_sc(__get_source(r[citing_entity]),__get_source(r[cited_entity])),
-                    # author_sc = compare citing[source_id] and cited[source_id]
-                    __cit_author_sc(__get_author(r[citing_entity]),__get_author(r[cited_entity]))
-                ])
-            else:
-                row.extend([oci_val,"","","","","",""])
+            #if citing_entity in r and cited_entity in r:
+            row.extend([
+                # oci value
+                oci_val,
+                # citing
+                __get_identifier(r[citing_entity]),
+                # cited
+                __get_identifier(r[cited_entity]),
+                # creation = citing[pub_date]
+                __get_pub_date(r[citing_entity]),
+                # timespan = citing[pub_date] - cited[pub_date]
+                __cit_duration(__get_pub_date(r[citing_entity]),__get_pub_date(r[cited_entity])),
+                # journal_sc = compare citing[source_id] and cited[source_id]
+                __cit_journal_sc(__get_source(r[citing_entity]),__get_source(r[cited_entity])),
+                # author_sc = compare citing[source_id] and cited[source_id]
+                __cit_author_sc(__get_author(r[citing_entity]),__get_author(r[cited_entity]))
+            ])
+            #else:
+            #    row.extend([oci_val,"","","","","",""])
 
     return res, True
 
