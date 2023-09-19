@@ -204,7 +204,7 @@ def metadata(res, *args):
     return res, True
 
 def poci_citations_info(res, *args):
-    args = args + (["pmid"],)
+    args = args + ("pmid",)
     citations_info(res, args)
 
 # args must contain the [[citing]] and [[cited]]
@@ -217,7 +217,7 @@ def citations_info(res, *args):
     # ids managed – ordered by relevance
     all_ids = ["doi","pmid"]
     if len(args) > 3:
-        all_ids = args[3]
+        all_ids = args[3].split("__")
 
     index_meta = {}
 
