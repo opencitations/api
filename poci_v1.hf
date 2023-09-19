@@ -28,7 +28,7 @@ get(API_CALL, headers=HTTP_HEADERS)
 #type operation
 #oci str([0-9]+-[0-9]+)
 #method get
-#postprocess poci_citations_info(oci,citing,cited)
+#postprocess citations_info(oci,citing,cited,"poci")
 #description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI).
 
 The Open Citation Identifier is a globally unique persistent identifier for bibliographic citations, which has a simple structure: the lower-case letters "oci" followed by a colon, followed by two numbers separated by a dash. For example, `oci:1-18` is a valid OCI.
@@ -121,7 +121,7 @@ WHERE {
 #type operation
 #pmid str(\d{1,})
 #preprocess lower(pmid) --> pmid2omid(pmid)
-#postprocess poci_citations_info(oci,citing,cited)
+#postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input PMID, that constitute the incoming citations of that identified bibliographic entity.
 
@@ -161,7 +161,7 @@ LIMIT 50000
 #type operation
 #pmid str(\d{1,})
 #preprocess lower(pmid) --> pmid2omid(pmid)
-#postprocess poci_citations_info(oci,citing,cited)
+#postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input PMID.
 
