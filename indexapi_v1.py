@@ -210,6 +210,11 @@ def citations_info(res, *args):
     oci_idx = header.index(args[0]);
     citing_idx = header.index(args[1])
     cited_idx = header.index(args[2])
+    # ids managed – ordered by relevance
+    all_ids = ["doi","pmid"]
+    if len(args) > 3:
+        all_ids = args[3]
+
     index_meta = {}
 
     #all_entities = ["omid:br/06101068294","omid:br/0610123167","omid:br/06101494166"]
@@ -248,7 +253,7 @@ def citations_info(res, *args):
             citing_id = ""
             citing_pubdate = ""
             if citing_entity in r:
-                citing_id = __get_identifier(r[citing_entity])
+                citing_id = __get_identifier(r[citing_entity], all_ids)
                 citing_pubdate = __get_pub_date(r[citing_entity])
 
             cited_id = ""
@@ -256,7 +261,7 @@ def citations_info(res, *args):
             journal_sc = ""
             author_sc = ""
             if citing_entity in r and cited_entity in r:
-                cited_id = __get_identifier(r[cited_entity])
+                cited_id = __get_identifier(r[cited_entity], all_ids)
                 duration = __cit_duration(__get_pub_date(r[citing_entity]),__get_pub_date(r[cited_entity]))
                 journal_sc = __cit_journal_sc(__get_source(r[citing_entity]),__get_source(r[cited_entity]))
                 author_sc = __cit_author_sc(__get_author(r[citing_entity]),__get_author(r[cited_entity]))
@@ -286,9 +291,9 @@ def __get_omid_str(val, reverse = False):
         return "https://w3id.org/oc/meta/"+val.split("oc/meta/")[1]
     return val.replace("https://w3id.org/oc/meta/br/","")
 
-def __get_identifier(elem):
+def __get_identifier(elem, ids = ["doi","pmid"]):
     if "ids" in elem:
-        for pre in ["doi","pmid"]:
+        for pre in ids:
             for id in elem["ids"]["value"].split(" __ "):
                 if id.startswith(pre+":"):
                     return id.replace(pre+":","")
