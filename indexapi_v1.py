@@ -275,12 +275,12 @@ def citations_info(res, *args):
                 if cited_id != "":
                     cited_id = "pmid:"+cited_id
 
-            pre_source = ""
-            if len(all_ids) > 1:
-                if citing_id.startswith("10."):
-                    pre_source = "coci => "
-                else:
-                    pre_source = "poci => "
+            # pre_source = ""
+            # if len(all_ids) > 1:
+            #     if citing_id.startswith("10."):
+            #         pre_source = "coci => "
+            #     else:
+            #         pre_source = "poci => "
 
             row.extend([
                 # oci value
