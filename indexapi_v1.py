@@ -266,6 +266,15 @@ def citations_info(res, *args):
                 journal_sc = __cit_journal_sc(__get_source(r[citing_entity]),__get_source(r[cited_entity]))
                 author_sc = __cit_author_sc(__get_author(r[citing_entity]),__get_author(r[cited_entity]))
 
+            # in case its the API of POCI add the prefix
+            if len(all_ids) == 1 and "pmid" in all_ids:
+                if oci_val != "":
+                    oci_val = "oci:"+oci_val
+                if citing_id != "":
+                    citing_id = "pmid:"+citing_id
+                if cited_id != "":
+                    cited_id = "pmid:"+cited_id
+
             row.extend([
                 # oci value
                 oci_val,
