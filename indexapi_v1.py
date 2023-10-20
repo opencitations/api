@@ -275,21 +275,27 @@ def citations_info(res, *args):
                 if cited_id != "":
                     cited_id = "pmid:"+cited_id
 
+            pre_source = ""
+            if len(all_ids) == 1 and "doi" in all_ids:
+                pre_source = "coci => "
+            elif len(all_ids) == 1 and "pmid" in all_ids:
+                pre_source = "poci => "
+
             row.extend([
                 # oci value
-                oci_val,
+                pre_source + oci_val,
                 # citing
-                citing_id,
+                pre_source + citing_id,
                 # cited
-                cited_id,
+                pre_source + cited_id,
                 # creation = citing[pub_date]
-                citing_pubdate,
+                pre_source + citing_pubdate,
                 # timespan = citing[pub_date] - cited[pub_date]
-                duration,
+                pre_source + duration,
                 # journal_sc = compare citing[source_id] and cited[source_id]
-                journal_sc,
+                pre_source + journal_sc,
                 # author_sc = compare citing[source_id] and cited[source_id]
-                author_sc
+                pre_source + author_sc
             ])
 
 
