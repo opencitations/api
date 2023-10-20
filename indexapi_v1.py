@@ -284,19 +284,19 @@ def citations_info(res, *args):
 
             row.extend([
                 # oci value
-                pre_source + oci_val,
+                oci_val,
                 # citing
-                pre_source + citing_id,
+                citing_id,
                 # cited
-                pre_source + cited_id,
+                cited_id,
                 # creation = citing[pub_date]
-                pre_source + citing_pubdate,
+                citing_pubdate,
                 # timespan = citing[pub_date] - cited[pub_date]
-                pre_source + duration,
+                duration,
                 # journal_sc = compare citing[source_id] and cited[source_id]
-                pre_source + journal_sc,
+                journal_sc,
                 # author_sc = compare citing[source_id] and cited[source_id]
-                pre_source + author_sc
+                author_sc
             ])
 
 
