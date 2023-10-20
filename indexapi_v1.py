@@ -175,7 +175,7 @@ def metadata(res, *args):
                     reference_ids.append(__get_identifier(r[e]))
 
             row.extend([
-                __get_identifier(r[omid_uri]),
+                __get_identifier(r[omid_uri],["doi"]),
                 str(len(citation_ids)),
                 "; ".join(citation_ids),
                 "; ".join(reference_ids)

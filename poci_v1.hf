@@ -44,14 +44,14 @@ The fields returned by this operation are:
 * *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
 * *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citation/0619099185-061602041405
+#call /citation/0601595569-06101365054
 #output_json [
   {
-    "oci": "0619099185-061602041405",
-    "citing": "10.1186/s40246-022-00378-z",
-    "cited": "10.1007/s40291-013-0028-5",
-    "creation": "2022-02-05",
-    "timespan": "P8Y9M20D",
+    "oci": "oci:0619099185-061602041405",
+    "citing": "pmid:36244310",
+    "cited": "pmid:10592235",
+    "creation": "2022-12",
+    "timespan": "P21Y",
     "journal_sc": "no",
     "author_sc": "no"
   }
