@@ -442,7 +442,7 @@ def __normalise(o):
     return sub("\s+", " ", s).strip()
 
 def __br_meta_metadata(values):
-    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
+    sparql_endpoint = "http://opencitations.net/meta/sparql"
 
     # SPARQL query
     sparql_query = """

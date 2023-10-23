@@ -79,11 +79,11 @@ LIMIT 50000
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/10.1142/9789812701527_0009
+#call /citation-count/10.15468/opc6g1
 #field_type int(count)
 #output_json [
     {
-        "count": "32"
+        "count": "62690"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -104,11 +104,11 @@ WHERE {
 The field returned by this operation is:
 
 * *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/10.1186/1756-8722-6-59
+#call /reference-count/10.15468/dl.hqvyq2
 #field_type int(count)
 #output_json [
     {
-        "count": "75"
+        "count": "227"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
