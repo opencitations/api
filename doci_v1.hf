@@ -49,10 +49,10 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #call /citation/0601000019-061403586813
 #output_json [
     {
-        "oci": "06101801781-06180334099",
+        "oci": "0601000019-061403586813",
         "citing": "10.15468/dl.hqvyq2",
         "cited": "10.15468/opc6g1",
-        "creation": "2020-01-01",
+        "creation": "2020",
         "timespan": "",
         "journal_sc": "yes",
         "author_sc": "no"
@@ -215,35 +215,18 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citations/10.1002/adfm.201505328
+#call /citations/10.15468/whj6d7
 #output_json [
     {
-        "oci": "0200100030836231029271431221029283702000106370908-02001000002361013152237020001050005030208",
-        "citing": "10.1038/natrevmats.2016.98",
-        "cited": "10.1002/adfm.201505328",
-        "creation": coci/"2017-01-17",
-        "timespan": "P11M"
-        "journal_sc": "no",
+        "oci": "0601000019-0603898912",
+        "citing": "10.15468/dl.hqvyq2",
+        "cited": "10.15468/whj6d7",
+        "creation": "2020",
+        "timespan": "",
+        "journal_sc": "yes",
         "author_sc": "no"
     },
-    {
-        "oci": "02001000002361013221037020001070002060708-02001000002361013152237020001050005030208",
-        "citing": "10.1002/adma.201702678",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2017-07-25",
-        "timespan": "P1Y5M8D"
-        "journal_sc": "no",
-        "author_sc": "no"
-    },
-    {
-        "oci": "020010003083623142314271634370200010737010005-02001000002361013152237020001050005030208",
-        "citing": "10.1038/nenergy.2017.105",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2017-07-10",
-        "timespan": "P1Y4M23D"
-        "journal_sc": "no",
-        "author_sc": "no"
-    }
+    ...
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -275,44 +258,36 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /references/10.1186/1756-8722-6-59
+#call /references/10.15468/dl.hqvyq2
 #output_json [
       {
-          "oci": "02001010806360107050663080702026306630509-0200101080636102703040309",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.1186/ar3439",
-          "creation": "2013",
-          "timespan": "P2Y",
-          "journal_sc": "no",
+          "oci": "0601000019-0603898912",
+          "citing": "10.15468/dl.hqvyq2",
+          "cited": "10.15468/whj6d7",
+          "creation": "2020",
+          "timespan": "",
+          "journal_sc": "yes",
           "author_sc": "no"
       },
       {
-          "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.1186/ar4086",
-          "creation": "2013",
-          "timespan": "P1Y",
-          "journal_sc": "no",
+          "oci": "0601000019-0603899075",
+          "citing": "10.15468/dl.hqvyq2",
+          "cited": "10.15468/wc8hub",
+          "creation": "2020",
+          "timespan": "",
+          "journal_sc": "yes",
           "author_sc": "no"
       },
       {
-          "oci": "02001010806360107050663080702026306630509-020010200003619122437020001023704023707090006",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.1200/jco.2012.42.7906",
-          "creation": "2013",
-          "timespan": "P0Y",
-          "journal_sc": "no",
+          "oci": "0601000019-0603899137",
+          "citing": "10.15468/dl.hqvyq2",
+          "cited": "10.15468/wxiqf6",
+          "creation": "2020",
+          "timespan": "",
+          "journal_sc": "yes",
           "author_sc": "no"
       },
-      {
-          "oci": "02001010806360107050663080702026306630509-02003010009360008080300010805370200010237060604070907",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.3109/08830185.2012.664797",
-          "creation": "2013",
-          "timespan": "P0Y",
-          "journal_sc": "no",
-          "author_sc": "no"
-      }
+      ...
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
