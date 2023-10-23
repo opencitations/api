@@ -455,23 +455,27 @@ def __br_meta_metadata(values):
     SELECT DISTINCT ?val ?pubDate (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' __ ') AS ?ids) (GROUP_CONCAT(?venue; separator="; ") as ?source) (GROUP_CONCAT(?raAuthor; separator="; ") as ?author)
     WHERE {
     	  VALUES ?val { """+" ".join(values)+""" }
-          ?val prism:publicationDate ?pubDate.
+          OPTIONAL { ?val prism:publicationDate ?pubDate. }
           OPTIONAL {
               ?val datacite:hasIdentifier ?identifier.
               ?identifier datacite:usesIdentifierScheme ?scheme;
                   literal:hasLiteralValue ?literalValue.
               BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
           }
-          {
-            ?val a fabio:JournalArticle;
-                  frbr:partOf+ ?venue.
-            ?venue a fabio:Journal.
-          } UNION {
-            ?val frbr:partOf ?venue.
+          OPTIONAL {
+              {
+                ?val a fabio:JournalArticle;
+                      frbr:partOf+ ?venue.
+                ?venue a fabio:Journal.
+              } UNION {
+                ?val frbr:partOf ?venue.
+              }
           }
-      ?val pro:isDocumentContextFor ?arAuthor.
-          ?arAuthor pro:withRole pro:author;
-                    pro:isHeldBy ?raAuthor.
+          OPTIONAL {
+              ?val pro:isDocumentContextFor ?arAuthor.
+                  ?arAuthor pro:withRole pro:author;
+                            pro:isHeldBy ?raAuthor.
+          }
      } GROUP BY ?val ?pubDate
     """
 
