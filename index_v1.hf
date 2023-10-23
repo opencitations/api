@@ -210,32 +210,32 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citations/10.1002/adfm.201505328
+#call /citations/10.1186/1756-8722-6-59
 #output_json [
     {
-        "oci": "06101068294-062402835516",
-        "citing": "10.1016/j.mssp.2022.106835",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2022-09",
-        "timespan": "P6Y6M",
+        "oci": "06101440095-06190834283",
+        "citing": "10.3390/molecules25092135",
+        "cited": "10.1186/1756-8722-6-59",
+        "creation": "2020-05-02",
+        "timespan": "P6Y8M13D",
         "journal_sc": "no",
         "author_sc": "no"
     },
     {
-        "oci": "0610123167-062402835516",
-        "citing": "10.1021/acs.chemrev.6b00558",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2017-03-17",
-        "timespan": "P1Y1M0D",
+        "oci": "06101524605-06190834283",
+        "citing": "10.1016/j.clim.2016.01.012",
+        "cited": "10.1186/1756-8722-6-59",
+        "creation": "2016-03",
+        "timespan": "P2Y6M",
         "journal_sc": "no",
         "author_sc": "no"
     },
     {
-        "oci": "06101494166-062402835516",
-        "citing": "10.1021/acs.nanolett.2c01914",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2022-06-21",
-        "timespan": "P6Y4M4D",
+        "oci": "06101763144-06190834283",
+        "citing": "10.3390/pharmaceutics13081222",
+        "cited": "10.1186/1756-8722-6-59",
+        "creation": "2021-08-07",
+        "timespan": "P7Y11M19D",
         "journal_sc": "no",
         "author_sc": "no"
     },
