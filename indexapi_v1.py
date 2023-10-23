@@ -357,7 +357,7 @@ def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
     consider_days = ___contains_days(citing_complete_pub_date) and ___contains_days(cited_complete_pub_date)
 
     try:
-        if citing_pub_datetime == "" or citing_pub_datetime == None:
+        if citing_complete_pub_date == "" or citing_complete_pub_date == None:
             return ""
         citing_pub_datetime = parse(
             citing_complete_pub_date, default=DEFAULT_DATE
