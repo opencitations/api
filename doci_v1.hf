@@ -46,15 +46,15 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citation/06101801781-06180334099
+#call /citation/0601000019-061403586813
 #output_json [
     {
         "oci": "06101801781-06180334099",
-        "citing": "10.7717/peerj-cs.421",
-        "cited": "10.1108/jd-12-2013-0166",
-        "creation": "2021-03-10",
-        "timespan": "P6Y0M1D",
-        "journal_sc": "no",
+        "citing": "10.15468/dl.hqvyq2",
+        "cited": "10.15468/opc6g1",
+        "creation": "2020-01-01",
+        "timespan": "",
+        "journal_sc": "yes",
         "author_sc": "no"
     }
 ]
