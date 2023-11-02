@@ -245,14 +245,32 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #call /references/10.1002/asi.20755
 #output_json [
     {
-        "oci": "062401300477-06180353247",
+        "oci": "062401300477-06101842879",
         "citing": "10.1002/asi.20755",
-        "cited": "10.1038/438900a",
+        "cited": "10.2307/1562247",
         "creation": "2007",
-        "timespan": "P1Y",
+        "timespan": "P4Y",
         "journal_sc": "no",
         "author_sc": "no"
-    }
+    },
+    {
+        "oci": "062401300477-06150873134",
+        "citing": "10.1002/asi.20755",
+        "cited": "10.2307/4486062",
+        "creation": "2007",
+        "timespan": "P0Y",
+        "journal_sc": "no",
+        "author_sc": "no"
+    },
+    {
+        "oci": "062401300477-06170317033",
+        "citing": "10.1002/asi.20755",
+        "cited": "10.2307/2529310",
+        "creation": "2007",
+        "timespan": "P29Y",
+        "journal_sc": "no",
+        "author_sc": "no"
+    },
     ...
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
