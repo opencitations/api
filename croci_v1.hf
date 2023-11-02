@@ -46,14 +46,14 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citation/06101801781-06180334099
+#call /citation/062401300477-06180353247
 #output_json [
     {
-        "oci": "06101801781-06180334099",
-        "citing": "10.7717/peerj-cs.421",
-        "cited": "10.1108/jd-12-2013-0166",
-        "creation": "2021-03-10",
-        "timespan": "P6Y0M1D",
+        "oci": "062401300477-06180353247",
+        "citing": "10.1002/asi.20755",
+        "cited": "10.1038/438900a",
+        "creation": "2007",
+        "timespan": "P1Y",
         "journal_sc": "no",
         "author_sc": "no"
     }
@@ -79,11 +79,11 @@ LIMIT 50000
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/10.1142/9789812701527_0009
+#call /citation-count/10.1038/438900a
 #field_type int(count)
 #output_json [
     {
-        "count": "32"
+        "count": "1"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -104,11 +104,11 @@ WHERE {
 The field returned by this operation is:
 
 * *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/10.1186/1756-8722-6-59
+#call /reference-count/10.1002/asi.20755
 #field_type int(count)
 #output_json [
     {
-        "count": "75"
+        "count": "13"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -200,36 +200,17 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citations/10.1002/adfm.201505328
+#call /citations/10.1038/438900a
 #output_json [
     {
-        "oci": "06101068294-062402835516",
-        "citing": "10.1016/j.mssp.2022.106835",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2022-09",
-        "timespan": "P6Y6M",
+        "oci": "062401300477-06180353247",
+        "citing": "10.1002/asi.20755",
+        "cited": "10.1038/438900a",
+        "creation": "2007",
+        "timespan": "P1Y",
         "journal_sc": "no",
         "author_sc": "no"
-    },
-    {
-        "oci": "0610123167-062402835516",
-        "citing": "10.1021/acs.chemrev.6b00558",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2017-03-17",
-        "timespan": "P1Y1M0D",
-        "journal_sc": "no",
-        "author_sc": "no"
-    },
-    {
-        "oci": "06101494166-062402835516",
-        "citing": "10.1021/acs.nanolett.2c01914",
-        "cited": "10.1002/adfm.201505328",
-        "creation": "2022-06-21",
-        "timespan": "P6Y4M4D",
-        "journal_sc": "no",
-        "author_sc": "no"
-    },
-    ...
+    }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -261,36 +242,18 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /references/10.1186/1756-8722-6-59
+#call /references/10.1002/asi.20755
 #output_json [
-      {
-          "oci": "06190834283-06101389277",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.1124/dmd.111.040840",
-          "creation": "2013-08-19",
-          "timespan": "P2Y1M11D",
-          "journal_sc": "no",
-          "author_sc": "no"
-      },
-      {
-          "oci": "06190834283-06102258727",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.1093/hmg/3.10.1743",
-          "creation": "2013-08-19",
-          "timespan": "P19Y",
-          "journal_sc": "no",
-          "author_sc": "no"
-      },
-      {
-          "oci": "06190834283-06103522789",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.3109/08830185.2012.664797",
-          "creation": "2013-08-19",
-          "timespan": "P1Y4M29D",
-          "journal_sc": "no",
-          "author_sc": "no"
-      },
-      ...
+    {
+        "oci": "062401300477-06180353247",
+        "citing": "10.1002/asi.20755",
+        "cited": "10.1038/438900a",
+        "creation": "2007",
+        "timespan": "P1Y",
+        "journal_sc": "no",
+        "author_sc": "no"
+    }
+    ...
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
