@@ -143,7 +143,7 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 * *citation_count*: the number of citations received by the bibliographic entity;
 * *oa_link*: the link to the Open Access version of the bibliographic entity, if available.
 
-Note: this operation strictly depends on external services (i.e. doi.org and associate applications) for gathering all the metadata of the articles requested. In fact, these metadata are not stored in COCI and are retrieved dynamically upon request.
+Note: this operation gathers all the metadata dynamically upon request from OpenCitations Meta.
 #call /metadata/10.1007/s11192-019-03217-6
 #field_type str(author) datetime(year) str(title) str(source_title) str(source_id) str(volume) str(issue) str(page) str(doi) str(reference) str(citation) int(citation_count) str(oa_link)
 #output_json [
