@@ -309,7 +309,7 @@ def __get_omid_str(val, reverse = False):
     return val.replace("https://w3id.org/oc/meta/br/","")
 
 def __get_all_pids(elem, uri_omid):
-    str_omid = "omid:br/"+__get_omid_str(uri_omid)
+    str_omid = "omid:br/"+__get_omid_str(uri_omid,True)
     str_ids = [str_omid]
     if "ids" in elem:
         for id in elem["ids"]["value"].split(" __ "):
