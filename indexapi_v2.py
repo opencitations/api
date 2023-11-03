@@ -168,15 +168,15 @@ def metadata(res, *args):
             citation_ids = []
             for e in citation.split("; "):
                 if e in r:
-                    citation_ids.append(__get_identifier(r[e]))
+                    citation_ids.append(__get_all_pids(r[e],e))
 
             reference_ids = []
             for e in reference.split("; "):
                 if e in r:
-                    reference_ids.append(__get_identifier(r[e]))
+                    reference_ids.append(__get_all_pids(r[e],e))
 
             row.extend([
-                __get_identifier(r[omid_uri],["doi"]),
+                __get_all_pids(r[omid_uri],omid_uri),
                 str(len(citation_ids)),
                 "; ".join(citation_ids),
                 "; ".join(reference_ids)
@@ -254,7 +254,7 @@ def citations_info(res, *args):
             citing_id = ""
             citing_pubdate = ""
             if citing_entity in r:
-                citing_id = __get_identifier(r[citing_entity], all_ids)
+                citing_id = __get_all_pids(r[citing_entity], citing_entity)
                 citing_pubdate = __get_pub_date(r[citing_entity])
 
             cited_id = ""
@@ -262,7 +262,7 @@ def citations_info(res, *args):
             journal_sc = ""
             author_sc = ""
             if citing_entity in r and cited_entity in r:
-                cited_id = __get_identifier(r[cited_entity], all_ids)
+                cited_id = __get_all_pids(r[cited_entity], cited_entity)
                 duration = __cit_duration(__get_pub_date(r[citing_entity]),__get_pub_date(r[cited_entity]))
                 journal_sc = __cit_journal_sc(__get_source(r[citing_entity]),__get_source(r[cited_entity]))
                 author_sc = __cit_author_sc(__get_author(r[citing_entity]),__get_author(r[cited_entity]))
@@ -308,14 +308,14 @@ def __get_omid_str(val, reverse = False):
         return "https://w3id.org/oc/meta/"+val.split("oc/meta/")[1]
     return val.replace("https://w3id.org/oc/meta/br/","")
 
-def __get_identifier(elem, ids = ["doi","pmid"]):
-    str_ids = []
+def __get_all_pids(elem, uri_omid):
+    str_omid = "omid:br/"+__get_omid_str(uri_omid)
+    str_ids = [str_omid]
     if "ids" in elem:
         for id in elem["ids"]["value"].split(" __ "):
             str_ids.append(id)
-        return " ".join(str_ids)
 
-    return ""
+    return " ".join(str_ids)
 
 def __get_pub_date(elem):
     if "pubDate" in elem:
