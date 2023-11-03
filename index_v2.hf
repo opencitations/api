@@ -50,8 +50,8 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #output_json [
     {
         "oci": "06101801781-06180334099",
-        "citing": "10.7717/peerj-cs.421",
-        "cited": "10.1108/jd-12-2013-0166",
+        "citing": "omid:br/06101801781 doi:10.7717/peerj-cs.421 pmid:33817056",
+        "cited": "omid:br/06180334099 doi:10.1108/jd-12-2013-0166",
         "creation": "2021-03-10",
         "timespan": "P6Y0M1D",
         "journal_sc": "no",
@@ -71,14 +71,14 @@ LIMIT 50000
 #url /citation-count/{id}
 #type operation
 #id str((omid|doi|pmid):(10\..+|\d+|br.+))
-#preprocess lower(id) --> doi2omid(id)
+#preprocess lower(id) --> id2omid(id)
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
 
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/10.1142/9789812701527_0009
+#call /citation-count/doi:10.1142/9789812701527_0009
 #field_type int(count)
 #output_json [
     {
@@ -88,14 +88,14 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(?citing) as ?count)
 WHERE {
-    ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[doi]]> .
+    ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[id]]> .
     ?oci cito:hasCitingEntity ?citing .
 }
 
 #url /reference-count/{id}
 #type operation
 #id str((omid|doi|pmid):(10\..+|\d+|br.+))
-#preprocess lower(doi) --> doi2omid(doi)
+#preprocess lower(doi) --> id2omid(id)
 #method get
 #description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
 
@@ -112,14 +112,14 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(?cited) as ?count)
 WHERE {
-    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[doi]]> .
+    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[id]]> .
     ?oci cito:hasCitedEntity ?cited .
 }
 
 #url /citations/{id}
 #type operation
 #id str((omid|doi|pmid):(10\..+|\d+|br.+))
-#preprocess lower(doi) --> doi2omid(doi)
+#preprocess lower(doi) --> id2omid(doi)
 #postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
@@ -179,7 +179,7 @@ LIMIT 50000
 #url /references/{id}
 #type operation
 #id str((omid|doi|pmid):(10\..+|\d+|br.+))
-#preprocess lower(doi) --> doi2omid(doi)
+#preprocess lower(doi) --> id2omid(doi)
 #postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input DOI.
