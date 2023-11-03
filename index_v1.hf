@@ -8,8 +8,6 @@ All the present operations return either a JSON document (default) or a CSV docu
 
 If you are going to use the REST APIs within an application/code, we encourage you to get the [OpenCitations Access Token](https://opencitations.net/accesstoken) and specify it in the "authorization" header of your REST API call. Here is a usage example in Python:
 
-**Note: We maintain these legacy APIs for historical and compatibility reasons. While we encourage the use of our latest and more efficient [V2 APIs](https://opencitations.net/index/api/v2), we understand that some applications may still rely on these older endpoints. Please note that legacy APIs may not receive updates or support, and their use may be phased out in the future. We recommend transitioning to our current [V2 APIs](https://opencitations.net/index/api/v2) for improved performance, security, and reliability.**
-
 <pre style="height: 150px"><code>
 from requests import get
 
@@ -18,6 +16,8 @@ HTTP_HEADERS = {"authorization": "YOUR-OPENCITATIONS-ACCESS-TOKEN"}
 
 get(API_CALL, headers=HTTP_HEADERS)
 </code></pre>
+
+<p style="color: #FFA500"><strong>Note:</strong> we use certain legacy APIs for historical and compatibility reasons. While we encourage the use of our latest and more efficient <a href="https://opencitations.net/index/api/v2">V2 APIs</a>, we understand that some applications may still rely on these older endpoints. Please note that legacy APIs may not receive updates or support, and their use may be phased out in the future. We recommend transitioning to our current <a href="https://opencitations.net/index/api/v2">V2 APIs</a> for improved performance, security, and reliability.</p>
 
 #version Version 1.2.0 (2023-11-06)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
