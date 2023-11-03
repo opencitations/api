@@ -73,7 +73,7 @@ LIMIT 50000
 #id str((omid|doi|pmid):(.+))
 #preprocess lower(id) --> id2omid(id)
 #method get
-#description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input DOI.
+#description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input PID (DOI, PMID, OMID)..
 
 The field returned by this operation is:
 
@@ -97,7 +97,7 @@ WHERE {
 #id str((omid|doi|pmid):(.+))
 #preprocess lower(id) --> id2omid(id)
 #method get
-#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input DOI.
+#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input PID (DOI, PMID, OMID).
 
 The field returned by this operation is:
 
@@ -122,7 +122,7 @@ WHERE {
 #preprocess lower(id) --> id2omid(id)
 #postprocess citations_info(oci,citing,cited)
 #method get
-#description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
+#description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input PID (DOI, PMID, OMID), that constitute the incoming citations of that identified bibliographic entity.
 
 The fields returned by this operation are:
 
@@ -182,7 +182,7 @@ LIMIT 50000
 #preprocess lower(id) --> id2omid(id)
 #postprocess citations_info(oci,citing,cited)
 #method get
-#description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input DOI.
+#description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input PID (DOI, PMID, OMID)..
 
 The fields returned by this operation are:
 
