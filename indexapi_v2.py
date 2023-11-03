@@ -107,7 +107,7 @@ def split_dois2omids(s):
 
 def id2omid(s):
     if "omid" in s:
-        return s.replace("omid:br/"),
+        return s.replace("omid:br/",""),
     return __get_omid_of(s),
 
 def pmid2omid(s):
