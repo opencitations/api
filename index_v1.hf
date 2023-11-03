@@ -2,7 +2,6 @@
 #type api
 #base https://test.opencitations.net/index
 #title The unifying REST API for all the OpenCitations Indexes
-#note <p style="color: #CC0000">we use certain legacy APIs for historical and compatibility reasons. While we encourage the use of our latest and more efficient <a href="https://opencitations.net/index/api/v2">V2 APIs</a>, we understand that some applications may still rely on these older endpoints. Please note that legacy APIs may not receive updates or support, and their use may be phased out in the future. We recommend transitioning to our current <a href="https://opencitations.net/index/api/v2">V2 APIs</a> for improved performance, security, and reliability.</p>
 #description This document describe the REST API for accessing the data stored in all the [OpenCitations Indexes](https://w3id.org/oc/index) hosted by [OpenCitations](http://opencitations.net). This API implements operations to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
 All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. If you would like to suggest an additional operation to be included in this API, please use the [issue tracker](https://github.com/opencitations/api/issues) of the OpenCitations APIs available on GitHub.
@@ -23,6 +22,7 @@ get(API_CALL, headers=HTTP_HEADERS)
 #version Version 1.2.0 (2023-11-06)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
+#note we use certain legacy APIs for historical and compatibility reasons. While we encourage the use of our latest and more efficient <a href="https://opencitations.net/index/api/v2">V2 APIs</a>, we understand that some applications may still rely on these older endpoints. Please note that legacy APIs may not receive updates or support, and their use may be phased out in the future. We recommend transitioning to our current <a href="https://opencitations.net/index/api/v2">V2 APIs</a> for improved performance, security, and reliability.
 #endpoint http://127.0.0.1/index/sparql
 #method post
 #addon indexapi_v1
