@@ -138,31 +138,31 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #call /citations/doi:10.1108/jd-12-2013-0166
 #output_json [
     {
-        "oci": "06101440095-06190834283",
-        "citing": "10.3390/molecules25092135",
-        "cited": "10.1186/1756-8722-6-59",
-        "creation": "2020-05-02",
-        "timespan": "P6Y8M13D",
+        "oci": "06101801781-06180334099",
+        "citing": "omid:br/06101801781 doi:10.7717/peerj-cs.421 pmid:33817056",
+        "cited": "omid:br/06180334099 doi:10.1108/jd-12-2013-0166",
+        "creation": "2021-03-10",
+        "timespan": "P6Y0M1D",
         "journal_sc": "no",
         "author_sc": "no"
     },
     {
-        "oci": "06101524605-06190834283",
-        "citing": "10.1016/j.clim.2016.01.012",
-        "cited": "10.1186/1756-8722-6-59",
-        "creation": "2016-03",
-        "timespan": "P2Y6M",
+        "oci": "06102227626-06180334099",
+        "citing": "omid:br/06102227626 doi:10.3233/ds-190019",
+        "cited": "omid:br/06180334099 doi:10.1108/jd-12-2013-0166",
+        "creation": "2019-11-25",
+        "timespan": "P4Y8M16D",
         "journal_sc": "no",
         "author_sc": "no"
     },
     {
-        "oci": "06101763144-06190834283",
-        "citing": "10.3390/pharmaceutics13081222",
-        "cited": "10.1186/1756-8722-6-59",
-        "creation": "2021-08-07",
-        "timespan": "P7Y11M19D",
+        "oci": "06102227629-06180334099",
+        "citing": "omid:br/06102227629 doi:10.3233/ds-190016",
+        "cited": "omid:br/06180334099 doi:10.1108/jd-12-2013-0166",
+        "creation": "2019-11-25",
+        "timespan": "P4Y8M16D",
         "journal_sc": "no",
-        "author_sc": "no"
+        "author_sc": "yes"
     },
     ...
 ]
@@ -197,30 +197,31 @@ The fields returned by this operation are:
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
 #call /references/doi:10.7717/peerj-cs.421
 #output_json [
+[
       {
-          "oci": "06190834283-06101389277",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.1124/dmd.111.040840",
-          "creation": "2013-08-19",
-          "timespan": "P2Y1M11D",
+          "oci": "06101801781-06101802023",
+          "citing": "omid:br/06101801781 doi:10.7717/peerj-cs.421 pmid:33817056",
+          "cited": "omid:br/06101802023 doi:10.7717/peerj-cs.163 pmid:33816816 doi:10.7287/peerj.preprints.26727v1",
+          "creation": "2021-03-10",
+          "timespan": "P2Y5M21D",
+          "journal_sc": "yes",
+          "author_sc": "no"
+      },
+      {
+          "oci": "06101801781-061202127742",
+          "citing": "omid:br/06101801781 doi:10.7717/peerj-cs.421 pmid:33817056",
+          "cited": "omid:br/061202127742 doi:10.1007/s11192-020-03792-z",
+          "creation": "2021-03-10",
+          "timespan": "P0Y3M6D",
           "journal_sc": "no",
           "author_sc": "no"
       },
       {
-          "oci": "06190834283-06102258727",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.1093/hmg/3.10.1743",
-          "creation": "2013-08-19",
-          "timespan": "P19Y",
-          "journal_sc": "no",
-          "author_sc": "no"
-      },
-      {
-          "oci": "06190834283-06103522789",
-          "citing": "10.1186/1756-8722-6-59",
-          "cited": "10.3109/08830185.2012.664797",
-          "creation": "2013-08-19",
-          "timespan": "P1Y4M29D",
+          "oci": "06101801781-061202127823",
+          "citing": "omid:br/06101801781 doi:10.7717/peerj-cs.421 pmid:33817056",
+          "cited": "omid:br/061202127823 doi:10.1007/s11192-020-03690-4 pmid:32981987",
+          "creation": "2021-03-10",
+          "timespan": "P0Y5M17D",
           "journal_sc": "no",
           "author_sc": "no"
       },
