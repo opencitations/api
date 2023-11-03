@@ -78,11 +78,11 @@ LIMIT 50000
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/doi:10.1142/9789812701527_0009
+#call /citation-count/doi:10.1108/jd-12-2013-0166
 #field_type int(count)
 #output_json [
     {
-        "count": "32"
+        "count": "34"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -102,11 +102,11 @@ WHERE {
 The field returned by this operation is:
 
 * *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/10.1186/1756-8722-6-59
+#call /reference-count/doi:10.7717/peerj-cs.421
 #field_type int(count)
 #output_json [
     {
-        "count": "75"
+        "count": "35"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
@@ -118,8 +118,8 @@ WHERE {
 
 #url /citations/{id}
 #type operation
-#id str((omid|doi|pmid):(10\..+|\d+|br.+))
-#preprocess lower(doi) --> id2omid(doi)
+#id str((omid|doi|pmid):(.+))
+#preprocess lower(id) --> id2omid(id)
 #postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input DOI, that constitute the incoming citations of that identified bibliographic entity.
@@ -135,7 +135,7 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /citations/10.1186/1756-8722-6-59
+#call /citations/doi:10.1108/jd-12-2013-0166
 #output_json [
     {
         "oci": "06101440095-06190834283",
@@ -172,14 +172,14 @@ SELECT ?oci ?citing ?cited
 WHERE {
       ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[doi]]> .
       ?oci cito:hasCitingEntity ?citing .
-      BIND(<https://w3id.org/oc/meta/br/[[doi]]> as ?cited) .
+      BIND(<https://w3id.org/oc/meta/br/[[id]]> as ?cited) .
 }
 LIMIT 50000
 
 #url /references/{id}
 #type operation
-#id str((omid|doi|pmid):(10\..+|\d+|br.+))
-#preprocess lower(doi) --> id2omid(doi)
+#id str((omid|doi|pmid):(.+))
+#preprocess lower(id) --> id2omid(id)
 #postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input DOI.
@@ -195,7 +195,7 @@ The fields returned by this operation are:
 * *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 
 The values of all the fields are prefixed with `[index name] => `, so as to cleary identify from where the related data is coming, and can contain one or more information, separated by `; `. This is particularly useful when a citation is actually contained in two or more OpenCitations Indexes. In this case, only one row will be returned, and the prefix used in the various data allows one to understand the source Index of such data.
-#call /references/10.1186/1756-8722-6-59
+#call /references/doi:10.7717/peerj-cs.421
 #output_json [
       {
           "oci": "06190834283-06101389277",
@@ -232,6 +232,6 @@ SELECT ?oci ?citing ?cited
 WHERE {
       ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[doi]]> .
       ?oci cito:hasCitedEntity ?cited .
-      BIND(<https://w3id.org/oc/meta/br/[[doi]]> as ?citing) .
+      BIND(<https://w3id.org/oc/meta/br/[[id]]> as ?citing) .
 }
 LIMIT 50000
