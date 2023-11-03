@@ -170,7 +170,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?oci ?citing ?cited
 WHERE {
-      ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[doi]]> .
+      ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[id]]> .
       ?oci cito:hasCitingEntity ?citing .
       BIND(<https://w3id.org/oc/meta/br/[[id]]> as ?cited) .
 }
@@ -230,7 +230,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?oci ?citing ?cited
 WHERE {
-      ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[doi]]> .
+      ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[id]]> .
       ?oci cito:hasCitedEntity ?cited .
       BIND(<https://w3id.org/oc/meta/br/[[id]]> as ?citing) .
 }
