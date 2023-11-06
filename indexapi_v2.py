@@ -37,7 +37,7 @@ def id2omid(s):
     return __get_omid_of(s),
 
 def __get_omid_of(s):
-    api = "https://opencitations.net/meta/api/v1/metadata/%s"
+    api = "https://127.0.0.1/meta/api/v1/metadata/%s"
     # api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
     try:
         r = get(api % s,

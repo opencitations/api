@@ -112,7 +112,7 @@ def pmid2omid(s):
     return __get_omid_of("pmid:"+s),
 
 def __get_omid_of(s):
-    api = "https://opencitations.net/meta/api/v1/metadata/%s"
+    api = "http://127.0.0.1/meta/api/v1/metadata/%s"
     # api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
     try:
         r = get(api % s,
@@ -501,7 +501,7 @@ def __br_meta_metadata(values):
         return None
 
 def __ocmeta_parser(ids, pre="doi"):
-    api = "https://opencitations.net/meta/api/v1/metadata/"
+    api = "http://127.0.0.1/meta/api/v1/metadata/"
     # api = "https://test.opencitations.net/meta/api/v1/metadata/"
 
     r = get(api + "__".join(ids), headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
