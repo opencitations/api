@@ -16,10 +16,13 @@
 
 __author__ = 'essepuntato'
 from urllib.parse import quote, unquote
-from requests import get
+from requests import get,post
 from rdflib import Graph, URIRef
 from re import sub,findall
 from json import loads
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse
 
 
 def lower(s):
@@ -96,37 +99,307 @@ def merge(res, *args):
 def split_dois(s):
     return "\"%s\"" % "\" \"".join(s.split("__")),
 
+def split_dois2omids(s):
+    #return "\"%s\"" % "\" \"".join([__get_omid_of(d) for d in s.split("__")]),
+    return " ".join(["<https://w3id.org/oc/meta/br/"+str(__get_omid_of("doi:"+d))+">" for d in s.split("__")]),
+
+
+
+def doi2omid(s):
+    return __get_omid_of("doi:"+s),
+
+def pmid2omid(s):
+    return __get_omid_of("pmid:"+s),
+
+def __get_omid_of(s):
+    api = "http://127.0.0.1/meta/api/v1/metadata/%s"
+    # api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
+    try:
+        r = get(api % s,
+                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
+        if r.status_code == 200:
+            json_res = loads(r.text)
+            if len(json_res) > 0:
+                #take the one and only result given back by META
+                body = json_res[0]
+                matches = findall(r'omid:br/[\dA-Za-z/]+', body["id"])
+                if matches:
+                    return matches[0].replace("omid:br/","")
+
+    except Exception as e:
+        return ""
+    return ""
 
 def metadata(res, *args):
-    # doi, reference, citation_count
     header = res[0]
-    doi_field = header.index("doi")
-    additional_fields = ["author", "year", "title",
-                         "source_title", "volume", "issue", "page", "source_id"]
+    oci_idx = header.index(args[0]);
+    citation_idx = header.index(args[1])
+    reference_idx = header.index(args[2])
 
+    res_entities = {}
+    if len(res) > 1:
+        for idx, row in enumerate(res[1:]):
+            res_entities[idx] = {
+                "omid": row[oci_idx][1],
+                "citation": row[citation_idx][1],
+                "reference": row[reference_idx][1]
+            }
+
+    # delete the item + citing + cited columns
+    res = [[elem for idx, elem in enumerate(row) if idx != oci_idx and idx != citation_idx and idx != reference_idx] for row in res]
+
+    header = res[0]
+    additional_fields = ["doi" , "citation_count", "citation", "reference", "author", "year", "title", "source_title", "volume", "issue", "page", "source_id", "oa_link"]
     header.extend(additional_fields)
-
     rows_to_remove = []
 
-    for row in res[1:]:
-        citing_doi = row[doi_field][1]
+    # org value: <https://w3id.org/oc/meta/br/06NNNNNN>
+    for idx, row in enumerate(res[1:]):
+        omid_uri = res_entities[idx]["omid"]
+        citation = res_entities[idx]["citation"]
+        reference = res_entities[idx]["reference"]
 
-        # r = None
-        # for p in (__crossref_parser,__datacite_parser):
-        #     if r is None:
-        #         r = p(citing_doi)
-
-        r = __ocmeta_parser(citing_doi)
+        entities = citation.split("; ") + reference.split("; ") + [omid_uri]
+        r = __br_meta_metadata(["<"+e+">" for e in entities])
         if r is None or all([i in ("", None) for i in r]):
-            rows_to_remove.append(row)
+            row.extend(["","",""])
         else:
-            row.extend(r)
 
-    for row in rows_to_remove:
-        res.remove(row)
+            citation_ids = []
+            for e in citation.split("; "):
+                if e in r:
+                    citation_ids.append(__get_identifier(r[e]))
+
+            reference_ids = []
+            for e in reference.split("; "):
+                if e in r:
+                    reference_ids.append(__get_identifier(r[e]))
+
+            row.extend([
+                __get_identifier(r[omid_uri],["doi"]),
+                str(len(citation_ids)),
+                "; ".join(citation_ids),
+                "; ".join(reference_ids)
+            ])
+
+
+        entity = "omid:"+omid_uri.split("oc/meta/")[1]
+        r = __ocmeta_parser([entity],"omid")
+        if r is None or all([i in ("", None) for i in r]):
+            row.extend(["","","","","","","","",""])
+        else:
+            if entity in r:
+                r = r[entity]
+                row.extend([
+                    r["authors_str"],
+                    r["pub_date"],
+                    r["title"],
+                    r["source_title"],
+                    r["volume"],
+                    r["issue"],
+                    r["page"],
+                    r["source_id"],
+                    ""
+                ])
 
     return res, True
 
+# args must contain the [[citing]] and [[cited]]
+def citations_info(res, *args):
+
+    header = res[0]
+    oci_idx = header.index(args[0]);
+    citing_idx = header.index(args[1])
+    cited_idx = header.index(args[2])
+    # ids managed – ordered by relevance
+    all_ids = ["doi","pmid"]
+    if len(args) > 3:
+        all_ids = args[3].split("__")
+
+    index_meta = {}
+
+    #all_entities = ["omid:br/06101068294","omid:br/0610123167","omid:br/06101494166"]
+    res_entities = {}
+    all_entities = []
+    if len(res) > 1:
+        for idx, row in enumerate(res[1:]):
+            res_entities[idx] = []
+            res_entities[idx] += [__get_omid_str(row[citing_idx][1]), __get_omid_str(row[cited_idx][1])]
+            all_entities += [__get_omid_str(row[citing_idx][1]), __get_omid_str(row[cited_idx][1])]
+
+    # delete the item + citing + cited columns
+    res = [[elem for idx, elem in enumerate(row) if idx != oci_idx and idx != citing_idx and idx != cited_idx] for row in res]
+
+    additional_fields = ["oci", "citing", "cited", "creation", "timespan", "journal_sc","author_sc"]
+    header = res[0]
+    header.extend(additional_fields)
+
+    # call __ocmeta_parser for each STEP entities each time
+    r = {}
+    STEP = 8
+    all_entities = list(set(all_entities))
+    all_entities = ["<"+e+">" for e in all_entities]
+    r = __br_meta_metadata(all_entities)
+
+    # process and elaborate additional fields
+    #creation = entities_data["citing"][1]
+    if len(res) > 1:
+        for idx, row in enumerate(res[1:]):
+
+            citing_entity = res_entities[idx][0]
+            cited_entity = res_entities[idx][1]
+
+            oci_val = __get_omid_str(citing_entity,True)+"-"+__get_omid_str(cited_entity,True)
+
+            citing_id = ""
+            citing_pubdate = ""
+            if citing_entity in r:
+                citing_id = __get_identifier(r[citing_entity], all_ids)
+                citing_pubdate = __get_pub_date(r[citing_entity])
+
+            cited_id = ""
+            duration = ""
+            journal_sc = ""
+            author_sc = ""
+            if citing_entity in r and cited_entity in r:
+                cited_id = __get_identifier(r[cited_entity], all_ids)
+                duration = __cit_duration(__get_pub_date(r[citing_entity]),__get_pub_date(r[cited_entity]))
+                journal_sc = __cit_journal_sc(__get_source(r[citing_entity]),__get_source(r[cited_entity]))
+                author_sc = __cit_author_sc(__get_author(r[citing_entity]),__get_author(r[cited_entity]))
+
+            # in case its the API of POCI add the prefix
+            if len(all_ids) == 1 and "pmid" in all_ids:
+                if oci_val != "":
+                    oci_val = "oci:"+oci_val
+                if citing_id != "":
+                    citing_id = "pmid:"+citing_id
+                if cited_id != "":
+                    cited_id = "pmid:"+cited_id
+
+            # pre_source = ""
+            # if len(all_ids) > 1:
+            #     if citing_id.startswith("10."):
+            #         pre_source = "coci => "
+            #     else:
+            #         pre_source = "poci => "
+
+            row.extend([
+                # oci value
+                oci_val,
+                # citing
+                citing_id,
+                # cited
+                cited_id,
+                # creation = citing[pub_date]
+                citing_pubdate,
+                # timespan = citing[pub_date] - cited[pub_date]
+                duration,
+                # journal_sc = compare citing[source_id] and cited[source_id]
+                journal_sc,
+                # author_sc = compare citing[source_id] and cited[source_id]
+                author_sc
+            ])
+
+
+    return res, True
+
+def __get_omid_str(val, reverse = False):
+    if not reverse:
+        return "https://w3id.org/oc/meta/"+val.split("oc/meta/")[1]
+    return val.replace("https://w3id.org/oc/meta/br/","")
+
+def __get_identifier(elem, ids = ["doi","pmid"]):
+    if "ids" in elem:
+        for pre in ids:
+            for id in elem["ids"]["value"].split(" __ "):
+                if id.startswith(pre+":"):
+                    return id.replace(pre+":","")
+    return ""
+
+def __get_pub_date(elem):
+    if "pubDate" in elem:
+        return elem["pubDate"]["value"]
+    return ""
+
+def __get_source(elem):
+    if "source" in elem:
+        return elem["source"]["value"].split("; ")
+    return ""
+
+def __get_author(elem):
+    if "author" in elem:
+        return elem["author"]["value"].split("; ")
+    return ""
+
+def __cit_journal_sc(citing_source_ids, cited_source_ids):
+    if len(set(citing_source_ids).intersection(set(cited_source_ids))) > 0:
+        return "yes"
+    return "no"
+
+def __cit_author_sc(citing_authors, cited_authors):
+    if len(set(citing_authors).intersection(set(cited_authors))) > 0:
+        return "yes"
+    return "no"
+
+def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
+
+    def ___contains_years(date):
+        return date is not None and len(date) >= 4
+
+    def ___contains_months(date):
+        return date is not None and len(date) >= 7
+
+    def ___contains_days(date):
+        return date is not None and len(date) >= 10
+
+    DEFAULT_DATE = datetime(1970, 1, 1, 0, 0)
+    consider_months = ___contains_months(citing_complete_pub_date) and ___contains_months(cited_complete_pub_date)
+    consider_days = ___contains_days(citing_complete_pub_date) and ___contains_days(cited_complete_pub_date)
+
+    try:
+        if citing_complete_pub_date == "" or citing_complete_pub_date == None:
+            return ""
+        citing_pub_datetime = parse(
+            citing_complete_pub_date, default=DEFAULT_DATE
+        )
+    except ValueError:  # It is not a leap year
+        citing_pub_datetime = parse(
+            citing_complete_pub_date[:7] + "-28", default=DEFAULT_DATE
+        )
+    try:
+        if cited_complete_pub_date == "" or cited_complete_pub_date == None:
+            return ""
+        cited_pub_datetime = parse(
+            cited_complete_pub_date, default=DEFAULT_DATE
+        )
+    except ValueError:  # It is not a leap year
+        cited_pub_datetime = parse(
+            cited_complete_pub_date[:7] + "-28", default=DEFAULT_DATE
+        )
+
+    delta = relativedelta(citing_pub_datetime, cited_pub_datetime)
+
+    result = ""
+    if (
+        delta.years < 0
+        or (delta.years == 0 and delta.months < 0 and consider_months)
+        or (
+            delta.years == 0
+            and delta.months == 0
+            and delta.days < 0
+            and consider_days
+        )
+    ):
+        result += "-"
+    result += "P%sY" % abs(delta.years)
+
+    if consider_months:
+        result += "%sM" % abs(delta.months)
+
+    if consider_days:
+        result += "%sD" % abs(delta.days)
+
+    return result
 
 def __get_issn(body):
     cur_id = ""
@@ -134,13 +407,11 @@ def __get_issn(body):
         cur_id = "; ".join("issn:" + cur_issn for cur_issn in body["ISSN"])
     return __normalise(cur_id)
 
-
 def __get_isbn(body):
     cur_id = ""
     if "ISBN" in body and len(body["ISBN"]):
         cur_id = "; ".join("isbn:" + cur_issn for cur_issn in body["ISBN"])
     return __normalise(cur_id)
-
 
 def __get_id(body, f_list):
     cur_id = ""
@@ -148,7 +419,6 @@ def __get_id(body, f_list):
         if cur_id == "":
             cur_id = f(body)
     return __normalise(cur_id)
-
 
 def __create_title_from_list(title_list):
     cur_title = ""
@@ -175,19 +445,89 @@ def __normalise(o):
         s = str(o)
     return sub("\s+", " ", s).strip()
 
-def __ocmeta_parser(doi):
-    api = "http://127.0.0.1/meta/api/v1/metadata/doi:%s"
+def __br_meta_metadata(values):
+    sparql_endpoint = "http://127.0.0.1/meta/sparql"
+
+    # SPARQL query
+    sparql_query = """
+    PREFIX pro: <http://purl.org/spar/pro/>
+    PREFIX frbr: <http://purl.org/vocab/frbr/core#>
+    PREFIX fabio: <http://purl.org/spar/fabio/>
+    PREFIX datacite: <http://purl.org/spar/datacite/>
+    PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
+    PREFIX prism: <http://prismstandard.org/namespaces/basic/2.0/>
+    SELECT DISTINCT ?val ?pubDate (GROUP_CONCAT(DISTINCT ?id; SEPARATOR=' __ ') AS ?ids) (GROUP_CONCAT(?venue; separator="; ") as ?source) (GROUP_CONCAT(?raAuthor; separator="; ") as ?author)
+    WHERE {
+    	  VALUES ?val { """+" ".join(values)+""" }
+          OPTIONAL { ?val prism:publicationDate ?pubDate. }
+          OPTIONAL {
+              ?val datacite:hasIdentifier ?identifier.
+              ?identifier datacite:usesIdentifierScheme ?scheme;
+                  literal:hasLiteralValue ?literalValue.
+              BIND(CONCAT(STRAFTER(STR(?scheme), "http://purl.org/spar/datacite/"), ":", ?literalValue) AS ?id)
+          }
+          OPTIONAL {
+              {
+                ?val a fabio:JournalArticle;
+                      frbr:partOf+ ?venue.
+                ?venue a fabio:Journal.
+              } UNION {
+                ?val frbr:partOf ?venue.
+              }
+          }
+          OPTIONAL {
+              ?val pro:isDocumentContextFor ?arAuthor.
+                  ?arAuthor pro:withRole pro:author;
+                            pro:isHeldBy ?raAuthor.
+          }
+     } GROUP BY ?val ?pubDate
+    """
+
+    headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
+    data = {"query": sparql_query}
 
     try:
-        r = get(api % doi,
-                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
-        if r.status_code == 200:
-            json_res = loads(r.text)
-            if len(json_res) > 0:
-                #take the one and only result given back by META
-                body = json_res[0]
+        response = post(sparql_endpoint, headers=headers, data=sparql_query)
+        if response.status_code == 200:
+            r = loads(response.text)
+            results = r["results"]["bindings"]
+            res_json = {}
+            if len(results) > 0:
+                for elem in results:
+                    res_json[elem["val"]["value"]] = elem
+            return res_json
+
+    except:
+        return None
+
+def __ocmeta_parser(ids, pre="doi"):
+    api = "http://127.0.0.1/meta/api/v1/metadata/"
+    # api = "https://test.opencitations.net/meta/api/v1/metadata/"
+
+    r = get(api + "__".join(ids), headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
+
+    f_res = {}
+    if r.status_code == 200:
+        json_res = loads(r.text)
+        if len(json_res) > 0:
+
+            for body in json_res:
+
+                id = None
+                omid = None
+                if "id" in body:
+                    for p_id in body["id"].split(" "):
+                        if str(p_id).startswith(pre):
+                            id = str(p_id)
+                        if str(p_id).startswith("omid"):
+                            omid = str(p_id)
+
+                if omid == None:
+                    continue
 
                 authors = []
+                l_authors_id = []
+                authors_orcid = []
                 if "author" in body:
                     if body["author"] != "":
                         for author in body["author"].split(";"):
@@ -197,19 +537,23 @@ def __ocmeta_parser(doi):
                             if len(author_ids) > 0:
                                 author_string = author.replace(author_ids[0],"").strip()
                                 if len(author_orcid) > 0:
+                                    authors_orcid.append(author_orcid[0].strip())
                                     author_string = author_string+", "+author_orcid[0].strip()
                             if author_string is not None:
                                 authors.append(__normalise(author_string))
 
                 source_title = ""
                 source_id = ""
+                all_source_ids = []
                 if "venue" in body:
                     if body["venue"] != "":
                         source_title_string = body["venue"]
+
                         source_issn = findall(r"(issn\:[\d\-^\]]{1,})",source_title_string)
                         source_isbn = findall(r"(isbn\:[\d\-^\]]{1,})",source_title_string)
                         source_ids = findall(r"\[.{1,}\]",source_title_string)
                         if len(source_ids) > 0:
+                            all_source_ids = source_ids[0].split(" ")
                             source_title_string = source_title_string.replace(source_ids[0],"").strip()
                         if len(source_issn) > 0:
                             source_id = source_issn[0]
@@ -218,7 +562,9 @@ def __ocmeta_parser(doi):
                         source_title = source_title_string
 
                 year = ""
+                pub_date = ""
                 if "pub_date" in body:
+                    pub_date = __normalise(body["pub_date"])
                     if len(body["pub_date"]) >= 4:
                         year = __normalise(body["pub_date"][:4])
 
@@ -238,11 +584,23 @@ def __ocmeta_parser(doi):
                 if "page" in body:
                     page = __normalise(body["page"])
 
-                return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
+                f_res[omid] = {
+                    "id": id,
+                    "authors_str": "; ".join(authors),
+                    "authors_orcid": authors_orcid,
+                    "pub_date": pub_date,
+                    "title": title,
+                    "source_title": source_title,
+                    "source_id": source_id,
+                    "all_source_ids": all_source_ids,
+                    "volume": volume,
+                    "issue": issue,
+                    "page":page
+                }
 
-    except Exception as e:
-        return ["", "", "", "", "", "", "", ""]
+        return f_res
 
+    return f_res
 
 def __crossref_parser(doi):
     api = "https://api.crossref.org/works/%s"
@@ -316,7 +674,8 @@ def __datacite_parser(doi):
 
     try:
         r = get(api % doi,
-                headers={"User-Agent": "COCI REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
+                headers={"User-Agent": "COCI REST API (via OpenCitations - "
+                                       "http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=30)
         if r.status_code == 200:
             json_res = loads(r.text)
             if "data" in json_res and "attributes" in json_res["data"]:

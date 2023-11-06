@@ -1,6 +1,6 @@
 #url /api/v1
 #type api
-#base https://w3id.org/oc/index/poci
+#base https://opencitations.net/index/poci
 #title REST API for POCI, the OpenCitations Index of PubMed open PMID-to-PMID references
 #description This document describe the REST API for accessing the data stored in [POCI](https://w3id.org/oc/index/poci) hosted by [OpenCitations](http://opencitations.net). This API implements operations to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the PMID of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
@@ -17,18 +17,154 @@ HTTP_HEADERS = {"authorization": "YOUR-OPENCITATIONS-ACCESS-TOKEN"}
 get(API_CALL, headers=HTTP_HEADERS)
 </code></pre>
 
-#version Version 1.0.0 (2022-12-26)
+<p style="color: #CC0000"><strong>Note:</strong> we use certain legacy APIs for historical and compatibility reasons. While we encourage the use of our latest and more efficient <a href="https://opencitations.net/index/api/v2">V2 APIs</a>, we understand that some applications may still rely on these older endpoints. Please note that legacy APIs may not receive updates or support, and their use may be phased out in the future. We recommend transitioning to our current <a href="https://opencitations.net/index/api/v2">V2 APIs</a> for improved performance, security, and reliability.</p>
+
+
+#version Version 1.1.0 (2023-11-06)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
-#endpoint http://127.0.0.1/poci/sparql
+#endpoint http://127.0.0.1/index/sparql
 #method post
 #addon indexapi_v1
+
+#url /citation/{oci}
+#type operation
+#oci str([0-9]+-[0-9]+)
+#method get
+#postprocess citations_info(oci,citing,cited,"pmid")
+#description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI).
+
+The Open Citation Identifier is a globally unique persistent identifier for bibliographic citations, which has a simple structure: the lower-case letters "oci" followed by a colon, followed by two numbers separated by a dash. For example, `oci:1-18` is a valid OCI.
+
+It is worth mentioning that, in this REST operation, the prefix "oci:" **should not** be specified, and only the dash-separated numbers of the OCI should be provided, as shown in the example below.
+
+The fields returned by this operation are:
+
+* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *citing*: the PMID of the citing entity;
+* *cited*: the PMID of the cited entity;
+* *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
+* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
+* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
+#call /citation/0601595569-06101365054
+#output_json [
+  {
+    "oci": "oci:0619099185-061602041405",
+    "citing": "pmid:36244310",
+    "cited": "pmid:10592235",
+    "creation": "2022-12",
+    "timespan": "P21Y",
+    "journal_sc": "no",
+    "author_sc": "no"
+  }
+]
+#field_type str(oci) str(citing) str(cited)
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?oci ?citing ?cited
+WHERE {
+      VALUES ?oci {<https://w3id.org/oc/index/ci/[[oci]]>} .
+      ?oci ?p <https://w3id.org/oc/index/poci/> .
+      ?oci cito:hasCitingEntity ?citing .
+      ?oci cito:hasCitedEntity ?cited .
+}
+LIMIT 50000
+
+#url /citation-count/{pmid}
+#type operation
+#pmid str(\d{1,})
+#preprocess lower(pmid) --> pmid2omid(pmid)
+#method get
+#description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input PMID.
+
+The field returned by this operation is:
+
+* *count*: the number of incoming citations to the input bibliographic entity.
+#call /citation-count/10414674
+#field_type int(count)
+#output_json [
+  {
+    "count": "1"
+  }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?citing) as ?count)
+WHERE {
+    ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+    ?oci ?p <https://w3id.org/oc/index/poci/> .
+    ?oci cito:hasCitingEntity ?citing .
+}
+
+#url /reference-count/{pmid}
+#type operation
+#pmid str(\d{1,})
+#preprocess lower(pmid) --> pmid2omid(pmid)
+#method get
+#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input PMID.
+
+The field returned by this operation is:
+
+* *count*: the number of outgoing citations from the input bibliographic entity.
+#call /reference-count/12680890
+#field_type int(count)
+#output_json [
+  {
+    "count": "26"
+  }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(?cited) as ?count)
+WHERE {
+    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+    ?oci ?p <https://w3id.org/oc/index/poci/> .
+    ?oci cito:hasCitedEntity ?cited .
+}
+
+#url /citations/{pmid}
+#type operation
+#pmid str(\d{1,})
+#preprocess lower(pmid) --> pmid2omid(pmid)
+#postprocess citations_info(oci,citing,cited,"pmid")
+#method get
+#description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input PMID, that constitute the incoming citations of that identified bibliographic entity.
+
+The fields returned by this operation are:
+
+* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *citing*: the PMID of the citing entity;
+* *cited*: the PMID of the cited entity;
+* *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
+* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
+* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
+#call /citations/10420846
+#output_json [
+  {
+    "id": "oci:01600102060800080707-01600100040200080406",
+    "citing": "pmid:12680877",
+    "cited": "pmid:10420846",
+    "creation": "2003",
+    "timespan": "P4Y",
+    "journal_sc": "no",
+    "author_sc": "no"
+  }
+]
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?oci ?citing ?cited
+WHERE {
+      ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+      ?oci ?p <https://w3id.org/oc/index/poci/> .
+      ?oci cito:hasCitingEntity ?citing .
+      BIND(<https://w3id.org/oc/meta/br/[[pmid]]> as ?cited) .
+}
+LIMIT 50000
 
 #url /references/{pmid}
 #type operation
 #pmid str(\d{1,})
-#preprocess lower(pmid) --> encode(pmid)
-#postprocess decode_pmid(citing, cited)
+#preprocess lower(pmid) --> pmid2omid(pmid)
+#postprocess citations_info(oci,citing,cited,"pmid")
 #method get
 #description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input PMID.
 
@@ -72,220 +208,13 @@ The fields returned by this operation are:
   },
   ...
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
+#field_type str(oci) str(citing) str(cited)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
+SELECT ?oci ?citing ?cited
 WHERE {
-    BIND(<https://pubmed.ncbi.nlm.nih.gov/[[pmid]]> as ?citing_iri) .
-    GRAPH <https://w3id.org/oc/index/poci/> {
-        ?citing_iri ^cito:hasCitingEntity ?oci_iri .
-        ?oci_iri
-            cito:hasCitedEntity ?cited_iri ;
-            cito:hasCitationCreationDate ?creation .
-
-        OPTIONAL {
-          ?oci_iri cito:hasCitationTimeSpan ?timespan .
-        }
-
-        OPTIONAL {
-            ?oci_iri a cito:JournalSelfCitation .
-            BIND("yes" as ?jsc)
-        }
-
-        OPTIONAL {
-            ?oci_iri a cito:AuthorSelfCitation .
-            BIND("yes" as ?asc)
-        }
-
-        BIND(STRAFTER(str(?citing_iri), "https://pubmed.ncbi.nlm.nih.gov/") AS ?citing_pmid)
-        BIND(CONCAT("pmid:", str(?citing_pmid)) as ?citing)
-        BIND(STRAFTER(str(?cited_iri), "https://pubmed.ncbi.nlm.nih.gov/") AS ?cited_pmid)
-        BIND(CONCAT("pmid:", str(?cited_pmid)) as ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
-        BIND(CONCAT("oci:", str(?id_val)) as ?id)
-    }
+      ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[pmid]]> .
+      ?oci ?p <https://w3id.org/oc/index/poci/> .
+      ?oci cito:hasCitedEntity ?cited .
+      BIND(<https://w3id.org/oc/meta/br/[[pmid]]> as ?citing) .
 }
 LIMIT 50000
-
-#url /citations/{pmid}
-#type operation
-#pmid str(\d{1,})
-#preprocess lower(pmid) --> encode(pmid)
-#postprocess decode_pmid(citing, cited)
-#method get
-#description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input PMID, that constitute the incoming citations of that identified bibliographic entity.
-
-The fields returned by this operation are:
-
-* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
-* *citing*: the PMID of the citing entity;
-* *cited*: the PMID of the cited entity;
-* *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
-* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
-* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
-* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citations/10420846
-#output_json [
-  {
-    "id": "oci:01600102060800080707-01600100040200080406",
-    "citing": "pmid:12680877",
-    "cited": "pmid:10420846",
-    "creation": "2003",
-    "timespan": "P4Y",
-    "journal_sc": "no",
-    "author_sc": "no"
-  }
-]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
-#sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
-WHERE {
-    BIND(<https://pubmed.ncbi.nlm.nih.gov/[[pmid]]> as ?cited_iri) .
-    GRAPH <https://w3id.org/oc/index/poci/> {
-        ?cited_iri ^cito:hasCitedEntity ?oci_iri .
-        ?oci_iri
-            cito:hasCitingEntity ?citing_iri ;
-            cito:hasCitationCreationDate ?creation .
-
-        OPTIONAL {
-            ?oci_iri cito:hasCitationTimeSpan ?timespan .
-        }
-
-        OPTIONAL {
-            ?oci_iri a cito:JournalSelfCitation .
-            BIND("yes" as ?jsc)
-        }
-
-        OPTIONAL {
-            ?oci_iri a cito:AuthorSelfCitation .
-            BIND("yes" as ?asc)
-        }
-
-        BIND(STRAFTER(str(?citing_iri), "https://pubmed.ncbi.nlm.nih.gov/") AS ?citing_pmid)
-        BIND(CONCAT("pmid:", str(?citing_pmid)) as ?citing)
-        BIND(STRAFTER(str(?cited_iri), "https://pubmed.ncbi.nlm.nih.gov/") AS ?cited_pmid)
-        BIND(CONCAT("pmid:", str(?cited_pmid)) as ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
-        BIND(CONCAT("oci:", str(?id_val)) as ?id)
-    }
-}
-LIMIT 50000
-
-#url /citation/{oci}
-#type operation
-#oci str([0-9]+-[0-9]+)
-#method get
-#postprocess decode_pmid(citing, cited)
-#description This operation retrieves the citation metadata for the citation identified by the input Open Citation Identifier (OCI).
-
-The Open Citation Identifier is a globally unique persistent identifier for bibliographic citations, which has a simple structure: the lower-case letters "oci" followed by a colon, followed by two numbers separated by a dash. For example, `oci:1-18` is a valid OCI.
-
-It is worth mentioning that, in this REST operation, the prefix "oci:" **should not** be specified, and only the dash-separated numbers of the OCI should be provided, as shown in the example below.
-
-The fields returned by this operation are:
-
-* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
-* *citing*: the PMID of the citing entity;
-* *cited*: the PMID of the cited entity;
-* *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
-* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
-* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
-* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
-#call /citation/01600102060800080900-01600100040104060704
-#output_json [
-  {
-    "id": "oci:01600102060800080900-01600100040104060704",
-    "citing": "pmid:12680890",
-    "cited": "pmid:10414674",
-    "creation": "2003",
-    "timespan": "P4Y",
-    "journal_sc": "no",
-    "author_sc": "no"
-  }
-]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
-#sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?id ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
-WHERE {
-    BIND(<https://w3id.org/oc/index/poci/ci/[[oci]]> as ?oci_iri) .
-    GRAPH <https://w3id.org/oc/index/poci/> {
-        ?oci_iri
-            cito:hasCitingEntity ?citing_iri ;
-            cito:hasCitedEntity ?cited_iri ;
-            cito:hasCitationCreationDate ?creation .
-
-        OPTIONAL {
-            ?oci_iri cito:hasCitationTimeSpan ?timespan .
-        }
-
-        OPTIONAL {
-            ?oci_iri a cito:JournalSelfCitation .
-            BIND("yes" as ?jsc)
-        }
-
-        OPTIONAL {
-            ?oci_iri a cito:AuthorSelfCitation .
-            BIND("yes" as ?asc)
-        }
-
-        BIND(STRAFTER(str(?citing_iri), "https://pubmed.ncbi.nlm.nih.gov/") AS ?citing_pmid)
-        BIND(CONCAT("pmid:", str(?citing_pmid)) as ?citing)
-        BIND(STRAFTER(str(?cited_iri), "https://pubmed.ncbi.nlm.nih.gov/") AS ?cited_pmid)
-        BIND(CONCAT("pmid:", str(?cited_pmid)) as ?cited)
-        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?id_val)
-        BIND(CONCAT("oci:", str(?id_val)) as ?id)
-    }
-}
-LIMIT 50000
-
-#url /citation-count/{pmid}
-#type operation
-#pmid str(\d{1,})
-#preprocess lower(pmid) --> encode(pmid)
-#method get
-#description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input PMID.
-
-The field returned by this operation is:
-
-* *count*: the number of incoming citations to the input bibliographic entity.
-#call /citation-count/10414674
-#field_type int(count)
-#output_json [
-  {
-    "count": "1"
-  }
-]
-#sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(?c) as ?count)
-WHERE {
-    BIND(<https://pubmed.ncbi.nlm.nih.gov/[[pmid]]> as ?cited) .
-    GRAPH <https://w3id.org/oc/index/poci/> {
-		  ?cited ^cito:hasCitedEntity ?c
-    }
-}
-
-#url /reference-count/{pmid}
-#type operation
-#pmid str(\d{1,})
-#preprocess lower(pmid) --> encode(pmid)
-#method get
-#description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input PMID.
-
-The field returned by this operation is:
-
-* *count*: the number of outgoing citations from the input bibliographic entity.
-#call /reference-count/12680890
-#field_type int(count)
-#output_json [
-  {
-    "count": "26"
-  }
-]
-#sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(?c) as ?count)
-WHERE {
-    BIND(<https://pubmed.ncbi.nlm.nih.gov/[[pmid]]> as ?citing) .
-    GRAPH <https://w3id.org/oc/index/poci/> {
-		  ?citing ^cito:hasCitingEntity ?c
-    }
-}
