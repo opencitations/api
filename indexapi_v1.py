@@ -112,23 +112,68 @@ def pmid2omid(s):
     return __get_omid_of("pmid:"+s),
 
 def __get_omid_of(s):
-    api = "http://127.0.0.1/meta/api/v1/metadata/%s"
-    # api = "https://test.opencitations.net/meta/api/v1/metadata/%s"
-    try:
-        r = get(api % s,
-                headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
-        if r.status_code == 200:
-            json_res = loads(r.text)
-            if len(json_res) > 0:
-                #take the one and only result given back by META
-                body = json_res[0]
-                matches = findall(r'omid:br/[\dA-Za-z/]+', body["id"])
-                if matches:
-                    return matches[0].replace("omid:br/","")
+    sparql_endpoint = "http://localhost:3003/blazegraph/sparql"
 
-    except Exception as e:
+    # SPARQL query
+    br_pre_l = ["doi","issn","isbn","pmid","pmcid","url","wikidata","wikipedia","jid","arxiv"]
+    for br_pre in br_pre_l:
+        if s.startswith(br_pre+":"):
+            s = s.replace(br_pre+":","")
+            break
+
+    sparql_query = """
+        PREFIX datacite: <http://purl.org/spar/datacite/>
+        PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
+        SELECT ?br {
+            ?identifier literal:hasLiteralValue '"""+s+"""'.
+            ?br datacite:hasIdentifier ?identifier;}
+    """
+    headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
+    data = {"query": sparql_query}
+    omid_l = []
+    try:
+        response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
+        if response.status_code == 200:
+            r = loads(response.text)
+            results = r["results"]["bindings"]
+            if len(results) > 0:
+                for elem in results:
+                    omid_val = elem["br"]["value"].split("meta/br/")[1]
+                    omid_l.append(omid_val)
+    except:
         return ""
-    return ""
+
+    if len(omid_l) == 0:
+        return []
+    elif len(omid_l) == 1:
+        return omid_l[0]
+    else:
+        # Check the OMID which has more citations/references
+        sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
+        sparql_endpoint = "http://localhost:7001"
+        sparql_query = """
+        PREFIX cito:<http://purl.org/spar/cito/>
+        SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
+          	VALUES ?cited {"""+sparql_values+"""} .
+        	?citation cito:hasCitedEntity ?cited .
+        } GROUP BY ?cited
+        """
+        try:
+            response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
+            if response.status_code == 200:
+                r = loads(response.text)
+                results = r["results"]["bindings"]
+                max_cits = -1
+                res_omid = omid_l[0]
+                if len(results) > 0:
+                    for elem in results:
+                        cits_num = elem["citation_count"]["value"]
+                        if int(cits_num) > max_cits:
+                            res_omid = elem["cited"]["value"].split("meta/br/")[1]
+                return res_omid
+        except:
+            return omid_l[0]
+
 
 def metadata(res, *args):
     header = res[0]
