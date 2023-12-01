@@ -95,6 +95,7 @@ def __get_omid_of(s):
                         cits_num = elem["citation_count"]["value"]
                         if int(cits_num) > max_cits:
                             res_omid = elem["cited"]["value"].split("meta/br/")[1]
+                            max_cits = int(cits_num)
                 return res_omid
         except:
             return omid_l[0]
