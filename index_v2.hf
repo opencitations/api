@@ -71,7 +71,7 @@ LIMIT 50000
 #url /citation-count/{id}
 #type operation
 #id str((omid|doi|pmid):(.+))
-#preprocess lower(id) --> id2omid(id)
+#preprocess lower(id) --> id2omids(id)
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input PID (DOI, PMID, OMID)..
 
@@ -88,14 +88,15 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(?citing) as ?count)
 WHERE {
-    ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[id]]> .
+    VALUES ?val {[[id]]} .
+    ?oci cito:hasCitedEntity ?val .
     ?oci cito:hasCitingEntity ?citing .
 }
 
 #url /reference-count/{id}
 #type operation
 #id str((omid|doi|pmid):(.+))
-#preprocess lower(id) --> id2omid(id)
+#preprocess lower(id) --> id2omids(id)
 #method get
 #description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input PID (DOI, PMID, OMID).
 
@@ -112,7 +113,8 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(?cited) as ?count)
 WHERE {
-    ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[id]]> .
+    VALUES ?val {[[id]]} .
+    ?oci cito:hasCitingEntity ?val .
     ?oci cito:hasCitedEntity ?cited .
 }
 

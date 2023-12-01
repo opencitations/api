@@ -36,7 +36,12 @@ def id2omid(s):
         return s.replace("omid:br/",""),
     return __get_omid_of(s),
 
-def __get_omid_of(s):
+def id2omids(s):
+    if "omid" in s:
+        return s.replace("omid:br/",""),
+    return __get_omid_of(s, multi = True),
+
+def __get_omid_of(s, multi = False):
     sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
@@ -68,8 +73,11 @@ def __get_omid_of(s):
     except:
         return ""
 
+    if multi:
+        return " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
+
     if len(omid_l) == 0:
-        return []
+        return ""
     elif len(omid_l) == 1:
         return omid_l[0]
     else:
