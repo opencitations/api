@@ -111,7 +111,10 @@ def doi2omid(s):
 def pmid2omid(s):
     return __get_omid_of("pmid:"+s),
 
-def __get_omid_of(s):
+def doi2omids(s):
+    return __get_omid_of("doi:"+s, multi = True),
+
+def __get_omid_of(s, multi = False):
     sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
@@ -143,8 +146,11 @@ def __get_omid_of(s):
     except:
         return ""
 
+    if multi:
+        return " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
+
     if len(omid_l) == 0:
-        return []
+        return ""
     elif len(omid_l) == 1:
         return omid_l[0]
     else:
