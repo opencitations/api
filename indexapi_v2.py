@@ -70,7 +70,7 @@ def __get_omid_of(s):
 
     if len(omid_l) == 0:
         return []
-    elif len(omid_l) == 1::
+    elif len(omid_l) == 1:
         return omid_l[0]
     else:
         # Check the OMID which has more citations/references
