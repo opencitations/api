@@ -112,7 +112,7 @@ def pmid2omid(s):
     return __get_omid_of("pmid:"+s),
 
 def __get_omid_of(s):
-    sparql_endpoint = "http://localhost:3003/blazegraph/sparql"
+    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
     br_pre_l = ["doi","issn","isbn","pmid","pmcid","url","wikidata","wikipedia","jid","arxiv"]
@@ -150,7 +150,7 @@ def __get_omid_of(s):
     else:
         # Check the OMID which has more citations/references
         sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
-        sparql_endpoint = "http://localhost:7001"
+        sparql_endpoint = "http://127.0.0.1:7001"
         sparql_query = """
         PREFIX cito:<http://purl.org/spar/cito/>
         SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
@@ -490,7 +490,7 @@ def __normalise(o):
     return sub("\s+", " ", s).strip()
 
 def __br_meta_metadata(values):
-    sparql_endpoint = "http://opencitations.net/meta/sparql"
+    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
     sparql_query = """
@@ -546,7 +546,6 @@ def __br_meta_metadata(values):
 
 def __ocmeta_parser(ids, pre="doi"):
     api = "http://127.0.0.1/meta/api/v1/metadata/"
-    # api = "https://test.opencitations.net/meta/api/v1/metadata/"
 
     r = get(api + "__".join(ids), headers={"User-Agent": "INDEX REST API (via OpenCitations - http://opencitations.net; mailto:contact@opencitations.net)"}, timeout=60)
 

@@ -37,7 +37,7 @@ def id2omid(s):
     return __get_omid_of(s),
 
 def __get_omid_of(s):
-    sparql_endpoint = "http://localhost:3003/blazegraph/sparql"
+    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
     br_pre_l = ["doi","issn","isbn","pmid","pmcid","url","wikidata","wikipedia","jid","arxiv"]
@@ -75,7 +75,7 @@ def __get_omid_of(s):
     else:
         # Check the OMID which has more citations/references
         sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
-        sparql_endpoint = "http://localhost:7001"
+        sparql_endpoint = "http://127.0.0.1:7001"
         sparql_query = """
         PREFIX cito:<http://purl.org/spar/cito/>
         SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
@@ -298,7 +298,7 @@ def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
     return result
 
 def __br_meta_metadata(values):
-    sparql_endpoint = "http://opencitations.net/meta/sparql"
+    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
     sparql_query = """
