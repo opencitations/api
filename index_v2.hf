@@ -173,6 +173,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 SELECT ?oci ?citing ?cited
 WHERE {
       VALUES ?cited {[[id]]} .
+      ?oci cito:hasCitedEntity ?cited .
       ?oci cito:hasCitingEntity ?citing .
 }
 LIMIT 50000
@@ -233,6 +234,7 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 SELECT ?oci ?citing ?cited
 WHERE {
       VALUES ?citing {[[id]]} .
+      ?oci cito:hasCitingEntity ?citing .
       ?oci cito:hasCitedEntity ?cited .
 }
 LIMIT 50000
