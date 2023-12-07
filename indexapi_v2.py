@@ -189,7 +189,7 @@ def citations_info(res, *args):
             #         pre_source = "poci => "
 
             # create all possible pairs of any-id in the citation
-            cit_pairs = [(a, b) for a in citing_id.split(" ") for b in cited_id.split(" ")]
+            #cit_pairs = [(a, b) for a in citing_id.split(" ") for b in cited_id.split(" ")]
 
             if not(any(c in index_cits for c in cit_pairs)):
                 row.extend([
@@ -210,7 +210,7 @@ def citations_info(res, *args):
                 ])
 
             # update the index of all citations
-            index_cits.update( cit_pairs )
+            #index_cits.update( cit_pairs )
 
 
     return res, True
