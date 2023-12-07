@@ -191,23 +191,23 @@ def citations_info(res, *args):
             # create all possible pairs of any-id in the citation
             cit_pairs = [(a, b) for a in citing_id.split(" ") for b in cited_id.split(" ")]
 
-            if not(any(c in index_cits for c in cit_pairs)):
-                row.extend([
-                    # oci value
-                    oci_val,
-                    # citing
-                    citing_id,
-                    # cited
-                    cited_id,
-                    # creation = citing[pub_date]
-                    citing_pubdate,
-                    # timespan = citing[pub_date] - cited[pub_date]
-                    duration,
-                    # journal_sc = compare citing[source_id] and cited[source_id]
-                    journal_sc,
-                    # author_sc = compare citing[source_id] and cited[source_id]
-                    author_sc
-                ])
+            #if not(any(c in index_cits for c in cit_pairs)):
+            row.extend([
+                # oci value
+                oci_val,
+                # citing
+                citing_id,
+                # cited
+                cited_id,
+                # creation = citing[pub_date]
+                citing_pubdate,
+                # timespan = citing[pub_date] - cited[pub_date]
+                duration,
+                # journal_sc = compare citing[source_id] and cited[source_id]
+                journal_sc,
+                # author_sc = compare citing[source_id] and cited[source_id]
+                author_sc
+            ])
 
             # update the index of all citations
             index_cits.update( cit_pairs )
