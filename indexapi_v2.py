@@ -38,7 +38,7 @@ def id2omid(s):
 
 def id2omids(s):
     if "omid" in s:
-        return s.replace("omid:br/",""),
+        return s.replace("omid:br/","<https://w3id.org/oc/meta/br/") +">",
     return __get_omid_of(s, multi = True),
 
 def __get_omid_of(s, multi = False):
