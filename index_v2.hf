@@ -1,6 +1,6 @@
 #url /api/v2
 #type api
-#base https://test.opencitations.net/index
+#base https://opencitations.net/index
 #title The REST API for OpenCitations Index
 #description This document describe the REST API for accessing the data stored in the [OpenCitations Index](https://w3id.org/oc/index) hosted by [OpenCitations](http://opencitations.net). This API implements operations to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the identifier of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
@@ -86,7 +86,7 @@ The field returned by this operation is:
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(DISTINCT(?citing)) as ?count)
+SELECT (count(?citing) as ?count)
 WHERE {
     VALUES ?val {[[id]]} .
     ?oci cito:hasCitedEntity ?val .
@@ -111,7 +111,7 @@ The field returned by this operation is:
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT (count(DISTINCT(?cited)) as ?count)
+SELECT (count(?cited) as ?count)
 WHERE {
     VALUES ?val {[[id]]} .
     ?oci cito:hasCitingEntity ?val .
