@@ -121,8 +121,7 @@ WHERE {
 #url /citations/{id}
 #type operation
 #id str((omid|doi|pmid):(.+))
-#preprocess lower(id) 
-#postprocess citations_info(oci,citing,cited)
+#preprocess lower(id) --> id2omids(id)
 #method get
 #description This operation retrieves the citation data for all the references appearing in the reference lists of other citing works to the bibliographic entity identified by the input PID (DOI, PMID, OMID), that constitute the incoming citations of that identified bibliographic entity.
 
