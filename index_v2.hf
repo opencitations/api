@@ -172,16 +172,16 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?oci ?citing ?cited
 WHERE {
-      VALUES ?cited {[[id]]} .
-      ?oci cito:hasCitedEntity ?cited .
+      ?oci cito:hasCitedEntity <https://w3id.org/oc/meta/br/[[id]]> .
       ?oci cito:hasCitingEntity ?citing .
+      BIND(<https://w3id.org/oc/meta/br/[[id]]> as ?cited) .
 }
 LIMIT 50000
 
 #url /references/{id}
 #type operation
 #id str((omid|doi|pmid):(.+))
-#preprocess lower(id) --> id2omids(id)
+#preprocess lower(id) --> id2omid(id)
 #postprocess citations_info(oci,citing,cited)
 #method get
 #description This operation retrieves the citation data for all the outgoing references to other cited works appearing in the reference list of the bibliographic entity identified by the input PID (DOI, PMID, OMID)..
@@ -233,8 +233,8 @@ The values of all the fields are prefixed with `[index name] => `, so as to clea
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT ?oci ?citing ?cited
 WHERE {
-      VALUES ?citing {[[id]]} .
-      ?oci cito:hasCitingEntity ?citing .
+      ?oci cito:hasCitingEntity <https://w3id.org/oc/meta/br/[[id]]> .
       ?oci cito:hasCitedEntity ?cited .
+      BIND(<https://w3id.org/oc/meta/br/[[id]]> as ?citing) .
 }
 LIMIT 50000
