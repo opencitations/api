@@ -68,15 +68,15 @@ def __get_omid_of(s, multi = False):
             PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
             PREFIX ns1: <http://purl.org/vocab/frbr/core#>
             PREFIX fabio: <http://purl.org/spar/fabio/>
-            SELECT ?item {
+            SELECT ?br {
             	?identifier literal:hasLiteralValue '"""+s+"""' .
             	?venue datacite:hasIdentifier ?identifier .
               	# all BRs of a Journal
-              	{?item ns1:partOf ?venue .}
-              	UNION { ?item ns1:partOf/ns1:partOf ?venue . }
-              	UNION { ?item ns1:partOf/ns1:partOf/ns1:partOf ?venue . }
-              	UNION { ?item ns1:partOf/ns1:partOf/ns1:partOf/ns1:partOf ?venue .}
-              	?item a fabio:JournalArticle .
+              	{?br ns1:partOf ?venue .}
+              	UNION { ?br ns1:partOf/ns1:partOf ?venue . }
+              	UNION { ?br ns1:partOf/ns1:partOf/ns1:partOf ?venue . }
+              	UNION { ?br ns1:partOf/ns1:partOf/ns1:partOf/ns1:partOf ?venue .}
+              	?br a fabio:JournalArticle .
             }
         """
 
