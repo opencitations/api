@@ -70,7 +70,7 @@ LIMIT 50000
 
 #url /citation-count/{id}
 #type operation
-#id str((omid|doi|pmid):(.+))
+#id str((omid|doi|pmid|issn):(.+))
 #preprocess lower(id) --> id2omids(id)
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input PID (DOI, PMID, OMID)..
@@ -95,7 +95,7 @@ WHERE {
 
 #url /reference-count/{id}
 #type operation
-#id str((omid|doi|pmid):(.+))
+#id str((omid|doi|pmid|issn):(.+))
 #preprocess lower(id) --> id2omids(id)
 #method get
 #description This operation retrieves the number of outgoing citations from the bibliographic entity identified by the input PID (DOI, PMID, OMID).
