@@ -42,6 +42,7 @@ def id2omids(s):
     return __get_omid_of(s, multi = True),
 
 def __get_omid_of(s, multi = False):
+    MULTI_VAL_MAX = 1000
     sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
@@ -96,39 +97,60 @@ def __get_omid_of(s, multi = False):
         return ""
 
     if multi:
-        return " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
+        sparql_str = ""
+        unions = []
+        for i in range(0, len(omid_l), MULTI_VAL_MAX):
+            concatenated_chunk = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l[i:i + MULTI_VAL_MAX]])
+            unions.append( "{ VALUES ?val { "+concatenated_chunk+" } . ?oci cito:hasCitedEntity ?val . }")
+        sparql_str = " UNION ".join(unions)
+
+        return sparql_str
 
     if len(omid_l) == 0:
         return ""
     elif len(omid_l) == 1:
         return omid_l[0]
     else:
-        # Check the OMID which has more citations/references
-        sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
-        sparql_endpoint = "http://127.0.0.1:7001"
-        sparql_query = """
-        PREFIX cito:<http://purl.org/spar/cito/>
-        SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
-          	VALUES ?cited {"""+sparql_values+"""} .
-        	?citation cito:hasCitedEntity ?cited .
-        } GROUP BY ?cited
-        """
-        try:
-            response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
-            if response.status_code == 200:
-                r = loads(response.text)
-                results = r["results"]["bindings"]
-                max_cits = -1
-                res_omid = omid_l[0]
-                if len(results) > 0:
-                    for elem in results:
-                        cits_num = elem["citation_count"]["value"]
-                        if int(cits_num) > max_cits:
-                            res_omid = elem["cited"]["value"].split("meta/br/")[1]
-                            max_cits = int(cits_num)
+        # return the citation/reference count of all OMIDs
+        return __call_tp_for_citations(omid_l)
+
+def __call_tp_for_citations(omid_l):
+    MAX_VALUES = 9900
+
+    part_omid_l = omid_l[:MAX_VALUES]
+    rest_omid_l = omid_l[MAX_VALUES:]
+
+    # Check the OMID which has more citations/references
+    sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in part_omid_l])
+    sparql_endpoint = "http://127.0.0.1:7001"
+    sparql_query = """
+    PREFIX cito:<http://purl.org/spar/cito/>
+    SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
+        VALUES ?cited {"""+sparql_values+"""} .
+        ?citation cito:hasCitedEntity ?cited .
+    } GROUP BY ?cited
+    """
+    try:
+        response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
+        if response.status_code == 200:
+            r = loads(response.text)
+            results = r["results"]["bindings"]
+            max_cits = -1
+            res_omid = part_omid_l[0]
+            if len(results) > 0:
+                for elem in results:
+                    cits_num = elem["citation_count"]["value"]
+                    if int(cits_num) > max_cits:
+                        res_omid = elem["cited"]["value"].split("meta/br/")[1]
+                        max_cits = int(cits_num)
+
+            if len(rest_omid_l) == 0:
                 return res_omid
-        except:
-            return omid_l[0]
+            else:
+                return res_omid + __call_tp_for_citations(rest_omid_l)
+    except:
+        return omid_l[0]
+
 
 # args must contain the [[citing]] and [[cited]]
 def citations_info(res, *args):

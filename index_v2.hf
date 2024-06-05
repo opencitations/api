@@ -70,7 +70,7 @@ LIMIT 50000
 
 #url /citation-count/{id}
 #type operation
-#id str((omid|doi|pmid|issn):(.+))
+#id str((omid|doi|pmid):(.+))
 #preprocess lower(id) --> id2omids(id)
 #method get
 #description This operation retrieves the number of incoming citations to the bibliographic entity identified by the input PID (DOI, PMID, OMID)..
@@ -90,6 +90,30 @@ SELECT (count(DISTINCT(?citing)) as ?count)
 WHERE {
     VALUES ?val {[[id]]} .
     ?oci cito:hasCitedEntity ?val .
+    ?oci cito:hasCitingEntity ?citing .
+}
+
+#url /venue-citation-count/{id}
+#type operation
+#id str((issn):(.+))
+#preprocess lower(id) --> id2omids(id)
+#method get
+#description This operation retrieves the number of incoming citations to all the bibliographic entities published into aspecific journal identified by the input ISSN.
+
+The field returned by this operation is:
+
+* *count*: the number of incoming citations to the input bibliographic entity.
+#call /venue-citation-count/issn:0028-0836
+#field_type int(count)
+#output_json [
+    {
+        "count": "90300"
+    }
+]
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT (count(DISTINCT(?citing)) as ?count)
+WHERE {
+    [[id]]
     ?oci cito:hasCitingEntity ?citing .
 }
 
