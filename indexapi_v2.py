@@ -42,7 +42,7 @@ def id2omids(s):
     return __get_omid_of(s, multi = True),
 
 def __get_omid_of(s, multi = False):
-    MULTI_VAL_MAX = 1000
+    MULTI_VAL_MAX = 3000
     sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
 
     # SPARQL query
