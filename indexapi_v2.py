@@ -97,14 +97,16 @@ def __get_omid_of(s, multi = False):
         return ""
 
     if multi:
-        sparql_str = ""
-        unions = []
-        for i in range(0, len(omid_l), MULTI_VAL_MAX):
-            concatenated_chunk = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l[i:i + MULTI_VAL_MAX]])
-            unions.append( "{ VALUES ?val { "+concatenated_chunk+" } . ?oci cito:hasCitedEntity ?val . }")
-        sparql_str = " UNION ".join(unions)
+        sparql_values = []
 
-        return sparql_str
+        for i in range(0, len(omid_l), MULTI_VAL_MAX):
+            sparql_values.append( " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l[i:i + MULTI_VAL_MAX]]) )
+
+        # TEST: giving a list back
+        #sparql_values.append(sparql_values[-1])
+        #sparql_values.append(sparql_values[-1])
+
+        return sparql_values
 
     if len(omid_l) == 0:
         return ""

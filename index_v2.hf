@@ -113,7 +113,8 @@ The field returned by this operation is:
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(DISTINCT(?citing)) as ?count)
 WHERE {
-    [[id]]
+    VALUES ?val {[[id]]} .
+    ?oci cito:hasCitedEntity ?val .
     ?oci cito:hasCitingEntity ?citing .
 }
 
