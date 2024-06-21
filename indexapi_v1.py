@@ -115,7 +115,7 @@ def doi2omids(s):
     return __get_omid_of("doi:"+s, multi = True),
 
 def __get_omid_of(s, multi = False):
-    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
+    sparql_endpoint = "http://127.0.0.1/meta/sparql"
 
     # SPARQL query
     br_pre_l = ["doi","issn","isbn","pmid","pmcid","url","wikidata","wikipedia","jid","arxiv"]
@@ -497,7 +497,7 @@ def __normalise(o):
     return sub("\s+", " ", s).strip()
 
 def __br_meta_metadata(values):
-    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
+    sparql_endpoint = "http://127.0.0.1/meta/sparql"
 
     # SPARQL query
     sparql_query = """
