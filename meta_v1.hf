@@ -544,7 +544,7 @@ WHERE {
               SELECT DISTINCT ?res
               WHERE {
                 [[id]]
-                ?knownRole pro:withRole pro:author.
+                ?knownRole pro:withRole pro:editor.
                 ?res pro:isDocumentContextFor ?knownRole;
                       a fabio:Expression.
               } LIMIT 1000
