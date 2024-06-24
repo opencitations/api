@@ -12,7 +12,7 @@
 
 #url /metadata/{ids}
 #type operation
-#ids str((doi|issn|isbn|omid|pmid):.+?(__(doi|issn|isbn|omid|pmid):.+?)*$)
+#ids str((doi|issn|isbn|omid|openalex|pmid|pmcid):.+?(__(doi|issn|isbn|omid|openalex|pmid|pmcid):.+?)*$)
 #preprocess generate_id_search(ids)
 #postprocess create_metadata_output()
 #method get
@@ -81,12 +81,7 @@ WHERE {
         (COUNT(?arEditorNext) AS ?totEditor)
         (COUNT(?arEditorNext) AS ?totPublisher)
         WHERE {
-            {
-                SELECT DISTINCT ?res
-                WHERE {
-                  [[ids]]
-                } LIMIT 1000
-            }
+            [[ids]]
             OPTIONAL {
                 ?res datacite:hasIdentifier ?identifier.
                 ?identifier datacite:usesIdentifierScheme ?scheme;

@@ -62,24 +62,46 @@ URI_TYPE_DICT = {
     'http://purl.org/spar/fabio/WebContent': 'web content'}
 
 
-def generate_id_search(ids:str) -> Tuple[str]:
+def generate_id_search(ids: str) -> Tuple[str]:
     id_searches = list()
     for identifier in ids.split('__'):
         scheme_literal_value = identifier.split(':', maxsplit=1)
         scheme = scheme_literal_value[0].lower()
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
+
+def generate_id_search(ids: str) -> Tuple[str]:
+    id_searches = list()
+    omid_values = []
+    other_values = []
+
+    for identifier in ids.split('__'):
+        scheme_literal_value = identifier.split(':', maxsplit=1)
+        scheme = scheme_literal_value[0].lower()
+        literal_value = quote(scheme_literal_value[1])
+        literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'omid':
-            id_searches.append('''{{?res a fabio:Expression. FILTER(str(?res) = "https://w3id.org/oc/meta/{0}")}}'''.format(literal_value))
-        elif scheme in {'doi', 'issn', 'isbn', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
-            id_searches.append('''
+            omid_values.append(f"{{ BIND(<https://w3id.org/oc/meta/{literal_value}> AS ?res) }}")
+        elif scheme in {'doi', 'issn', 'isbn', 'openalex', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
+            other_values.append(f'''
                 {{
-                    ?identifier literal:hasLiteralValue "{0}";
-                                datacite:usesIdentifierScheme datacite:{1};
+                    ?identifier literal:hasLiteralValue "{literal_value}";
+                                datacite:usesIdentifierScheme datacite:{scheme};
                                 ^datacite:hasIdentifier ?res.
                     ?res a fabio:Expression.
-                }}'''.format(literal_value, scheme))
-    ids_search = 'UNION'.join(id_searches)
+                }}
+            ''')
+
+    if omid_values:
+        id_searches.append(f'''
+            ?res a fabio:Expression.
+            {" UNION ".join(omid_values)}
+        ''')
+
+    if other_values:
+        id_searches.append(" UNION ".join(other_values))
+
+    ids_search = " UNION ".join(id_searches)
     return ids_search,
 
 def generate_ra_search(identifier:str) -> Tuple[str]:
