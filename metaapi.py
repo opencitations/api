@@ -65,18 +65,20 @@ URI_TYPE_DICT = {
 def generate_id_search(ids:str) -> Tuple[str]:
     id_searches = list()
     for identifier in ids.split('__'):
-        scheme_literal_value = identifier.split(':')
+        scheme_literal_value = identifier.split(':', maxsplit=1)
         scheme = scheme_literal_value[0].lower()
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'omid':
-            id_searches.append('''{{?res a fabio:Expression. BIND(<https://w3id.org/oc/meta/{0}> AS ?res)}}'''.format(literal_value))
+            id_searches.append('''{{?res a fabio:Expression. FILTER(str(?res) = "https://w3id.org/oc/meta/{0}")}}'''.format(literal_value))
         elif scheme in {'doi', 'issn', 'isbn', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
             id_searches.append('''
-                {{?res a fabio:Expression;
-                      datacite:hasIdentifier ?identifier.
-                ?identifier literal:hasLiteralValue ?literalValue.
-                FILTER(bif:contains(?literalValue, "'{0}'"))}}'''.format(literal_value))
+                {{
+                    ?identifier literal:hasLiteralValue "{0}";
+                                datacite:usesIdentifierScheme datacite:{1};
+                                ^datacite:hasIdentifier ?res.
+                    ?res a fabio:Expression.
+                }}'''.format(literal_value, scheme))
     ids_search = 'UNION'.join(id_searches)
     return ids_search,
 
@@ -92,11 +94,10 @@ def generate_ra_search(identifier:str) -> Tuple[str]:
         return '<https://w3id.org/oc/meta/{0}> ^pro:isHeldBy ?knownRole.'.format(literal_value),
     else:
         return '''
-            ?knownPersonIdentifier literal:hasLiteralValue ?literalValue.
-            FILTER(bif:contains(?literalValue, "'{0}'"))
-            ?knownPersonIdentifier datacite:usesIdentifierScheme datacite:{1}.
-            ?knownPerson datacite:hasIdentifier ?knownPersonIdentifier;
-                        ^pro:isHeldBy ?knownRole.
+            ?knownPersonIdentifier literal:hasLiteralValue "{0}";
+                                datacite:usesIdentifierScheme datacite:{1};
+                                ^datacite:hasIdentifier ?knownPerson.
+            ?knownPerson ^pro:isHeldBy ?knownRole.
         '''.format(literal_value, scheme),
 
 def create_metadata_output(results):
