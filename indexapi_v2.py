@@ -154,12 +154,30 @@ def __call_tp_for_citations(omid_l):
     except:
         return omid_l[0]
 
+# args must contain the <count>
+def sum_all(res, *args):
 
-# args must contain the [[citing]] and [[cited]]
+    header = res[0]
+    try:
+        count_idx = header.index(args[0])
+
+        tot_count = 0
+        for idx, row in enumerate(res[1:]):
+            tot_count += int(row[count_idx][1])
+
+        # delete the item + citing + cited columns
+        res = [header,[str(tot_count)]]
+        return res, True
+        
+    except:
+        return [], True
+
+
+# args must contain the <citing> and <cited>
 def citations_info(res, *args):
 
     header = res[0]
-    oci_idx = header.index(args[0]);
+    oci_idx = header.index(args[0])
     citing_idx = header.index(args[1])
     cited_idx = header.index(args[2])
     # ids managed – ordered by relevance
