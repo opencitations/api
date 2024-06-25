@@ -103,11 +103,11 @@ WHERE {
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /venue-citation-count/issn:0028-0836
+#call /venue-citation-count/issn:0138-9130
 #field_type int(count)
 #output_json [
     {
-        "count": "90300"
+        "count": "64352"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
