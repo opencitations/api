@@ -59,7 +59,8 @@ def __get_omid_of(s, multi = False):
         PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
         SELECT ?br {
             ?identifier literal:hasLiteralValue '"""+s+"""'.
-            ?br datacite:hasIdentifier ?identifier;}
+            ?br datacite:hasIdentifier ?identifier
+        }
     """
 
     # in case is a journal the SAPRQL query retrieves all associated BRs
