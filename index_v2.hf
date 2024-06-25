@@ -97,6 +97,7 @@ WHERE {
 #type operation
 #id str((issn):(.+))
 #preprocess lower(id) --> id2omids(id)
+#postprocess sum_all(count)
 #method get
 #description This operation retrieves the number of incoming citations to all the bibliographic entities published into aspecific journal identified by the input ISSN.
 
