@@ -125,7 +125,7 @@ def __call_tp_for_citations(omid_l):
 
     # Check the OMID which has more citations/references
     sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in part_omid_l])
-    sparql_endpoint = "http://127.0.0.1:7001"
+    sparql_endpoint = "http://127.0.0.1/index/sparql"
     sparql_query = """
     PREFIX cito:<http://purl.org/spar/cito/>
     SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
@@ -168,7 +168,7 @@ def sum_all(res, *args):
         # delete the item + citing + cited columns
         res = [header,[str(tot_count)]]
         return res, True
-        
+
     except:
         return [], True
 
