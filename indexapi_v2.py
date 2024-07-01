@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2023, Silvio Peroni <essepuntato@gmail.com>
+# Copyright (c) 2023, Silvio Peroni <essepuntato@gmail.com>, Ivan Heibi <ivan.heibi2@unibo.it>
 #
 # Permission to use, copy, modify, and/or distribute this software for any purpose
 # with or without fee is hereby granted, provided that the above copyright notice
@@ -42,12 +42,15 @@ def id2omids(s):
     return __get_omid_of(s, multi = True),
 
 def __get_omid_of(s, multi = False):
-    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
+    MULTI_VAL_MAX = 9000
+    sparql_endpoint = "http://127.0.0.1/meta/sparql"
 
     # SPARQL query
+    is_journal = False
     br_pre_l = ["doi","issn","isbn","pmid","pmcid","url","wikidata","wikipedia","jid","arxiv"]
     for br_pre in br_pre_l:
         if s.startswith(br_pre+":"):
+            is_journal = br_pre in ["issn"]
             s = s.replace(br_pre+":","")
             break
 
@@ -56,8 +59,29 @@ def __get_omid_of(s, multi = False):
         PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
         SELECT ?br {
             ?identifier literal:hasLiteralValue '"""+s+"""'.
-            ?br datacite:hasIdentifier ?identifier;}
+            ?br datacite:hasIdentifier ?identifier
+        }
     """
+
+    # in case is a journal the SAPRQL query retrieves all associated BRs
+    if is_journal:
+        sparql_query = """
+            PREFIX datacite: <http://purl.org/spar/datacite/>
+            PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
+            PREFIX ns1: <http://purl.org/vocab/frbr/core#>
+            PREFIX fabio: <http://purl.org/spar/fabio/>
+            SELECT ?br {
+            	?identifier literal:hasLiteralValue '"""+s+"""' .
+            	?venue datacite:hasIdentifier ?identifier .
+              	# all BRs of a Journal
+              	{?br ns1:partOf ?venue .}
+              	UNION { ?br ns1:partOf/ns1:partOf ?venue . }
+              	UNION { ?br ns1:partOf/ns1:partOf/ns1:partOf ?venue . }
+              	UNION { ?br ns1:partOf/ns1:partOf/ns1:partOf/ns1:partOf ?venue .}
+              	?br a fabio:JournalArticle .
+            }
+        """
+
     headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
     data = {"query": sparql_query}
     omid_l = []
@@ -74,45 +98,86 @@ def __get_omid_of(s, multi = False):
         return ""
 
     if multi:
-        return " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
+        sparql_values = []
+
+        for i in range(0, len(omid_l), MULTI_VAL_MAX):
+            sparql_values.append( " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l[i:i + MULTI_VAL_MAX]]) )
+
+        # TEST: giving a list back
+        #sparql_values.append(sparql_values[-1])
+        #sparql_values.append(sparql_values[-1])
+
+        return sparql_values
 
     if len(omid_l) == 0:
         return ""
     elif len(omid_l) == 1:
         return omid_l[0]
     else:
-        # Check the OMID which has more citations/references
-        sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l])
-        sparql_endpoint = "http://127.0.0.1:7001"
-        sparql_query = """
-        PREFIX cito:<http://purl.org/spar/cito/>
-        SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
-          	VALUES ?cited {"""+sparql_values+"""} .
-        	?citation cito:hasCitedEntity ?cited .
-        } GROUP BY ?cited
-        """
-        try:
-            response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
-            if response.status_code == 200:
-                r = loads(response.text)
-                results = r["results"]["bindings"]
-                max_cits = -1
-                res_omid = omid_l[0]
-                if len(results) > 0:
-                    for elem in results:
-                        cits_num = elem["citation_count"]["value"]
-                        if int(cits_num) > max_cits:
-                            res_omid = elem["cited"]["value"].split("meta/br/")[1]
-                            max_cits = int(cits_num)
-                return res_omid
-        except:
-            return omid_l[0]
+        # return the citation/reference count of all OMIDs
+        return __call_tp_for_citations(omid_l)
 
-# args must contain the [[citing]] and [[cited]]
+def __call_tp_for_citations(omid_l):
+    MAX_VALUES = 9900
+
+    part_omid_l = omid_l[:MAX_VALUES]
+    rest_omid_l = omid_l[MAX_VALUES:]
+
+    # Check the OMID which has more citations/references
+    sparql_values = " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in part_omid_l])
+    sparql_endpoint = "http://127.0.0.1/index/sparql"
+    sparql_query = """
+    PREFIX cito:<http://purl.org/spar/cito/>
+    SELECT ?cited (COUNT(?citation) as ?citation_count) WHERE {
+        VALUES ?cited {"""+sparql_values+"""} .
+        ?citation cito:hasCitedEntity ?cited .
+    } GROUP BY ?cited
+    """
+    try:
+        response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
+        if response.status_code == 200:
+            r = loads(response.text)
+            results = r["results"]["bindings"]
+            max_cits = -1
+            res_omid = part_omid_l[0]
+            if len(results) > 0:
+                for elem in results:
+                    cits_num = elem["citation_count"]["value"]
+                    if int(cits_num) > max_cits:
+                        res_omid = elem["cited"]["value"].split("meta/br/")[1]
+                        max_cits = int(cits_num)
+
+            if len(rest_omid_l) == 0:
+                return res_omid
+            else:
+                return res_omid + __call_tp_for_citations(rest_omid_l)
+    except:
+        return omid_l[0]
+
+# args must contain the <count>
+def sum_all(res, *args):
+
+    header = res[0]
+    try:
+        count_idx = header.index(args[0])
+
+        tot_count = 0
+        for idx, row in enumerate(res[1:]):
+            tot_count += int(row[count_idx][1])
+
+        # delete the item + citing + cited columns
+        res = [header,[str(tot_count)]]
+        return res, True
+
+    except:
+        return [], True
+
+
+# args must contain the <citing> and <cited>
 def citations_info(res, *args):
 
     header = res[0]
-    oci_idx = header.index(args[0]);
+    oci_idx = header.index(args[0])
     citing_idx = header.index(args[1])
     cited_idx = header.index(args[2])
     # ids managed – ordered by relevance
@@ -307,7 +372,7 @@ def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
     return result
 
 def __br_meta_metadata(values):
-    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
+    sparql_endpoint = "http://127.0.0.1/meta/sparql"
 
     # SPARQL query
     sparql_query = """

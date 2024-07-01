@@ -115,7 +115,7 @@ def doi2omids(s):
     return __get_omid_of("doi:"+s, multi = True),
 
 def __get_omid_of(s, multi = False):
-    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
+    sparql_endpoint = "http://127.0.0.1/meta/sparql"
 
     # SPARQL query
     br_pre_l = ["doi","issn","isbn","pmid","pmcid","url","wikidata","wikipedia","jid","arxiv"]
@@ -129,7 +129,8 @@ def __get_omid_of(s, multi = False):
         PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
         SELECT ?br {
             ?identifier literal:hasLiteralValue '"""+s+"""'.
-            ?br datacite:hasIdentifier ?identifier;}
+            ?br datacite:hasIdentifier ?identifier
+        }
     """
     headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
     data = {"query": sparql_query}
@@ -497,7 +498,7 @@ def __normalise(o):
     return sub("\s+", " ", s).strip()
 
 def __br_meta_metadata(values):
-    sparql_endpoint = "http://127.0.0.1:3003/blazegraph/sparql"
+    sparql_endpoint = "http://127.0.0.1/meta/sparql"
 
     # SPARQL query
     sparql_query = """
