@@ -43,7 +43,7 @@ def id2omids(s):
 
 def __get_omid_of(s, multi = False):
     MULTI_VAL_MAX = 9000
-    sparql_endpoint = "http://127.0.0.1/meta/sparql"
+    sparql_endpoint = "https://test.opencitations.net/meta/sparql"
 
     # SPARQL query
     is_journal = False
@@ -373,7 +373,7 @@ def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
     return result
 
 def __br_meta_metadata(values):
-    sparql_endpoint = "http://127.0.0.1/meta/sparql"
+    sparql_endpoint = "https://test.opencitations.net/meta/sparql"
 
     # SPARQL query
     sparql_query = """

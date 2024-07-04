@@ -62,13 +62,13 @@ URI_TYPE_DICT = {
     'http://purl.org/spar/fabio/WebContent': 'web content'}
 
 
-def generate_id_search(ids: str) -> Tuple[str]:
-    id_searches = list()
-    for identifier in ids.split('__'):
-        scheme_literal_value = identifier.split(':', maxsplit=1)
-        scheme = scheme_literal_value[0].lower()
-        literal_value = quote(scheme_literal_value[1])
-        literal_value = literal_value.lower() if scheme == 'doi' else literal_value
+# def generate_id_search(ids: str) -> Tuple[str]:
+#     id_searches = list()
+#     for identifier in ids.split('__'):
+#         scheme_literal_value = identifier.split(':', maxsplit=1)
+#         scheme = scheme_literal_value[0].lower()
+#         literal_value = quote(scheme_literal_value[1])
+#         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
 
 def generate_id_search(ids: str) -> Tuple[str]:
     id_searches = list()
@@ -86,8 +86,8 @@ def generate_id_search(ids: str) -> Tuple[str]:
         elif scheme in {'doi', 'issn', 'isbn', 'openalex', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
             other_values.append('''
                 {{
-                    ?identifier literal:hasLiteralValue '''+literal_value+''';
-                                datacite:usesIdentifierScheme datacite:{scheme};
+                    ?identifier literal:hasLiteralValue "'''+literal_value+'''";
+                                datacite:usesIdentifierScheme datacite:'''+scheme+''';
                                 ^datacite:hasIdentifier ?res.
                     ?res a fabio:Expression.
                 }}
