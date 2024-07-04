@@ -84,9 +84,9 @@ def generate_id_search(ids: str) -> Tuple[str]:
             #omid_values.append(f"{{ BIND(<https://w3id.org/oc/meta/{literal_value}> AS ?res) }}")
             omid_values.append("{{ BIND(<https://w3id.org/oc/meta/"+literal_value+"> AS ?res) }}")
         elif scheme in {'doi', 'issn', 'isbn', 'openalex', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
-            other_values.append(f'''
+            other_values.append('''
                 {{
-                    ?identifier literal:hasLiteralValue "{literal_value}";
+                    ?identifier literal:hasLiteralValue '''+literal_value+''';
                                 datacite:usesIdentifierScheme datacite:{scheme};
                                 ^datacite:hasIdentifier ?res.
                     ?res a fabio:Expression.
@@ -94,10 +94,7 @@ def generate_id_search(ids: str) -> Tuple[str]:
             ''')
 
     if omid_values:
-        id_searches.append(f'''
-            ?res a fabio:Expression.
-            {" UNION ".join(omid_values)}
-        ''')
+        id_searches.append('''?res a fabio:Expression.'''+" UNION ".join(omid_values)}        )
 
     if other_values:
         id_searches.append(" UNION ".join(other_values))
