@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2023, Silvio Peroni <essepuntato@gmail.com>, Ivan Heibi <ivan.heibi2@unibo.it>
+# Copyright (c) 2023, Silvio Peroni <essepuntato@gmail.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any purpose
 # with or without fee is hereby granted, provided that the above copyright notice
@@ -134,6 +134,7 @@ def __call_tp_for_citations(omid_l):
     } GROUP BY ?cited
     """
     try:
+        headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
         response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
         if response.status_code == 200:
             r = loads(response.text)
