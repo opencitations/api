@@ -30,8 +30,8 @@ URI_TYPE_DICT = {
     'http://purl.org/spar/fabio/AudioDocument': 'audio document',
     'http://purl.org/spar/fabio/Book': 'book',
     'http://purl.org/spar/fabio/BookChapter': 'book chapter',
-    'http://purl.org/spar/fabio/ExpressionCollection': 'book section', 
-    'http://purl.org/spar/fabio/BookSeries': 'book series', 
+    'http://purl.org/spar/fabio/ExpressionCollection': 'book section',
+    'http://purl.org/spar/fabio/BookSeries': 'book series',
     'http://purl.org/spar/fabio/BookSet': 'book set',
     'http://purl.org/spar/fabio/ComputerProgram': 'computer program',
     'http://purl.org/spar/doco/Part': 'book part',
@@ -40,25 +40,25 @@ URI_TYPE_DICT = {
     'http://purl.org/spar/fabio/DataManagementPlan': 'data management plan',
     'http://purl.org/spar/fabio/Thesis': 'dissertation',
     'http://purl.org/spar/fabio/Editorial': 'editorial',
-    'http://purl.org/spar/fabio/Journal': 'journal', 
+    'http://purl.org/spar/fabio/Journal': 'journal',
     'http://purl.org/spar/fabio/JournalArticle': 'journal article',
     'http://purl.org/spar/fabio/JournalEditorial': 'journal editorial',
-    'http://purl.org/spar/fabio/JournalIssue': 'journal issue', 
+    'http://purl.org/spar/fabio/JournalIssue': 'journal issue',
     'http://purl.org/spar/fabio/JournalVolume': 'journal volume',
     'http://purl.org/spar/fabio/Newspaper': 'newspaper',
     'http://purl.org/spar/fabio/NewspaperArticle': 'newspaper article',
     'http://purl.org/spar/fabio/NewspaperIssue': 'newspaper issue',
-    'http://purl.org/spar/fr/ReviewVersion': 'peer review', 
+    'http://purl.org/spar/fr/ReviewVersion': 'peer review',
     'http://purl.org/spar/fabio/AcademicProceedings': 'proceedings',
     'http://purl.org/spar/fabio/Preprint': 'preprint',
     'http://purl.org/spar/fabio/Presentation': 'presentation',
-    'http://purl.org/spar/fabio/ProceedingsPaper': 'proceedings article', 
-    'http://purl.org/spar/fabio/ReferenceBook': 'reference book', 
-    'http://purl.org/spar/fabio/ReferenceEntry': 'reference entry', 
-    'http://purl.org/spar/fabio/ReportDocument': 'report', 
+    'http://purl.org/spar/fabio/ProceedingsPaper': 'proceedings article',
+    'http://purl.org/spar/fabio/ReferenceBook': 'reference book',
+    'http://purl.org/spar/fabio/ReferenceEntry': 'reference entry',
+    'http://purl.org/spar/fabio/ReportDocument': 'report',
     'http://purl.org/spar/fabio/RetractionNotice': 'retraction notice',
-    'http://purl.org/spar/fabio/Series': 'series', 
-    'http://purl.org/spar/fabio/SpecificationDocument': 'standard', 
+    'http://purl.org/spar/fabio/Series': 'series',
+    'http://purl.org/spar/fabio/SpecificationDocument': 'standard',
     'http://purl.org/spar/fabio/WebContent': 'web content'}
 
 
@@ -81,7 +81,8 @@ def generate_id_search(ids: str) -> Tuple[str]:
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'omid':
-            omid_values.append(f"{{ BIND(<https://w3id.org/oc/meta/{literal_value}> AS ?res) }}")
+            #omid_values.append(f"{{ BIND(<https://w3id.org/oc/meta/{literal_value}> AS ?res) }}")
+            omid_values.append("{{ BIND(<https://w3id.org/oc/meta/"+literal_value+"> AS ?res) }}")
         elif scheme in {'doi', 'issn', 'isbn', 'openalex', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
             other_values.append(f'''
                 {{
