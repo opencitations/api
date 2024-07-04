@@ -134,6 +134,7 @@ def __call_tp_for_citations(omid_l):
     } GROUP BY ?cited
     """
     try:
+        headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
         response = post(sparql_endpoint, headers=headers, data=sparql_query, timeout=45)
         if response.status_code == 200:
             r = loads(response.text)
