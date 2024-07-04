@@ -94,7 +94,7 @@ def generate_id_search(ids: str) -> Tuple[str]:
             ''')
 
     if omid_values:
-        id_searches.append('''?res a fabio:Expression.'''+" UNION ".join(omid_values)}        )
+        id_searches.append("?res a fabio:Expression."+" UNION ".join(omid_values))
 
     if other_values:
         id_searches.append(" UNION ".join(other_values))
