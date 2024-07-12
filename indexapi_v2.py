@@ -23,7 +23,7 @@ from json import loads
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
-
+from collections import defaultdict
 
 def lower(s):
     return s.lower(),
@@ -101,6 +101,7 @@ def __get_omid_of(s, multi = False):
         if len(omid_l) == 0:
             return ""
         else:
+            sparql_values = []
             for i in range(0, len(omid_l), MULTI_VAL_MAX):
                 sparql_values.append( " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l[i:i + MULTI_VAL_MAX]]) )
             return sparql_values
@@ -168,6 +169,35 @@ def sum_all(res, *args):
 
     except:
         return [], True
+
+
+def count_unique_brs(res, *args):
+    header = res[0]
+    idx_omid_br_uri = header.index(args[0])
+
+    count_brs = 0
+    if len(res) > 1:
+        l_brs = []
+        for idx, row in enumerate(res[1:]):
+            l_brs.append(row[idx_omid_br_uri][1])
+        l_brs = ["<"+_c+">" for _c in l_brs]
+        l_brs_anyids = __get_ids_from_meta(l_brs)
+
+        unique_brs_anyid = []
+        for s in l_brs_anyids:
+            # check the unique br anyids
+            _c_intersection = 0
+            for __unique in unique_brs_anyid:
+                _c_intersection += len(__unique.intersection(s))
+            # if there is no common anyids with the other br entities
+            if _c_intersection == 0:
+                unique_brs_anyid.append(s)
+
+        count_brs = len(unique_brs_anyid)
+
+    res = [["count"],[count_brs]]
+    return res, True
+
 
 
 # args must contain the <citing> and <cited>
@@ -367,6 +397,39 @@ def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
         result += "%sD" % abs(delta.days)
 
     return result
+
+def __get_ids_from_meta(values):
+    sparql_endpoint = "https://test.opencitations.net/meta/sparql"
+    sparql_query = """
+    PREFIX datacite: <http://purl.org/spar/datacite/>
+    PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
+    SELECT ?br_omid ?identifier_val ?scheme {
+      	VALUES ?br_omid { """+" ".join(values)+""" }
+      	?br_omid datacite:hasIdentifier ?identifier .
+        ?identifier literal:hasLiteralValue ?identifier_val .
+      	?identifier datacite:usesIdentifierScheme ?scheme .
+    }
+    """
+    headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
+    data = {"query": sparql_query}
+
+    try:
+        response = post(sparql_endpoint, headers=headers, data=sparql_query)
+        res = defaultdict(set)
+        if response.status_code == 200:
+            r = loads(response.text)
+            results = r["results"]["bindings"]
+
+            if len(results) > 0:
+                for elem in results:
+                    omid_br = elem["br_omid"]["value"]
+                    anyid_pref = elem["scheme"]["value"].split("datacite/")[1]
+                    anyid_val = elem["identifier_val"]["value"]
+                    res[omid_br].add(anyid_pref+":"+anyid_val)
+                return res.values()
+        return []
+    except:
+        return []
 
 def __br_meta_metadata(values):
     sparql_endpoint = "http://127.0.0.1/meta/sparql"
