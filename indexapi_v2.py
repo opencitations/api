@@ -101,6 +101,7 @@ def __get_omid_of(s, multi = False):
         if len(omid_l) == 0:
             return ""
         else:
+            sparql_values = []
             for i in range(0, len(omid_l), MULTI_VAL_MAX):
                 sparql_values.append( " ".join(["<https://w3id.org/oc/meta/br/"+e+">" for e in omid_l[i:i + MULTI_VAL_MAX]]) )
             return sparql_values
