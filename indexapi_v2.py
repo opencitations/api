@@ -73,7 +73,6 @@ def __get_omid_of(s, multi = False):
             SELECT ?br {
             	?identifier literal:hasLiteralValue '"""+s+"""' .
             	?venue datacite:hasIdentifier ?identifier .
-              	# all BRs of a Journal
               	{?br ns1:partOf ?venue .}
               	UNION { ?br ns1:partOf/ns1:partOf ?venue . }
               	UNION { ?br ns1:partOf/ns1:partOf/ns1:partOf ?venue . }

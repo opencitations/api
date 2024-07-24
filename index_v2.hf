@@ -98,23 +98,25 @@ WHERE {
 #type operation
 #id str((issn):(.+))
 #preprocess lower(id) --> id2omids(id)
+#postprocess sum_all(count)
 #method get
 #description This operation retrieves the number of incoming citations to all the bibliographic entities published into aspecific journal identified by the input ISSN.
 
 The field returned by this operation is:
 
 * *count*: the number of incoming citations to the input bibliographic entity.
-#call /venue-citation-count/issn:0028-0836
+#call /venue-citation-count/issn:0138-9130
 #field_type int(count)
 #output_json [
     {
-        "count": "90300"
+        "count": "64352"
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
 SELECT (count(DISTINCT(?citing)) as ?count)
 WHERE {
-    [[id]]
+    VALUES ?val {[[id]]} .
+    ?oci cito:hasCitedEntity ?val .
     ?oci cito:hasCitingEntity ?citing .
 }
 
