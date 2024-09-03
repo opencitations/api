@@ -398,13 +398,18 @@ def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
 
     return result
 
-def __get_ids_from_meta(values):
+def __get_ids_from_meta(values, final_res = dict()):
+    MAX_VALUES = 3000
+
+    values_part = values[:MAX_VALUES]
+    values_rest = values[MAX_VALUES:]
+
     sparql_endpoint = "https://test.opencitations.net/meta/sparql"
     sparql_query = """
     PREFIX datacite: <http://purl.org/spar/datacite/>
     PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
     SELECT ?br_omid ?identifier_val ?scheme {
-      	VALUES ?br_omid { """+" ".join(values)+""" }
+      	VALUES ?br_omid { """+" ".join(values_part)+""" }
       	?br_omid datacite:hasIdentifier ?identifier .
         ?identifier literal:hasLiteralValue ?identifier_val .
       	?identifier datacite:usesIdentifierScheme ?scheme .
@@ -413,9 +418,9 @@ def __get_ids_from_meta(values):
     headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
     data = {"query": sparql_query}
 
+    res = defaultdict(set)
     try:
         response = post(sparql_endpoint, headers=headers, data=sparql_query)
-        res = defaultdict(set)
         if response.status_code == 200:
             r = loads(response.text)
             results = r["results"]["bindings"]
@@ -426,10 +431,16 @@ def __get_ids_from_meta(values):
                     anyid_pref = elem["scheme"]["value"].split("datacite/")[1]
                     anyid_val = elem["identifier_val"]["value"]
                     res[omid_br].add(anyid_pref+":"+anyid_val)
-                return res.values()
-        return []
     except:
-        return []
+        pass
+
+    for k in res:
+      final_res[k] = res[k]
+    if len(values_rest) > 0:
+      return __get_ids_from_meta(values_rest, final_res)
+    else:
+      return final_res.values()
+
 
 def __br_meta_metadata(values):
     sparql_endpoint = "http://127.0.0.1/meta/sparql"
