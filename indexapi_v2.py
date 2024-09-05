@@ -182,9 +182,9 @@ def count_unique_brs(res, *args):
             l_brs.append(row[idx_omid_br_uri][1])
         l_brs = ["<"+_c+">" for _c in l_brs]
         l_brs_anyids = __get_ids_from_meta(l_brs)
-
         unique_brs_anyid = []
-        for s in l_brs_anyids:
+        for _l in l_brs_anyids:
+            s = set(_l)
             # check the unique br anyids
             _c_intersection = 0
             for __unique in unique_brs_anyid:
@@ -398,13 +398,17 @@ def __cit_duration(citing_complete_pub_date, cited_complete_pub_date):
 
     return result
 
-def __get_ids_from_meta(values, final_res = dict()):
-    MAX_VALUES = 3000
+def __get_ids_from_meta(values, finalres = None):
+
+    if finalres == None:
+        finalres = []
+
+    MAX_VALUES = 2000
 
     values_part = values[:MAX_VALUES]
     values_rest = values[MAX_VALUES:]
 
-    sparql_endpoint = "https://test.opencitations.net/meta/sparql"
+    sparql_endpoint = "http://test.opencitations.net/meta/sparql"
     sparql_query = """
     PREFIX datacite: <http://purl.org/spar/datacite/>
     PREFIX literal: <http://www.essepuntato.it/2010/06/literalreification/>
@@ -418,28 +422,31 @@ def __get_ids_from_meta(values, final_res = dict()):
     headers={"Accept": "application/sparql-results+json", "Content-Type": "application/sparql-query"}
     data = {"query": sparql_query}
 
-    res = defaultdict(set)
+    res = dict()
+
     try:
         response = post(sparql_endpoint, headers=headers, data=sparql_query)
         if response.status_code == 200:
             r = loads(response.text)
             results = r["results"]["bindings"]
-
             if len(results) > 0:
                 for elem in results:
                     omid_br = elem["br_omid"]["value"]
                     anyid_pref = elem["scheme"]["value"].split("datacite/")[1]
                     anyid_val = elem["identifier_val"]["value"]
-                    res[omid_br].add(anyid_pref+":"+anyid_val)
+
+                    if omid_br not in res:
+                        res[omid_br] = []
+                    res[omid_br].append(anyid_pref+":"+anyid_val)
     except:
         pass
 
-    for k in res:
-      final_res[k] = res[k]
+    finalres += [res[k] for k in res]
+    res = None
     if len(values_rest) > 0:
-      return __get_ids_from_meta(values_rest, final_res)
+        return __get_ids_from_meta(values_rest, finalres)
     else:
-      return final_res.values()
+        return finalres
 
 
 def __br_meta_metadata(values):
