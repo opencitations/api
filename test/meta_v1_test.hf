@@ -218,7 +218,15 @@ WHERE {
         } GROUP BY ?res ?title ?author_ ?editor_ ?publisher_ ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totAuthor) DESC(?totEditor) DESC(?totPublisher)
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
-    BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
+    BIND(
+        IF(BOUND(?venueMetaid),
+           IF(STR(?venue_ids) != "",
+              CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"),
+              CONCAT(" [", ?venueMetaid, "]")
+           ),
+           ""
+        )
+    AS ?venueIdentifiers)
     BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue)
 } GROUP BY ?id ?title ?type ?issue ?volume ?venue ?pub_date ?page
 
@@ -462,7 +470,15 @@ WHERE {
         } GROUP BY ?res ?title ?author_ ?editor_ ?publisher_ ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totAuthor) DESC(?totEditor) DESC(?totPublisher)
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
-    BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
+    BIND(
+        IF(BOUND(?venueMetaid),
+           IF(STR(?venue_ids) != "",
+              CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"),
+              CONCAT(" [", ?venueMetaid, "]")
+           ),
+           ""
+        )
+    AS ?venueIdentifiers)
     BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue)
 } GROUP BY ?id ?title ?type ?issue ?volume ?venue ?pub_date ?page
 
@@ -680,6 +696,14 @@ WHERE {
         } GROUP BY ?res ?title ?author_ ?editor_ ?publisher_ ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totAuthor) DESC(?totEditor) DESC(?totPublisher)
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
-    BIND(IF(STR(?venue_ids) != "", CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"), "") AS ?venueIdentifiers)
+    BIND(
+        IF(BOUND(?venueMetaid),
+           IF(STR(?venue_ids) != "",
+              CONCAT(" [", ?venue_ids, " ", ?venueMetaid, "]"),
+              CONCAT(" [", ?venueMetaid, "]")
+           ),
+           ""
+        )
+    AS ?venueIdentifiers)
     BIND(CONCAT(?venueName, ?venueIdentifiers) AS ?venue)
 } GROUP BY ?id ?title ?type ?issue ?volume ?venue ?pub_date ?page

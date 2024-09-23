@@ -293,5 +293,33 @@ class TestMetaAPI(unittest.TestCase):
         normalized_expected = self.normalize_json(expected_output)        
         self.assertEqual(normalized_output, normalized_expected)
 
+    def test_venue_without_external_id(self):
+        # https://github.com/opencitations/api/issues/15
+        output = self.execute_operation("/api/v1/metadata/omid:br/061903571196")
+        expected_output = [
+            {
+                "id": "doi:10.36106/gjra/9300981 openalex:W4306682982 omid:br/061903571196",
+                "title": "Lung Cavitation: An Unwanted Complication Of Covid-19 Lung Disease",
+                "author": "A Dosi, Ravi [omid:ra/061909585847]; Agrawal, Ankur [omid:ra/061909585849]; Jaiswal, Neha [omid:ra/061909585850]; Patidar, Ravindra [omid:ra/061909585851]; Shivhare, Shailendra [omid:ra/061909585848]",
+                "pub_date": "2022-09-15",
+                "issue": "",
+                "volume": "",
+                "venue": "Global Journal For Research Analysis [omid:br/061903571793]",
+                "type": "journal article",
+                "page": "31-33",
+                "publisher": "World Wide Journals [crossref:21849 omid:ra/0640115418]",
+                "editor": ""
+            }
+        ]
+        try:
+            output_json = json.loads(output)
+        except json.JSONDecodeError:
+            self.fail("The output is not valid JSON")
+        normalized_output = self.normalize_json(output_json)
+        normalized_expected = self.normalize_json(expected_output)
+        self.assertEqual(normalized_output, normalized_expected)
+        print(normalized_output[0]["venue"])
+        self.assertIn("omid:", normalized_output[0]["venue"], "The venue field should contain an OMID")
+
 if __name__ == '__main__':
     unittest.main()
