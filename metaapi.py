@@ -79,7 +79,7 @@ def generate_id_search(ids: str) -> Tuple[str]:
     for identifier in ids.split('__'):
         scheme_literal_value = identifier.split(':', maxsplit=1)
         scheme = scheme_literal_value[0].lower()
-        literal_value = quote(scheme_literal_value[1])
+        literal_value = scheme_literal_value[1]
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'omid':
             omid_values.append("{{ BIND(<https://w3id.org/oc/meta/"+literal_value+"> AS ?res) }}")

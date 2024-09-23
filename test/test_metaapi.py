@@ -386,6 +386,8 @@ class TestMetaAPI(unittest.TestCase):
         self.assertEqual(normalized_omid[0]['publisher'], "Organisation For Economic Co-Operation And Development (Oecd) [crossref:1963 omid:ra/0610116167]")
 
     def test_author_order_in_metadata(self):
+        # https://github.com/opencitations/api/issues/13
+
         output = self.execute_operation("/api/v1/metadata/omid:br/0680773548")
         expected_output = [
             {
@@ -422,6 +424,33 @@ class TestMetaAPI(unittest.TestCase):
             "Korfali, Gülsen [omid:ra/06802276623]"
         ]
         self.assertEqual(authors, expected_author_order)
+
+    def test_metadata_retrieval_with_parentheses_in_doi(self):
+        # https://github.com/opencitations/api/issues/12
+
+        test_dois = [
+            "doi:10.1016/s0005-7894(77)80292-x",
+            "doi:10.1016/s0002-9610(00)00404-9",
+            "doi:10.1016/s0188-4409(00)00147-8",
+            "doi:10.1002/1096-8644(200103)114:3<224::aid-ajpa1022>3.3.co;2-9",
+            "doi:10.1002/(sici)1098-2760(19990605)21:5<330::aid-mop7>3.3.co;2-e"
+        ]
+
+        for doi in test_dois:
+            output = self.execute_operation(f"/api/v1/metadata/{doi}")
+            
+            try:
+                print(output)
+                output_json = json.loads(output)
+            except json.JSONDecodeError:
+                self.fail(f"The output for {doi} is not valid JSON")
+
+            # Check if the output is not empty
+            self.assertNotEqual(len(output_json), 0, f"No metadata returned for {doi}")
+
+            # Check if the 'id' field in the returned metadata contains the input DOI
+            self.assertIn(doi, output_json[0]['id'], f"Returned metadata does not match input DOI for {doi}")
+
 
 if __name__ == '__main__':
     unittest.main()
