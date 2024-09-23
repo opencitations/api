@@ -61,7 +61,6 @@ class TestMetaAPI(unittest.TestCase):
         ]
         try:
             output_json = json.loads(output)
-            print(output_json)
         except json.JSONDecodeError:
             self.fail("L'output non è un JSON valido")
         normalized_output = self.normalize_json(output_json)
@@ -140,7 +139,7 @@ class TestMetaAPI(unittest.TestCase):
             {
                 "id": "doi:10.5334/johd.178 omid:br/06404693975",
                 "title": "The Integration Of The Japan Link Center's Bibliographic Data Into OpenCitations",
-                "author": "Heibi, Ivan [orcid:0000-0001-5366-5194 omid:ra/064013186642]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/064013186643]; Moretti, Arianna [orcid:0000-0001-5486-7070 omid:ra/061206532421]; Peroni, Silvio [orcid:0000-0003-0530-4305 omid:ra/064013186644]; Rizzetto, Elia [orcid:0009-0003-7161-9310 omid:ra/064013186645]; Soricetti, Marta [orcid:0009-0008-1466-7742 omid:ra/064013186641]",
+                "author": "Moretti, Arianna [orcid:0000-0001-5486-7070 omid:ra/061206532421]; Soricetti, Marta [orcid:0009-0008-1466-7742 omid:ra/064013186641]; Heibi, Ivan [orcid:0000-0001-5366-5194 omid:ra/064013186642]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/064013186643]; Peroni, Silvio [orcid:0000-0003-0530-4305 omid:ra/064013186644]; Rizzetto, Elia [orcid:0009-0003-7161-9310 omid:ra/064013186645]",
                 "pub_date": "2024",
                 "issue": "",
                 "volume": "10",
@@ -257,7 +256,6 @@ class TestMetaAPI(unittest.TestCase):
         ]
         try:
             output_json = json.loads(output)
-            print(json.dumps(output_json, indent=4))
         except json.JSONDecodeError:
             self.fail("L'output non è un JSON valido")
         normalized_output = self.normalize_json(output_json)
@@ -297,7 +295,7 @@ class TestMetaAPI(unittest.TestCase):
             {
                 "id": "doi:10.36106/gjra/9300981 openalex:W4306682982 omid:br/061903571196",
                 "title": "Lung Cavitation: An Unwanted Complication Of Covid-19 Lung Disease",
-                "author": "A Dosi, Ravi [omid:ra/061909585847]; Agrawal, Ankur [omid:ra/061909585849]; Jaiswal, Neha [omid:ra/061909585850]; Patidar, Ravindra [omid:ra/061909585851]; Shivhare, Shailendra [omid:ra/061909585848]",
+                "author": "A Dosi, Ravi [omid:ra/061909585847]; Shivhare, Shailendra [omid:ra/061909585848]; Agrawal, Ankur [omid:ra/061909585849]; Jaiswal, Neha [omid:ra/061909585850]; Patidar, Ravindra [omid:ra/061909585851]",
                 "pub_date": "2022-09-15",
                 "issue": "",
                 "volume": "",
@@ -386,6 +384,44 @@ class TestMetaAPI(unittest.TestCase):
         self.assertEqual(normalized_omid[0]['venue'], "OECD Economic Surveys: China [issn:2072-5027 openalex:S4210223649 omid:br/061402215286]")
         self.assertEqual(normalized_omid[0]['type'], "book")
         self.assertEqual(normalized_omid[0]['publisher'], "Organisation For Economic Co-Operation And Development (Oecd) [crossref:1963 omid:ra/0610116167]")
+
+    def test_author_order_in_metadata(self):
+        output = self.execute_operation("/api/v1/metadata/omid:br/0680773548")
+        expected_output = [
+            {
+                "author": "Bilgin, Hülya [orcid:0000-0001-6639-5533 omid:ra/0622032021]; Bozkurt, Merlin [omid:ra/06802276621]; Yilmazlar, Selçuk [omid:ra/06802276622]; Korfali, Gülsen [omid:ra/06802276623]",
+                "issue": "3",
+                "editor": "",
+                "pub_date": "2006-05",
+                "title": "Sudden Asystole Without Any Alerting Signs During Cerebellopontine Angle Surgery",
+                "volume": "18",
+                "page": "243-244",
+                "id": "doi:10.1016/j.jclinane.2005.12.014 openalex:W2127410217 pmid:16731339 omid:br/0680773548",
+                "publisher": "Elsevier Bv [crossref:78 omid:ra/0610116009]",
+                "type": "journal article",
+                "venue": "Journal Of Clinical Anesthesia [issn:0952-8180 openalex:S155967237 omid:br/0621013884]"
+            }
+        ]
+
+        try:
+            output_json = json.loads(output)
+        except json.JSONDecodeError:
+            self.fail("The output is not valid JSON")
+
+        normalized_output = self.normalize_json(output_json)
+        normalized_expected = self.normalize_json(expected_output)
+
+        self.assertEqual(normalized_output, normalized_expected)
+
+        # Check specific author order
+        authors = normalized_output[0]['author'].split('; ')
+        expected_author_order = [
+            "Bilgin, Hülya [orcid:0000-0001-6639-5533 omid:ra/0622032021]",
+            "Bozkurt, Merlin [omid:ra/06802276621]",
+            "Yilmazlar, Selçuk [omid:ra/06802276622]",
+            "Korfali, Gülsen [omid:ra/06802276623]"
+        ]
+        self.assertEqual(authors, expected_author_order)
 
 if __name__ == '__main__':
     unittest.main()

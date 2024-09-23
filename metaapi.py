@@ -129,6 +129,9 @@ def create_metadata_output(results):
             if i == header.index('type'):
                 beautiful_type = __postprocess_type(data[1])
                 output_result.append((data[0], beautiful_type))
+            elif i == header.index('author') or i == header.index('editor') or i == header.index('publisher'):
+                ordered_list = process_ordered_list(data[1])
+                output_result.append((data[0], ordered_list))
             else:
                 output_result.append(data)
         output_results.append(output_result)
@@ -140,6 +143,29 @@ def __postprocess_type(type_uri:str) -> str:
     else:
         type_string = ''
     return type_string
+
+def process_ordered_list(items):
+    if not items:
+        return items
+    items_dict = {}
+    role_to_name = {}
+    for item in items.split('|'):
+        parts = item.split(':')
+        name = ':'.join(parts[:-2])
+        current_role = parts[-2]
+        next_role = parts[-1] if parts[-1] != '' else None
+        items_dict[current_role] = next_role
+        role_to_name[current_role] = name
+
+    ordered_items = []
+    start_role = next(iter(role for role, next_role in items_dict.items() if not role in items_dict.values()))
+
+    current_role = start_role
+    while current_role:
+        ordered_items.append(role_to_name[current_role])
+        current_role = items_dict.get(current_role, '')
+
+    return "; ".join(ordered_items)
 
 def clean_name(name: str) -> str:
     if ',' in name:

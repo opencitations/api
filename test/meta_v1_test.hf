@@ -63,21 +63,20 @@ PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (STR(?title) AS ?title)
-(GROUP_CONCAT(DISTINCT ?author_; SEPARATOR="; ") AS ?author)
+(GROUP_CONCAT(DISTINCT ?author_info; SEPARATOR="|") AS ?author)
 (STR(?pub_date) AS ?pub_date)
 (STR(?issue) AS ?issue)
 (STR(?volume) AS ?volume)
 ?venue
 ?type
 ?page
-(GROUP_CONCAT(DISTINCT ?publisher_; SEPARATOR="; ") AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_; SEPARATOR="; ") AS ?editor)
+(GROUP_CONCAT(DISTINCT ?publisher_info; SEPARATOR="|") AS ?publisher)
+(GROUP_CONCAT(DISTINCT ?editor_info; SEPARATOR="|") AS ?editor)
 WHERE {
     {
-        SELECT ?res ?title ?author_ ?editor_ ?publisher_ ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
+        SELECT ?res ?title ?author_info ?editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
         (GROUP_CONCAT(DISTINCT ?id ; SEPARATOR=" ") AS ?ids)
         (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
-        (COUNT(?arAuthorNext) AS ?totAuthor)
         (COUNT(?arEditorNext) AS ?totEditor)
         (COUNT(?arEditorNext) AS ?totPublisher)
         WHERE {
@@ -90,9 +89,13 @@ WHERE {
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arAuthor.
-                OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
                 ?arAuthor pro:withRole pro:author;
                         pro:isHeldBy ?raAuthor.
+                OPTIONAL {
+                    ?arAuthor oco:hasNext ?nextAuthorRole .
+                }
+                BIND(STRAFTER(STR(?arAuthor), "https://w3id.org/oc/meta/ar/") AS ?roleUri)
+                BIND(STRAFTER(STR(?nextAuthorRole), "https://w3id.org/oc/meta/ar/") AS ?nextRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
                 OPTIONAL {?raAuthor foaf:familyName ?familyName.}
                 OPTIONAL {?raAuthor foaf:givenName ?givenName.}
@@ -121,12 +124,17 @@ WHERE {
                         CONCAT(?authorName, " [", ?author_metaid, "]")
                     )
                 AS ?author_)
+                BIND(CONCAT(?author_, ":", ?roleUri, ":", COALESCE(?nextRoleUri, "")) AS ?author_info)
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arEditor.
-                OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
                 ?arEditor pro:withRole pro:editor;
                             pro:isHeldBy ?raEditor.
+                OPTIONAL {
+                    ?arEditor oco:hasNext ?nextEditorRole .
+                }
+                BIND(STRAFTER(STR(?arEditor), "https://w3id.org/oc/meta/ar/") AS ?editorRoleUri)
+                BIND(STRAFTER(STR(?nextEditorRole), "https://w3id.org/oc/meta/ar/") AS ?nextEditorRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
                 OPTIONAL {?raEditor foaf:familyName ?editorFamilyName.}
                 OPTIONAL {?raEditor foaf:givenName ?editorGivenName.}
@@ -155,12 +163,17 @@ WHERE {
                         CONCAT(?editorName, " [", ?editor_metaid, "]")
                     )
                 AS ?editor_)
+                BIND(CONCAT(?editor_, ":", ?editorRoleUri, ":", COALESCE(?nextEditorRoleUri, "")) AS ?editor_info)
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arPublisher.
                 ?arPublisher pro:withRole pro:publisher;
                             pro:isHeldBy ?raPublisher.
-                OPTIONAL {?arPublisher oco:hasNext* ?arPublisherNext}
+                OPTIONAL {
+                    ?arPublisher oco:hasNext ?nextPublisherRole .
+                }
+                BIND(STRAFTER(STR(?arPublisher), "https://w3id.org/oc/meta/ar/") AS ?publisherRoleUri)
+                BIND(STRAFTER(STR(?nextPublisherRole), "https://w3id.org/oc/meta/ar/") AS ?nextPublisherRoleUri)
                 ?raPublisher foaf:name ?publisherName_.
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisher_metaid)
                 ?raPublisher foaf:name ?publisher_name.
@@ -177,6 +190,7 @@ WHERE {
                         CONCAT(?publisher_name, " [", ?publisher_metaid, "]")
                     )
                 AS ?publisher_)
+                BIND(CONCAT(?publisher_, ":", ?publisherRoleUri, ":", COALESCE(?nextPublisherRoleUri, "")) AS ?publisher_info)
             }
             OPTIONAL {
                 {
@@ -215,7 +229,7 @@ WHERE {
                 ?resVolume a fabio:JournalVolume;
                             fabio:hasSequenceIdentifier ?volume.
             }
-        } GROUP BY ?res ?title ?author_ ?editor_ ?publisher_ ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totAuthor) DESC(?totEditor) DESC(?totPublisher)
+        } GROUP BY ?res ?title ?author_info ?editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totEditor) DESC(?totPublisher)
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
     BIND(
@@ -307,23 +321,20 @@ PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (STR(?title) AS ?title)
-(GROUP_CONCAT(DISTINCT ?author_; SEPARATOR="; ") AS ?author)
+(GROUP_CONCAT(DISTINCT ?author_info; SEPARATOR="|") AS ?author)
 (STR(?pub_date) AS ?pub_date)
 (STR(?issue) AS ?issue)
 (STR(?volume) AS ?volume)
 ?venue
 ?type
 ?page
-(GROUP_CONCAT(DISTINCT ?publisher_; SEPARATOR="; ") AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_; SEPARATOR="; ") AS ?editor)
+(GROUP_CONCAT(DISTINCT ?publisher_info; SEPARATOR="|") AS ?publisher)
+(GROUP_CONCAT(DISTINCT ?editor_info; SEPARATOR="|") AS ?editor)
 WHERE {
     {
-        SELECT ?res ?title ?author_ ?editor_ ?publisher_ ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
+        SELECT ?res ?title ?author_info ?editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
         (GROUP_CONCAT(DISTINCT ?id ; SEPARATOR=" ") AS ?ids)
         (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
-        (COUNT(?arAuthorNext) AS ?totAuthor)
-        (COUNT(?arEditorNext) AS ?totEditor)
-        (COUNT(?arEditorNext) AS ?totPublisher)
         WHERE {
             {
               SELECT DISTINCT ?res
@@ -342,9 +353,13 @@ WHERE {
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arAuthor.
-                OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
                 ?arAuthor pro:withRole pro:author;
                         pro:isHeldBy ?raAuthor.
+                OPTIONAL {
+                    ?arAuthor oco:hasNext ?nextAuthorRole .
+                }
+                BIND(STRAFTER(STR(?arAuthor), "https://w3id.org/oc/meta/ar/") AS ?roleUri)
+                BIND(STRAFTER(STR(?nextAuthorRole), "https://w3id.org/oc/meta/ar/") AS ?nextRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
                 OPTIONAL {?raAuthor foaf:familyName ?familyName.}
                 OPTIONAL {?raAuthor foaf:givenName ?givenName.}
@@ -373,12 +388,17 @@ WHERE {
                         CONCAT(?authorName, " [", ?author_metaid, "]")
                     )
                 AS ?author_)
+                BIND(CONCAT(?author_, ":", ?roleUri, ":", COALESCE(?nextRoleUri, "")) AS ?author_info)
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arEditor.
-                OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
                 ?arEditor pro:withRole pro:editor;
                             pro:isHeldBy ?raEditor.
+                OPTIONAL {
+                    ?arEditor oco:hasNext ?nextEditorRole .
+                }
+                BIND(STRAFTER(STR(?arEditor), "https://w3id.org/oc/meta/ar/") AS ?editorRoleUri)
+                BIND(STRAFTER(STR(?nextEditorRole), "https://w3id.org/oc/meta/ar/") AS ?nextEditorRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
                 OPTIONAL {?raEditor foaf:familyName ?editorFamilyName.}
                 OPTIONAL {?raEditor foaf:givenName ?editorGivenName.}
@@ -407,13 +427,17 @@ WHERE {
                         CONCAT(?editorName, " [", ?editor_metaid, "]")
                     )
                 AS ?editor_)
+                BIND(CONCAT(?editor_, ":", ?editorRoleUri, ":", COALESCE(?nextEditorRoleUri, "")) AS ?editor_info)
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arPublisher.
                 ?arPublisher pro:withRole pro:publisher;
                             pro:isHeldBy ?raPublisher.
-                OPTIONAL {?arPublisher oco:hasNext* ?arPublisherNext}
-                ?raPublisher foaf:name ?publisherName_.
+                OPTIONAL {
+                    ?arPublisher oco:hasNext ?nextPublisherRole .
+                }
+                BIND(STRAFTER(STR(?arPublisher), "https://w3id.org/oc/meta/ar/") AS ?publisherRoleUri)
+                BIND(STRAFTER(STR(?nextPublisherRole), "https://w3id.org/oc/meta/ar/") AS ?nextPublisherRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisher_metaid)
                 ?raPublisher foaf:name ?publisher_name.
                 OPTIONAL {
@@ -429,6 +453,7 @@ WHERE {
                         CONCAT(?publisher_name, " [", ?publisher_metaid, "]")
                     )
                 AS ?publisher_)
+                BIND(CONCAT(?publisher_, ":", ?publisherRoleUri, ":", COALESCE(?nextPublisherRoleUri, "")) AS ?publisher_info)
             }
             OPTIONAL {
                 {
@@ -467,7 +492,7 @@ WHERE {
                 ?resVolume a fabio:JournalVolume;
                             fabio:hasSequenceIdentifier ?volume.
             }
-        } GROUP BY ?res ?title ?author_ ?editor_ ?publisher_ ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totAuthor) DESC(?totEditor) DESC(?totPublisher)
+        } GROUP BY ?res ?title ?author_info ?editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page ?venueName ?venueMetaid
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
     BIND(
@@ -533,23 +558,20 @@ PREFIX oco: <https://w3id.org/oc/ontology/>
 SELECT DISTINCT
 ?id
 (STR(?title) AS ?title)
-(GROUP_CONCAT(DISTINCT ?author_; SEPARATOR="; ") AS ?author)
+(GROUP_CONCAT(DISTINCT ?author_info; SEPARATOR="|") AS ?author)
 (STR(?pub_date) AS ?pub_date)
 (STR(?issue) AS ?issue)
 (STR(?volume) AS ?volume)
 ?venue
 ?type
 ?page
-(GROUP_CONCAT(DISTINCT ?publisher_; SEPARATOR="; ") AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_; SEPARATOR="; ") AS ?editor)
+(GROUP_CONCAT(DISTINCT ?publisher_info; SEPARATOR="|") AS ?publisher)
+(GROUP_CONCAT(DISTINCT ?editor_info; SEPARATOR="|") AS ?editor)
 WHERE {
     {
-        SELECT ?res ?title ?author_ ?editor_ ?publisher_ ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
+        SELECT ?res ?title ?author_info ?editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
         (GROUP_CONCAT(DISTINCT ?id ; SEPARATOR=" ") AS ?ids)
         (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
-        (COUNT(?arAuthorNext) AS ?totAuthor)
-        (COUNT(?arEditorNext) AS ?totEditor)
-        (COUNT(?arEditorNext) AS ?totPublisher)
         WHERE {
             {
               SELECT DISTINCT ?res
@@ -568,9 +590,13 @@ WHERE {
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arAuthor.
-                OPTIONAL {?arAuthor oco:hasNext* ?arAuthorNext}
                 ?arAuthor pro:withRole pro:author;
                         pro:isHeldBy ?raAuthor.
+                OPTIONAL {
+                    ?arAuthor oco:hasNext ?nextAuthorRole .
+                }
+                BIND(STRAFTER(STR(?arAuthor), "https://w3id.org/oc/meta/ar/") AS ?roleUri)
+                BIND(STRAFTER(STR(?nextAuthorRole), "https://w3id.org/oc/meta/ar/") AS ?nextRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raAuthor), "/ra/")) AS ?author_metaid)
                 OPTIONAL {?raAuthor foaf:familyName ?familyName.}
                 OPTIONAL {?raAuthor foaf:givenName ?givenName.}
@@ -599,12 +625,17 @@ WHERE {
                         CONCAT(?authorName, " [", ?author_metaid, "]")
                     )
                 AS ?author_)
+                BIND(CONCAT(?author_, ":", ?roleUri, ":", COALESCE(?nextRoleUri, "")) AS ?author_info)
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arEditor.
-                OPTIONAL {?arEditor oco:hasNext* ?arEditorNext}
                 ?arEditor pro:withRole pro:editor;
                             pro:isHeldBy ?raEditor.
+                OPTIONAL {
+                    ?arEditor oco:hasNext ?nextEditorRole .
+                }
+                BIND(STRAFTER(STR(?arEditor), "https://w3id.org/oc/meta/ar/") AS ?editorRoleUri)
+                BIND(STRAFTER(STR(?nextEditorRole), "https://w3id.org/oc/meta/ar/") AS ?nextEditorRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raEditor), "/ra/")) AS ?editor_metaid)
                 OPTIONAL {?raEditor foaf:familyName ?editorFamilyName.}
                 OPTIONAL {?raEditor foaf:givenName ?editorGivenName.}
@@ -633,13 +664,17 @@ WHERE {
                         CONCAT(?editorName, " [", ?editor_metaid, "]")
                     )
                 AS ?editor_)
+                BIND(CONCAT(?editor_, ":", ?editorRoleUri, ":", COALESCE(?nextEditorRoleUri, "")) AS ?editor_info)
             }
             OPTIONAL {
                 ?res pro:isDocumentContextFor ?arPublisher.
                 ?arPublisher pro:withRole pro:publisher;
                             pro:isHeldBy ?raPublisher.
-                OPTIONAL {?arPublisher oco:hasNext* ?arPublisherNext}
-                ?raPublisher foaf:name ?publisherName_.
+                OPTIONAL {
+                    ?arPublisher oco:hasNext ?nextPublisherRole .
+                }
+                BIND(STRAFTER(STR(?arPublisher), "https://w3id.org/oc/meta/ar/") AS ?publisherRoleUri)
+                BIND(STRAFTER(STR(?nextPublisherRole), "https://w3id.org/oc/meta/ar/") AS ?nextPublisherRoleUri)
                 BIND(CONCAT("omid:ra/", STRAFTER(STR(?raPublisher), "/ra/")) AS ?publisher_metaid)
                 ?raPublisher foaf:name ?publisher_name.
                 OPTIONAL {
@@ -655,6 +690,7 @@ WHERE {
                         CONCAT(?publisher_name, " [", ?publisher_metaid, "]")
                     )
                 AS ?publisher_)
+                BIND(CONCAT(?publisher_, ":", ?publisherRoleUri, ":", COALESCE(?nextPublisherRoleUri, "")) AS ?publisher_info)
             }
             OPTIONAL {
                 {
@@ -693,7 +729,7 @@ WHERE {
                 ?resVolume a fabio:JournalVolume;
                             fabio:hasSequenceIdentifier ?volume.
             }
-        } GROUP BY ?res ?title ?author_ ?editor_ ?publisher_ ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totAuthor) DESC(?totEditor) DESC(?totPublisher)
+        } GROUP BY ?res ?title ?author_info ?editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page ?venueName ?venueMetaid
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
     BIND(
