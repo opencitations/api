@@ -82,7 +82,6 @@ def generate_id_search(ids: str) -> Tuple[str]:
         literal_value = quote(scheme_literal_value[1])
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'omid':
-            #omid_values.append(f"{{ BIND(<https://w3id.org/oc/meta/{literal_value}> AS ?res) }}")
             omid_values.append("{{ BIND(<https://w3id.org/oc/meta/"+literal_value+"> AS ?res) }}")
         elif scheme in {'doi', 'issn', 'isbn', 'openalex', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
             other_values.append('''

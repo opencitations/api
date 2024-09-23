@@ -30,11 +30,7 @@ class TestMetaAPI(unittest.TestCase):
         return output
 
     def normalize_string(self, s):
-        original = s
-        new_s = s.replace('\u2018', "'").replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"')
-        if original != new_s:
-            print(f"Normalized: '{original}' to '{new_s}'")
-        return new_s
+        return s.replace('\u2018', "'").replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"')
 
     def normalize_json(self, json_data):
         if isinstance(json_data, dict):
@@ -50,7 +46,7 @@ class TestMetaAPI(unittest.TestCase):
         output = self.execute_operation("/api/v1/metadata/doi:10.1007/978-1-4020-9632-7")
         expected_output = [
             {
-                "id": "doi:10.1007/978-1-4020-9632-7 omid:br/0612058700",
+                "id": "doi:10.1007/978-1-4020-9632-7 isbn:9781402096327 isbn:9789048127108 openalex:W4249829199 omid:br/0612058700",
                 "title": "Adaptive Environmental Management",
                 "author": "",
                 "pub_date": "2009",
@@ -65,6 +61,7 @@ class TestMetaAPI(unittest.TestCase):
         ]
         try:
             output_json = json.loads(output)
+            print(output_json)
         except json.JSONDecodeError:
             self.fail("L'output non è un JSON valido")
         normalized_output = self.normalize_json(output_json)
@@ -258,9 +255,9 @@ class TestMetaAPI(unittest.TestCase):
                 "editor": ""
             }
         ]
-        
         try:
             output_json = json.loads(output)
+            print(json.dumps(output_json, indent=4))
         except json.JSONDecodeError:
             self.fail("L'output non è un JSON valido")
         normalized_output = self.normalize_json(output_json)
@@ -318,8 +315,77 @@ class TestMetaAPI(unittest.TestCase):
         normalized_output = self.normalize_json(output_json)
         normalized_expected = self.normalize_json(expected_output)
         self.assertEqual(normalized_output, normalized_expected)
-        print(normalized_output[0]["venue"])
         self.assertIn("omid:", normalized_output[0]["venue"], "The venue field should contain an OMID")
+
+    def test_metadata_retrieval_with_different_ids(self):
+        # https://github.com/opencitations/api/issues/14
+        
+        # Test retrieval using OMID
+        output_omid = self.execute_operation("/api/v1/metadata/omid:br/06603870331")
+        json_omid = json.loads(output_omid)
+        
+        # Test retrieval using ISBN
+        output_isbn = self.execute_operation("/api/v1/metadata/isbn:9789264960114")
+        json_isbn = json.loads(output_isbn)
+        
+        # Test retrieval using DOI
+        output_doi = self.execute_operation("/api/v1/metadata/doi:10.1787/b0e499cf-en")
+        json_doi = json.loads(output_doi)
+        
+        # Normalize the results
+        normalized_omid = self.normalize_json(json_omid)
+        normalized_isbn = self.normalize_json(json_isbn)
+        normalized_doi = self.normalize_json(json_doi)
+        
+        # Check that all results have the same basic structure
+        self.assertEqual(len(normalized_omid), 1)
+        self.assertEqual(len(normalized_isbn), 1)
+        self.assertEqual(len(normalized_doi), 1)
+        
+        # Define the complete list of expected IDs
+        expected_ids = [
+            'doi:10.1787/b0e499cf-en',
+            'isbn:9789264597587',
+            'isbn:9789264759596',
+            'isbn:9789264799318',
+            'isbn:9789264960114',
+            'openalex:W4221051054',
+            'omid:br/06603870331'
+        ]
+        
+        # Check that the OMID result contains all IDs
+        omid_ids = normalized_omid[0]['id'].split()
+        for expected_id in expected_ids:
+            self.assertIn(expected_id, omid_ids)
+        
+        # Check that the ISBN result contains all IDs
+        isbn_ids = normalized_isbn[0]['id'].split()
+        for expected_id in expected_ids:
+            self.assertIn(expected_id, isbn_ids)
+
+        # Check that the DOI result contains all IDs
+        doi_ids = normalized_doi[0]['id'].split()
+        for expected_id in expected_ids:
+            self.assertIn(expected_id, doi_ids)
+        
+        # Check that the number of IDs is correct
+        self.assertEqual(len(omid_ids), len(expected_ids))
+        self.assertEqual(len(isbn_ids), len(expected_ids))
+        self.assertEqual(len(doi_ids), len(expected_ids))
+        
+        # Check that other metadata fields are the same across all results
+        fields_to_check = ['title', 'author', 'pub_date', 'venue', 'publisher', 'type', 'issue', 'volume', 'page', 'editor']
+        for field in fields_to_check:
+            self.assertEqual(normalized_omid[0][field], normalized_isbn[0][field])
+            self.assertEqual(normalized_omid[0][field], normalized_doi[0][field])
+
+        # Check specific values
+        self.assertEqual(normalized_omid[0]['title'], "OECD Economic Surveys: China 2022")
+        self.assertEqual(normalized_omid[0]['author'], "Oecd [omid:ra/066010636485]")
+        self.assertEqual(normalized_omid[0]['pub_date'], "2022-03-18")
+        self.assertEqual(normalized_omid[0]['venue'], "OECD Economic Surveys: China [issn:2072-5027 openalex:S4210223649 omid:br/061402215286]")
+        self.assertEqual(normalized_omid[0]['type'], "book")
+        self.assertEqual(normalized_omid[0]['publisher'], "Organisation For Economic Co-Operation And Development (Oecd) [crossref:1963 omid:ra/0610116167]")
 
 if __name__ == '__main__':
     unittest.main()
