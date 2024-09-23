@@ -59,7 +59,8 @@ URI_TYPE_DICT = {
     'http://purl.org/spar/fabio/RetractionNotice': 'retraction notice',
     'http://purl.org/spar/fabio/Series': 'series',
     'http://purl.org/spar/fabio/SpecificationDocument': 'standard',
-    'http://purl.org/spar/fabio/WebContent': 'web content'}
+    'http://purl.org/spar/fabio/WebContent': 'web content'
+}
 
 
 # def generate_id_search(ids: str) -> Tuple[str]:
