@@ -67,6 +67,33 @@ class TestMetaAPI(unittest.TestCase):
         normalized_expected = self.normalize_json(expected_output)
         self.assertEqual(normalized_output, normalized_expected)
 
+    def test_metadata_retrieval_editor_inbook(self):
+        # https://github.com/opencitations/api/issues/16
+
+        output = self.execute_operation("/api/v1/metadata/omid:br/061702784433")
+        expected_output = [
+            {
+                "id": "doi:10.1007/978-3-642-30859-8_14 openalex:W1555136325 omid:br/061702784433",
+                "title": "Analysing Students’ Use Of Recorded Lectures Through Methodological Triangulation",
+                "author": "Gorissen, Pierre [omid:ra/061707839728]; Van Bruggen, Jan [omid:ra/061707839729]; Jochems, Wim [omid:ra/061707839730]",
+                "pub_date": "2012",
+                "issue": "",
+                "volume": "",
+                "venue": "Advances In Intelligent Systems And Computing [doi:10.1007/978-3-642-30859-8 isbn:9783642308581 isbn:9783642308598 openalex:W2221102889 omid:br/061702785338]",
+                "type": "book chapter",
+                "page": "145-156",
+                "publisher": "Springer Science And Business Media Llc [crossref:297 omid:ra/0610116006]",
+                "editor": "Uden, Lorna [omid:ra/062409604521]; Corchado, Juan Manuel [orcid:0000-0002-2829-1829 omid:ra/064010719912]; De Paz Santana, Juan F. [omid:ra/062409604522]; Prieta, Fernando De La [orcid:0000-0002-8239-5020 omid:ra/069026742]"
+            }
+        ]        
+
+        try:
+            output_json = json.loads(output)
+        except json.JSONDecodeError:
+            self.fail("L'output non è un JSON valido")
+        normalized_output = self.normalize_json(output_json)
+        normalized_expected = self.normalize_json(expected_output)
+        self.assertEqual(normalized_output, normalized_expected)
 
     def test_author_works_retrieval(self):
         output = self.execute_operation("/api/v1/author/orcid:0000-0002-8420-0696")
@@ -440,7 +467,6 @@ class TestMetaAPI(unittest.TestCase):
             output = self.execute_operation(f"/api/v1/metadata/{doi}")
             
             try:
-                print(output)
                 output_json = json.loads(output)
             except json.JSONDecodeError:
                 self.fail(f"The output for {doi} is not valid JSON")

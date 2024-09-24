@@ -71,14 +71,12 @@ SELECT DISTINCT
 ?type
 ?page
 (GROUP_CONCAT(DISTINCT ?publisher_info; SEPARATOR="|") AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_info; SEPARATOR="|") AS ?editor)
+(GROUP_CONCAT(DISTINCT ?combined_editor_info; SEPARATOR="|") AS ?editor)
 WHERE {
     {
-        SELECT ?res ?title ?author_info ?editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
+        SELECT ?res ?title ?author_info ?combined_editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
         (GROUP_CONCAT(DISTINCT ?id ; SEPARATOR=" ") AS ?ids)
         (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
-        (COUNT(?arEditorNext) AS ?totEditor)
-        (COUNT(?arEditorNext) AS ?totPublisher)
         WHERE {
             [[ids]]
             OPTIONAL {
@@ -166,6 +164,56 @@ WHERE {
                 BIND(CONCAT(?editor_, ":", ?editorRoleUri, ":", COALESCE(?nextEditorRoleUri, "")) AS ?editor_info)
             }
             OPTIONAL {
+                ?res frbr:partOf ?container.
+                ?container pro:isDocumentContextFor ?arContainerEditor.
+                ?arContainerEditor pro:withRole pro:editor;
+                                pro:isHeldBy ?raContainerEditor.
+                OPTIONAL {
+                    ?arContainerEditor oco:hasNext ?nextContainerEditorRole .
+                }
+                BIND(STRAFTER(STR(?arContainerEditor), "https://w3id.org/oc/meta/ar/") AS ?containerEditorRoleUri)
+                BIND(STRAFTER(STR(?nextContainerEditorRole), "https://w3id.org/oc/meta/ar/") AS ?nextContainerEditorRoleUri)
+                BIND(CONCAT("omid:ra/", STRAFTER(STR(?raContainerEditor), "/ra/")) AS ?container_editor_metaid)
+                OPTIONAL {?raContainerEditor foaf:familyName ?containerEditorFamilyName.}
+                OPTIONAL {?raContainerEditor foaf:givenName ?containerEditorGivenName.}
+                OPTIONAL {?raContainerEditor foaf:name ?container_editor_name.}
+                OPTIONAL {
+                    ?raContainerEditor datacite:hasIdentifier ?containerEditorIdentifier.
+                    ?containerEditorIdentifier datacite:usesIdentifierScheme ?containerEditorIdSchema;
+                                                literal:hasLiteralValue ?containerEditorIdLiteralValue.
+                    BIND(CONCAT(STRAFTER(STR(?containerEditorIdSchema), "http://purl.org/spar/datacite/"), ":", ?containerEditorIdLiteralValue) AS ?container_editor_id)
+                }
+                BIND(
+                    IF(
+                        STRLEN(STR(?containerEditorFamilyName)) > 0 && STRLEN(STR(?containerEditorGivenName)) > 0,
+                        CONCAT(?containerEditorFamilyName, ", ", ?containerEditorGivenName),
+                        IF(
+                            STRLEN(STR(?containerEditorFamilyName)) > 0,
+                            CONCAT(?containerEditorFamilyName, ","),
+                            ?container_editor_name
+                        )
+                    )
+                AS ?containerEditorName)
+                BIND(
+                    IF(
+                        STRLEN(STR(?container_editor_id)) > 0,
+                        CONCAT(?containerEditorName, " [", ?container_editor_id, " ", ?container_editor_metaid, "]"),
+                        CONCAT(?containerEditorName, " [", ?container_editor_metaid, "]")
+                    )
+                AS ?container_editor_)
+                BIND(CONCAT(?container_editor_, ":", ?containerEditorRoleUri, ":", COALESCE(?nextContainerEditorRoleUri, "")) AS ?container_editor_info)
+            }
+            BIND(
+                IF(BOUND(?editor_info),
+                IF(BOUND(?container_editor_info),
+                    CONCAT(?editor_info, "|", ?container_editor_info),
+                    ?editor_info),
+                IF(BOUND(?container_editor_info),
+                    ?container_editor_info,
+                    "")
+                )
+            AS ?combined_editor_info)
+            OPTIONAL {
                 ?res pro:isDocumentContextFor ?arPublisher.
                 ?arPublisher pro:withRole pro:publisher;
                             pro:isHeldBy ?raPublisher.
@@ -229,7 +277,7 @@ WHERE {
                 ?resVolume a fabio:JournalVolume;
                             fabio:hasSequenceIdentifier ?volume.
             }
-        } GROUP BY ?res ?title ?author_info ?editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid ORDER BY DESC(?totEditor) DESC(?totPublisher)
+        } GROUP BY ?res ?title ?author_info ?combined_editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page  ?venueName ?venueMetaid
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
     BIND(
@@ -329,10 +377,10 @@ SELECT DISTINCT
 ?type
 ?page
 (GROUP_CONCAT(DISTINCT ?publisher_info; SEPARATOR="|") AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_info; SEPARATOR="|") AS ?editor)
+(GROUP_CONCAT(DISTINCT ?combined_editor_info; SEPARATOR="|") AS ?editor)
 WHERE {
     {
-        SELECT ?res ?title ?author_info ?editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
+        SELECT ?res ?title ?author_info ?combined_editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
         (GROUP_CONCAT(DISTINCT ?id ; SEPARATOR=" ") AS ?ids)
         (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
         WHERE {
@@ -430,6 +478,56 @@ WHERE {
                 BIND(CONCAT(?editor_, ":", ?editorRoleUri, ":", COALESCE(?nextEditorRoleUri, "")) AS ?editor_info)
             }
             OPTIONAL {
+                ?res frbr:partOf ?container.
+                ?container pro:isDocumentContextFor ?arContainerEditor.
+                ?arContainerEditor pro:withRole pro:editor;
+                                   pro:isHeldBy ?raContainerEditor.
+                OPTIONAL {
+                    ?arContainerEditor oco:hasNext ?nextContainerEditorRole .
+                }
+                BIND(STRAFTER(STR(?arContainerEditor), "https://w3id.org/oc/meta/ar/") AS ?containerEditorRoleUri)
+                BIND(STRAFTER(STR(?nextContainerEditorRole), "https://w3id.org/oc/meta/ar/") AS ?nextContainerEditorRoleUri)
+                BIND(CONCAT("omid:ra/", STRAFTER(STR(?raContainerEditor), "/ra/")) AS ?container_editor_metaid)
+                OPTIONAL {?raContainerEditor foaf:familyName ?containerEditorFamilyName.}
+                OPTIONAL {?raContainerEditor foaf:givenName ?containerEditorGivenName.}
+                OPTIONAL {?raContainerEditor foaf:name ?container_editor_name.}
+                OPTIONAL {
+                    ?raContainerEditor datacite:hasIdentifier ?containerEditorIdentifier.
+                    ?containerEditorIdentifier datacite:usesIdentifierScheme ?containerEditorIdSchema;
+                                                literal:hasLiteralValue ?containerEditorIdLiteralValue.
+                    BIND(CONCAT(STRAFTER(STR(?containerEditorIdSchema), "http://purl.org/spar/datacite/"), ":", ?containerEditorIdLiteralValue) AS ?container_editor_id)
+                }
+                BIND(
+                    IF(
+                        STRLEN(STR(?containerEditorFamilyName)) > 0 && STRLEN(STR(?containerEditorGivenName)) > 0,
+                        CONCAT(?containerEditorFamilyName, ", ", ?containerEditorGivenName),
+                        IF(
+                            STRLEN(STR(?containerEditorFamilyName)) > 0,
+                            CONCAT(?containerEditorFamilyName, ","),
+                            ?container_editor_name
+                        )
+                    )
+                AS ?containerEditorName)
+                BIND(
+                    IF(
+                        STRLEN(STR(?container_editor_id)) > 0,
+                        CONCAT(?containerEditorName, " [", ?container_editor_id, " ", ?container_editor_metaid, "]"),
+                        CONCAT(?containerEditorName, " [", ?container_editor_metaid, "]")
+                    )
+                AS ?container_editor_)
+                BIND(CONCAT(?container_editor_, ":", ?containerEditorRoleUri, ":", COALESCE(?nextContainerEditorRoleUri, "")) AS ?container_editor_info)
+            }
+            BIND(
+                IF(BOUND(?editor_info),
+                   IF(BOUND(?container_editor_info),
+                      CONCAT(?editor_info, "|", ?container_editor_info),
+                      ?editor_info),
+                   IF(BOUND(?container_editor_info),
+                      ?container_editor_info,
+                      "")
+                )
+            AS ?combined_editor_info)
+            OPTIONAL {
                 ?res pro:isDocumentContextFor ?arPublisher.
                 ?arPublisher pro:withRole pro:publisher;
                             pro:isHeldBy ?raPublisher.
@@ -492,7 +590,7 @@ WHERE {
                 ?resVolume a fabio:JournalVolume;
                             fabio:hasSequenceIdentifier ?volume.
             }
-        } GROUP BY ?res ?title ?author_info ?editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page ?venueName ?venueMetaid
+        } GROUP BY ?res ?title ?author_info ?combined_editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page ?venueName ?venueMetaid
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
     BIND(
@@ -566,10 +664,10 @@ SELECT DISTINCT
 ?type
 ?page
 (GROUP_CONCAT(DISTINCT ?publisher_info; SEPARATOR="|") AS ?publisher)
-(GROUP_CONCAT(DISTINCT ?editor_info; SEPARATOR="|") AS ?editor)
+(GROUP_CONCAT(DISTINCT ?combined_editor_info; SEPARATOR="|") AS ?editor)
 WHERE {
     {
-        SELECT ?res ?title ?author_info ?editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
+        SELECT ?res ?title ?author_info ?combined_editor_info ?publisher_info ?type ?pub_date ?page ?issue ?volume ?venueName ?venueMetaid
         (GROUP_CONCAT(DISTINCT ?id ; SEPARATOR=" ") AS ?ids)
         (GROUP_CONCAT(DISTINCT ?venue_ids_; SEPARATOR=' ') AS ?venue_ids)
         WHERE {
@@ -667,6 +765,56 @@ WHERE {
                 BIND(CONCAT(?editor_, ":", ?editorRoleUri, ":", COALESCE(?nextEditorRoleUri, "")) AS ?editor_info)
             }
             OPTIONAL {
+                ?res frbr:partOf ?container.
+                ?container pro:isDocumentContextFor ?arContainerEditor.
+                ?arContainerEditor pro:withRole pro:editor;
+                                   pro:isHeldBy ?raContainerEditor.
+                OPTIONAL {
+                    ?arContainerEditor oco:hasNext ?nextContainerEditorRole .
+                }
+                BIND(STRAFTER(STR(?arContainerEditor), "https://w3id.org/oc/meta/ar/") AS ?containerEditorRoleUri)
+                BIND(STRAFTER(STR(?nextContainerEditorRole), "https://w3id.org/oc/meta/ar/") AS ?nextContainerEditorRoleUri)
+                BIND(CONCAT("omid:ra/", STRAFTER(STR(?raContainerEditor), "/ra/")) AS ?container_editor_metaid)
+                OPTIONAL {?raContainerEditor foaf:familyName ?containerEditorFamilyName.}
+                OPTIONAL {?raContainerEditor foaf:givenName ?containerEditorGivenName.}
+                OPTIONAL {?raContainerEditor foaf:name ?container_editor_name.}
+                OPTIONAL {
+                    ?raContainerEditor datacite:hasIdentifier ?containerEditorIdentifier.
+                    ?containerEditorIdentifier datacite:usesIdentifierScheme ?containerEditorIdSchema;
+                                                literal:hasLiteralValue ?containerEditorIdLiteralValue.
+                    BIND(CONCAT(STRAFTER(STR(?containerEditorIdSchema), "http://purl.org/spar/datacite/"), ":", ?containerEditorIdLiteralValue) AS ?container_editor_id)
+                }
+                BIND(
+                    IF(
+                        STRLEN(STR(?containerEditorFamilyName)) > 0 && STRLEN(STR(?containerEditorGivenName)) > 0,
+                        CONCAT(?containerEditorFamilyName, ", ", ?containerEditorGivenName),
+                        IF(
+                            STRLEN(STR(?containerEditorFamilyName)) > 0,
+                            CONCAT(?containerEditorFamilyName, ","),
+                            ?container_editor_name
+                        )
+                    )
+                AS ?containerEditorName)
+                BIND(
+                    IF(
+                        STRLEN(STR(?container_editor_id)) > 0,
+                        CONCAT(?containerEditorName, " [", ?container_editor_id, " ", ?container_editor_metaid, "]"),
+                        CONCAT(?containerEditorName, " [", ?container_editor_metaid, "]")
+                    )
+                AS ?container_editor_)
+                BIND(CONCAT(?container_editor_, ":", ?containerEditorRoleUri, ":", COALESCE(?nextContainerEditorRoleUri, "")) AS ?container_editor_info)
+            }
+            BIND(
+                IF(BOUND(?editor_info),
+                   IF(BOUND(?container_editor_info),
+                      CONCAT(?editor_info, "|", ?container_editor_info),
+                      ?editor_info),
+                   IF(BOUND(?container_editor_info),
+                      ?container_editor_info,
+                      "")
+                )
+            AS ?combined_editor_info)
+            OPTIONAL {
                 ?res pro:isDocumentContextFor ?arPublisher.
                 ?arPublisher pro:withRole pro:publisher;
                             pro:isHeldBy ?raPublisher.
@@ -729,7 +877,7 @@ WHERE {
                 ?resVolume a fabio:JournalVolume;
                             fabio:hasSequenceIdentifier ?volume.
             }
-        } GROUP BY ?res ?title ?author_info ?editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page ?venueName ?venueMetaid
+        } GROUP BY ?res ?title ?author_info ?combined_editor_info ?publisher_info ?type ?issue ?volume ?pub_date ?page ?venueName ?venueMetaid
     }
     BIND(CONCAT(?ids, IF(STR(?ids) != "", " ", ""), "omid:br/", STRAFTER(STR(?res), "/br/")) AS ?id)
     BIND(
