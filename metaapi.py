@@ -59,16 +59,17 @@ URI_TYPE_DICT = {
     'http://purl.org/spar/fabio/RetractionNotice': 'retraction notice',
     'http://purl.org/spar/fabio/Series': 'series',
     'http://purl.org/spar/fabio/SpecificationDocument': 'standard',
-    'http://purl.org/spar/fabio/WebContent': 'web content'}
+    'http://purl.org/spar/fabio/WebContent': 'web content'
+}
 
 
-def generate_id_search(ids: str) -> Tuple[str]:
-    id_searches = list()
-    for identifier in ids.split('__'):
-        scheme_literal_value = identifier.split(':', maxsplit=1)
-        scheme = scheme_literal_value[0].lower()
-        literal_value = quote(scheme_literal_value[1])
-        literal_value = literal_value.lower() if scheme == 'doi' else literal_value
+# def generate_id_search(ids: str) -> Tuple[str]:
+#     id_searches = list()
+#     for identifier in ids.split('__'):
+#         scheme_literal_value = identifier.split(':', maxsplit=1)
+#         scheme = scheme_literal_value[0].lower()
+#         literal_value = quote(scheme_literal_value[1])
+#         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
 
 def generate_id_search(ids: str) -> Tuple[str]:
     id_searches = list()
@@ -78,25 +79,22 @@ def generate_id_search(ids: str) -> Tuple[str]:
     for identifier in ids.split('__'):
         scheme_literal_value = identifier.split(':', maxsplit=1)
         scheme = scheme_literal_value[0].lower()
-        literal_value = quote(scheme_literal_value[1])
+        literal_value = scheme_literal_value[1]
         literal_value = literal_value.lower() if scheme == 'doi' else literal_value
         if scheme == 'omid':
-            omid_values.append(f"{{ BIND(<https://w3id.org/oc/meta/{literal_value}> AS ?res) }}")
+            omid_values.append("{{ BIND(<https://w3id.org/oc/meta/"+literal_value+"> AS ?res) }}")
         elif scheme in {'doi', 'issn', 'isbn', 'openalex', 'pmid', 'pmcid', 'url', 'wikidata', 'wikipedia'}:
-            other_values.append(f'''
+            other_values.append('''
                 {{
-                    ?identifier literal:hasLiteralValue "{literal_value}";
-                                datacite:usesIdentifierScheme datacite:{scheme};
+                    ?identifier literal:hasLiteralValue "'''+literal_value+'''";
+                                datacite:usesIdentifierScheme datacite:'''+scheme+''';
                                 ^datacite:hasIdentifier ?res.
                     ?res a fabio:Expression.
                 }}
             ''')
 
     if omid_values:
-        id_searches.append(f'''
-            ?res a fabio:Expression.
-            {" UNION ".join(omid_values)}
-        ''')
+        id_searches.append("?res a fabio:Expression."+" UNION ".join(omid_values))
 
     if other_values:
         id_searches.append(" UNION ".join(other_values))
@@ -131,6 +129,9 @@ def create_metadata_output(results):
             if i == header.index('type'):
                 beautiful_type = __postprocess_type(data[1])
                 output_result.append((data[0], beautiful_type))
+            elif i == header.index('author') or i == header.index('editor') or i == header.index('publisher'):
+                ordered_list = process_ordered_list(data[1])
+                output_result.append((data[0], ordered_list))
             else:
                 output_result.append(data)
         output_results.append(output_result)
@@ -142,6 +143,29 @@ def __postprocess_type(type_uri:str) -> str:
     else:
         type_string = ''
     return type_string
+
+def process_ordered_list(items):
+    if not items:
+        return items
+    items_dict = {}
+    role_to_name = {}
+    for item in items.split('|'):
+        parts = item.split(':')
+        name = ':'.join(parts[:-2])
+        current_role = parts[-2]
+        next_role = parts[-1] if parts[-1] != '' else None
+        items_dict[current_role] = next_role
+        role_to_name[current_role] = name
+
+    ordered_items = []
+    start_role = next(iter(role for role, next_role in items_dict.items() if not role in items_dict.values()))
+
+    current_role = start_role
+    while current_role:
+        ordered_items.append(role_to_name[current_role])
+        current_role = items_dict.get(current_role, '')
+
+    return "; ".join(ordered_items)
 
 def clean_name(name: str) -> str:
     if ',' in name:
