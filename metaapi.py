@@ -114,7 +114,7 @@ def generate_ra_search(identifier:str) -> Tuple[str]:
         return '<https://w3id.org/oc/meta/{0}> ^pro:isHeldBy ?knownRole.'.format(literal_value),
     else:
         return '''
-            ?knownPersonIdentifier literal:hasLiteralValue "{0}";
+            ?knownPersonIdentifier literal:hasLiteralValue "{0}"^^<http://www.w3.org/2001/XMLSchema#string>;
                                 datacite:usesIdentifierScheme datacite:{1};
                                 ^datacite:hasIdentifier ?knownPerson.
             ?knownPerson ^pro:isHeldBy ?knownRole.
