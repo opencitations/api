@@ -44,17 +44,12 @@ jobs:
 
     - name: Run tests with coverage
       run: |
-        uv run pytest --cov-report=xml --cov-report=term --cov=ccc_addon.py --cov=indexapi_v1.py --cov=indexapi_v2.py --cov=metaapi.py --cov=occapi.py --cov=publishers.py --cov=wikidataapi.py
-        echo "COVERAGE=$(uv run coverage report | grep TOTAL | awk '{print $4}')" >> $GITHUB_ENV
+        echo "COVERAGE=$(uv run pytest | tee /dev/stderr | grep TOTAL | awk '{print $4}')" >> $GITHUB_ENV
 
     - name: Stop test database
       if: always()
       run: ./test/stop_test_db.sh
       
-    - name: Generate HTML coverage report
-      run: |
-        uv run coverage html -d htmlcov
-        
     - name: Upload coverage artifact
       if: matrix.python-version == '3.10' && github.ref == 'refs/heads/master'
       uses: actions/upload-artifact@v4

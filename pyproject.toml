@@ -21,6 +21,16 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-pythonpath = [
-    "."
+addopts = "--cov --cov-report=term-missing --cov-report=html"
+pythonpath = "."
+
+[tool.coverage.run]
+source = [
+    "ccc_addon",
+    "indexapi_v1",
+    "indexapi_v2",
+    "metaapi",
+    "occapi",
+    "publishers",
+    "wikidataapi",
 ]
