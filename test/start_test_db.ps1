@@ -9,7 +9,7 @@ if (!(Test-Path $DATA_DIR)) {
     New-Item -ItemType Directory -Path $DATA_DIR -Force | Out-Null
 }
 
-& poetry run virtuoso-launch `
+& uv run virtuoso-launch `
     --name $CONTAINER_NAME `
     --http-port $HTTP_PORT `
     --isql-port $ISQL_PORT `
@@ -21,4 +21,4 @@ if (!(Test-Path $DATA_DIR)) {
     --wait-ready `
     --force-remove
 
-& poetry run virtuoso-bulk-load -d /data/meta_subset/ --port 1111 --docker-container virtuoso-test-api -k test123 
+& uv run virtuoso-bulk-load -d /data/meta_subset/ --port 1111 --docker-container virtuoso-test-api -k test123 

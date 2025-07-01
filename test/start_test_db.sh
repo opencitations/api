@@ -11,7 +11,7 @@ MEMORY="4g"
 
 mkdir -p "$DATA_DIR"
 
-poetry run virtuoso-launch \
+uv run virtuoso-launch \
     --name "$CONTAINER_NAME" \
     --http-port "$HTTP_PORT" \
     --isql-port "$ISQL_PORT" \
@@ -23,4 +23,4 @@ poetry run virtuoso-launch \
     --wait-ready \
     --force-remove
 
-poetry run virtuoso-bulk-load -d /data/meta_subset/ --port 1111 --docker-container virtuoso-test-api -k test123 
+uv run virtuoso-bulk-load -d /data/meta_subset/ --port 1111 --docker-container virtuoso-test-api -k test123 

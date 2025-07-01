@@ -2,14 +2,26 @@ name: Run tests
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - "**" # All branches, including those with /
   pull_request:
     branches: [ master ]
 
+# Add permissions needed for GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Environment for GitHub Pages
+env:
+  COVERAGE_REPORT_PATH: htmlcov
+
 jobs:
-  test:
+  CheckCoverage:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
@@ -30,9 +42,83 @@ jobs:
     - name: Start test database
       run: ./test/start_test_db.sh
 
-    - name: Run tests
-      run: uv run pytest
+    - name: Run tests with coverage
+      run: |
+        uv run pytest --cov-report=xml --cov-report=term --cov=ccc_addon.py --cov=indexapi_v1.py --cov=indexapi_v2.py --cov=metaapi.py --cov=occapi.py --cov=publishers.py --cov=wikidataapi.py
+        echo "COVERAGE=$(uv run coverage report | grep TOTAL | awk '{print $4}')" >> $GITHUB_ENV
 
     - name: Stop test database
       if: always()
-      run: ./test/stop_test_db.sh 
+      run: ./test/stop_test_db.sh
+      
+    - name: Generate HTML coverage report
+      run: |
+        uv run coverage html -d htmlcov
+        
+    - name: Upload coverage artifact
+      if: matrix.python-version == '3.10' && github.ref == 'refs/heads/master'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: ${{ env.COVERAGE_REPORT_PATH }}
+        
+    - name: Generate coverage badge
+      if: matrix.python-version == '3.10'
+      run: |
+        # Extract coverage percentage as a number
+        COVERAGE_NUM=$(echo ${{ env.COVERAGE }} | sed 's/%//')
+        
+        # Determine color based on coverage
+        if (( $(echo "$COVERAGE_NUM >= 90" | bc -l) )); then
+          COLOR="green"
+        elif (( $(echo "$COVERAGE_NUM >= 75" | bc -l) )); then
+          COLOR="yellow"
+        elif (( $(echo "$COVERAGE_NUM >= 60" | bc -l) )); then
+          COLOR="orange"
+        else
+          COLOR="red"
+        fi
+        
+        echo "BADGE_COLOR=$COLOR" >> $GITHUB_ENV
+      
+    - name: Create badge
+      if: matrix.python-version == '3.10'
+      uses: RubbaBoy/BYOB@v1.3.0
+      with:
+        name: opencitations-api-coverage-${{ github.ref_name }}
+        label: "Coverage"
+        status: "${{ env.COVERAGE }}"
+        color: ${{ env.BADGE_COLOR }}
+        github_token: ${{ secrets.GIST_PAT }}
+        repository: arcangelo7/badges
+        actor: arcangelo7
+
+  deploy-pages:
+    needs: CheckCoverage
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: .
+        continue-on-error: true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 
