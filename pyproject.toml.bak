@@ -1,0 +1,29 @@
+[project]
+name = "api"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "arcangelo7", email = "arcangelomas@gmail.com"}
+]
+license = {text = "ISC"}
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ramose>=1.0.8,<2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "virtuoso-utilities>=1.0.0,<2.0.0",
+    "pytest>=8.4.1,<9.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "virtuoso-utilities>=1.0.0,<2.0.0",
+    "pytest>=8.4.1,<9.0.0",
+]

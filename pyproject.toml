@@ -1,16 +1,25 @@
-[tool.poetry]
+[project]
 name = "api"
 version = "0.1.0"
-description = ""
-authors = ["arcangelo7 <arcangelomas@gmail.com>"]
-license = "ISC"
+description = "Add your description here"
+authors = [
+    {name = "arcangelo7", email = "arcangelo.massari@unibo.it"}
+]
+license = {text = "ISC"}
 readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "ramose>=1.0.8",
+    "sparqlwrapper>=2.0.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-ramose = "^1.0.8"
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "virtuoso-utilities>=1.0.0",
+]
 
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pytest.ini_options]
+pythonpath = [
+    "."
+]

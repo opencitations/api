@@ -4,3 +4,39 @@
 
 # api
 REST API specification for all the OpenCitations datasets
+
+## Installation
+Install dependencies using [uv](https://docs.astral.sh/uv/):
+```bash
+uv sync
+```
+
+## Testing
+
+### Prerequisites
+- Docker (for test database)
+
+### Running Tests
+1. Install development dependencies:
+   ```bash
+   uv sync --dev
+   ```
+
+2. Start the test database:
+   ```bash
+   ./test/start_test_db.sh  # Linux/macOS
+   # or
+   .\test\start_test_db.ps1  # Windows PowerShell
+   ```
+
+3. Run the test suite:
+   ```bash
+   uv run pytest
+   ```
+
+4. Stop the test database:
+   ```bash
+   ./test/stop_test_db.sh  # Linux/macOS
+   # or
+   .\test\stop_test_db.ps1  # Windows PowerShell
+   ```
