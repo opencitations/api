@@ -1,9 +1,9 @@
 import json
 import os
 import sys
-import pytest
 from io import StringIO
 
+import pytest
 from ramose import APIManager
 
 
@@ -38,17 +38,19 @@ def normalize_string(s):
     """
     Normalize Unicode characters in a string.
     """
-    return s.replace('\u2018', "'").replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"')
+    return s.replace('‘', "'").replace('’', "'").replace('"', '"')
 
 
 def normalize_json(json_data):
     """
-    Recursively normalize Unicode characters in JSON data.
+    Recursively normalize Unicode characters in JSON data and sort lists of objects by ID.
     """
     if isinstance(json_data, dict):
         return {k: normalize_json(v) for k, v in json_data.items()}
     elif isinstance(json_data, list):
-        return [normalize_json(item) for item in json_data]
+        normalized_list = [normalize_json(item) for item in json_data]
+        return sorted(normalized_list, key=lambda x: x.get('id', ''))
+        return normalized_list
     elif isinstance(json_data, str):
         return normalize_string(json_data)
     else:
