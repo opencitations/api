@@ -27,5 +27,12 @@ jobs:
     - name: Install dependencies
       run: uv sync --dev
 
+    - name: Start test database
+      run: ./test/start_test_db.sh
+
     - name: Run tests
-      run: uv run pytest 
+      run: uv run pytest
+
+    - name: Stop test database
+      if: always()
+      run: ./test/stop_test_db.sh 
