@@ -361,3 +361,203 @@ def test_author_order_in_metadata(api_manager):
         "Korfali, Gülsen [omid:ra/06802276623]"
     ]
     assert authors == expected_author_order
+
+
+def test_author_works_retrieval_with_omid(api_manager):
+    """
+    Test retrieval of works by a specific author using OMID identifier.
+    This tests the OMID scheme handling in generate_ra_search function.
+    """
+    output = execute_operation(api_manager, "/api/v1/author/omid:ra/06250110138")
+    expected_output = [
+        {
+            "id": "doi:10.5334/johd.178 omid:br/06404693975",
+            "title": "The Integration Of The Japan Link Center's Bibliographic Data Into OpenCitations",
+            "author": "Moretti, Arianna [orcid:0000-0001-5486-7070 omid:ra/061206532421]; Soricetti, Marta [orcid:0009-0008-1466-7742 omid:ra/064013186641]; Heibi, Ivan [orcid:0000-0001-5366-5194 omid:ra/063011864088]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]; Peroni, Silvio [orcid:0000-0003-0530-4305 omid:ra/0614010840729]; Rizzetto, Elia [orcid:0009-0003-7161-9310 omid:ra/064013186645]",
+            "pub_date": "2024",
+            "issue": "",
+            "volume": "10",
+            "venue": "Journal Of Open Humanities Data [issn:2059-481X openalex:S4210240912 omid:br/06160186133]",
+            "type": "journal article",
+            "page": "",
+            "publisher": "Ubiquity Press, Ltd. [crossref:3285 omid:ra/0610116010]",
+            "editor": ""
+        },
+        {
+            "id": "doi:10.1007/s11192-022-04367-w openalex:W3214893238 omid:br/061202127149",
+            "title": "Identifying And Correcting Invalid Citations Due To DOI Errors In Crossref Data",
+            "author": "Cioffi, Alessia [orcid:0000-0002-9812-4065 omid:ra/061206532419]; Coppini, Sara [orcid:0000-0002-6279-3830 omid:ra/061206532420]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]; Moretti, Arianna [orcid:0000-0001-5486-7070 omid:ra/061206532421]; Peroni, Silvio [orcid:0000-0003-0530-4305 omid:ra/0614010840729]; Santini, Cristian [orcid:0000-0001-7363-6737 omid:ra/067099715]; Shahidzadeh, Nooshin [orcid:0000-0003-4114-074X omid:ra/06220110984]",
+            "pub_date": "2022-06",
+            "issue": "6",
+            "volume": "127",
+            "venue": "Scientometrics [issn:0138-9130 issn:1588-2861 openalex:S148561398 omid:br/0626055628]",
+            "type": "journal article",
+            "page": "3593-3612",
+            "publisher": "Springer Science And Business Media Llc [crossref:297 omid:ra/0610116006]",
+            "editor": ""
+        },
+        {
+            "id": "doi:10.32388/x2dx81 openalex:W3153150899 omid:br/062203845802",
+            "title": "Review Of: \"Investigating Invalid DOIs In COCI\"",
+            "author": "Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]",
+            "pub_date": "2021-04-19",
+            "issue": "",
+            "volume": "",
+            "venue": "",
+            "type": "journal article",
+            "page": "",
+            "publisher": "Qeios Ltd [crossref:17262 omid:ra/0640115413]",
+            "editor": ""
+        },
+        {
+            "id": "doi:10.5281/zenodo.4733920 omid:br/060504628",
+            "title": "Classes Of Errors In DOI Names (Data Management Plan)",
+            "author": "Boente, Ricarda [orcid:0000-0002-2133-8735 omid:ra/06908359558]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]; Santini, Cristian [orcid:0000-0001-7363-6737 omid:ra/067099715]; Tural, Deniz [orcid:0000-0002-6391-4198 omid:ra/06908359559]",
+            "pub_date": "2021-05-03",
+            "issue": "",
+            "volume": "",
+            "venue": "",
+            "type": "",
+            "page": "",
+            "publisher": "Zenodo [omid:ra/0601747332]",
+            "editor": ""
+        }
+    ]
+    try:
+        output_json = json.loads(output)
+    except json.JSONDecodeError:
+        assert False, "The output is not valid JSON"
+    normalized_output = normalize_json(output_json)
+    normalized_expected = normalize_json(expected_output)
+    assert normalized_output == normalized_expected
+
+
+def test_editor_works_retrieval_with_omid(api_manager):
+    """
+    Test retrieval of works edited by a specific person using OMID identifier.
+    This tests the OMID scheme handling in generate_ra_search function for editors.
+    """
+    output = execute_operation(api_manager, "/api/v1/editor/omid:ra/069012996")
+    expected_output = [
+        {
+            "id": "doi:10.1007/978-1-4020-9632-7 isbn:9781402096327 isbn:9789048127108 openalex:W4249829199 omid:br/0612058700",
+            "title": "Adaptive Environmental Management",
+            "author": "",
+            "pub_date": "2009",
+            "issue": "",
+            "volume": "",
+            "venue": "",
+            "type": "book",
+            "page": "",
+            "publisher": "Springer Science And Business Media Llc [crossref:297 omid:ra/0610116006]",
+            "editor": "Allan, Catherine [orcid:0000-0003-2098-4759 omid:ra/069012996]; Stankey, George H. [omid:ra/061808486861]"
+        }
+    ]
+
+    try:
+        output_json = json.loads(output)
+    except json.JSONDecodeError:
+        assert False, "The output is not valid JSON"
+    normalized_output = normalize_json(output_json)
+    normalized_expected = normalize_json(expected_output)        
+    assert normalized_output == normalized_expected
+
+
+def test_author_works_retrieval_without_scheme_prefix(api_manager):
+    """
+    Test retrieval of works by a specific author using identifier without scheme prefix.
+    This tests the default ORCID scheme fallback in generate_ra_search function.
+    """
+    output = execute_operation(api_manager, "/api/v1/author/0000-0002-8420-0696")
+    expected_output = [
+        {
+            "id": "doi:10.5334/johd.178 omid:br/06404693975",
+            "title": "The Integration Of The Japan Link Center's Bibliographic Data Into OpenCitations",
+            "author": "Moretti, Arianna [orcid:0000-0001-5486-7070 omid:ra/061206532421]; Soricetti, Marta [orcid:0009-0008-1466-7742 omid:ra/064013186641]; Heibi, Ivan [orcid:0000-0001-5366-5194 omid:ra/063011864088]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]; Peroni, Silvio [orcid:0000-0003-0530-4305 omid:ra/0614010840729]; Rizzetto, Elia [orcid:0009-0003-7161-9310 omid:ra/064013186645]",
+            "pub_date": "2024",
+            "issue": "",
+            "volume": "10",
+            "venue": "Journal Of Open Humanities Data [issn:2059-481X openalex:S4210240912 omid:br/06160186133]",
+            "type": "journal article",
+            "page": "",
+            "publisher": "Ubiquity Press, Ltd. [crossref:3285 omid:ra/0610116010]",
+            "editor": ""
+        },
+        {
+            "id": "doi:10.1007/s11192-022-04367-w openalex:W3214893238 omid:br/061202127149",
+            "title": "Identifying And Correcting Invalid Citations Due To DOI Errors In Crossref Data",
+            "author": "Cioffi, Alessia [orcid:0000-0002-9812-4065 omid:ra/061206532419]; Coppini, Sara [orcid:0000-0002-6279-3830 omid:ra/061206532420]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]; Moretti, Arianna [orcid:0000-0001-5486-7070 omid:ra/061206532421]; Peroni, Silvio [orcid:0000-0003-0530-4305 omid:ra/0614010840729]; Santini, Cristian [orcid:0000-0001-7363-6737 omid:ra/067099715]; Shahidzadeh, Nooshin [orcid:0000-0003-4114-074X omid:ra/06220110984]",
+            "pub_date": "2022-06",
+            "issue": "6",
+            "volume": "127",
+            "venue": "Scientometrics [issn:0138-9130 issn:1588-2861 openalex:S148561398 omid:br/0626055628]",
+            "type": "journal article",
+            "page": "3593-3612",
+            "publisher": "Springer Science And Business Media Llc [crossref:297 omid:ra/0610116006]",
+            "editor": ""
+        },
+        {
+            "id": "doi:10.32388/x2dx81 openalex:W3153150899 omid:br/062203845802",
+            "title": "Review Of: \"Investigating Invalid DOIs In COCI\"",
+            "author": "Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]",
+            "pub_date": "2021-04-19",
+            "issue": "",
+            "volume": "",
+            "venue": "",
+            "type": "journal article",
+            "page": "",
+            "publisher": "Qeios Ltd [crossref:17262 omid:ra/0640115413]",
+            "editor": ""
+        },
+        {
+            "id": "doi:10.5281/zenodo.4733920 omid:br/060504628",
+            "title": "Classes Of Errors In DOI Names (Data Management Plan)",
+            "author": "Boente, Ricarda [orcid:0000-0002-2133-8735 omid:ra/06908359558]; Massari, Arcangelo [orcid:0000-0002-8420-0696 omid:ra/06250110138]; Santini, Cristian [orcid:0000-0001-7363-6737 omid:ra/067099715]; Tural, Deniz [orcid:0000-0002-6391-4198 omid:ra/06908359559]",
+            "pub_date": "2021-05-03",
+            "issue": "",
+            "volume": "",
+            "venue": "",
+            "type": "",
+            "page": "",
+            "publisher": "Zenodo [omid:ra/0601747332]",
+            "editor": ""
+        }
+    ]
+    try:
+        output_json = json.loads(output)
+    except json.JSONDecodeError:
+        assert False, "The output is not valid JSON"
+    normalized_output = normalize_json(output_json)
+    normalized_expected = normalize_json(expected_output)
+    assert normalized_output == normalized_expected
+
+
+def test_editor_works_retrieval_without_scheme_prefix(api_manager):
+    """
+    Test retrieval of works edited by a specific person using identifier without scheme prefix.
+    This tests the default ORCID scheme fallback in generate_ra_search function for editors.
+    """
+    output = execute_operation(api_manager, "/api/v1/editor/0000-0003-2098-4759")
+    expected_output = [
+        {
+            "id": "doi:10.1007/978-1-4020-9632-7 isbn:9781402096327 isbn:9789048127108 openalex:W4249829199 omid:br/0612058700",
+            "title": "Adaptive Environmental Management",
+            "author": "",
+            "pub_date": "2009",
+            "issue": "",
+            "volume": "",
+            "venue": "",
+            "type": "book",
+            "page": "",
+            "publisher": "Springer Science And Business Media Llc [crossref:297 omid:ra/0610116006]",
+            "editor": "Allan, Catherine [orcid:0000-0003-2098-4759 omid:ra/069012996]; Stankey, George H. [omid:ra/061808486861]"
+        }
+    ]
+
+    try:
+        output_json = json.loads(output)
+    except json.JSONDecodeError:
+        assert False, "The output is not valid JSON"
+    normalized_output = normalize_json(output_json)
+    normalized_expected = normalize_json(expected_output)        
+    assert normalized_output == normalized_expected

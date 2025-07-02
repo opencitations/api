@@ -167,39 +167,39 @@ def process_ordered_list(items):
 
     return "; ".join(ordered_items)
 
-def clean_name(name: str) -> str:
-    if ',' in name:
-        split_name = re.split('\s*,\s*', name)
-        first_name = split_name[1].split()
-        for i, w in enumerate(first_name):
-            first_name[i] = clean_title(w)
-        new_first_name = ' '.join(first_name)
-        surname = split_name[0].split()
-        for i, w in enumerate(surname):
-            surname[i] = clean_title(w)
-        new_surname = ' '.join(surname)
-        if new_surname and new_first_name:
-            new_name = new_surname + ', ' + new_first_name
-        elif not new_surname and new_first_name:
-            new_name = ', ' + new_first_name
-        else:
-            new_name = ''
-    else:
-        split_name = name.split()
-        for i, w in enumerate(split_name):
-            split_name[i] = clean_title(w)
-        new_name = ' '.join(split_name)
-    return new_name
+# def clean_name(name: str) -> str:
+#     if ',' in name:
+#         split_name = re.split('\s*,\s*', name)
+#         first_name = split_name[1].split()
+#         for i, w in enumerate(first_name):
+#             first_name[i] = clean_title(w)
+#         new_first_name = ' '.join(first_name)
+#         surname = split_name[0].split()
+#         for i, w in enumerate(surname):
+#             surname[i] = clean_title(w)
+#         new_surname = ' '.join(surname)
+#         if new_surname and new_first_name:
+#             new_name = new_surname + ', ' + new_first_name
+#         elif not new_surname and new_first_name:
+#             new_name = ', ' + new_first_name
+#         else:
+#             new_name = ''
+#     else:
+#         split_name = name.split()
+#         for i, w in enumerate(split_name):
+#             split_name[i] = clean_title(w)
+#         new_name = ' '.join(split_name)
+#     return new_name
 
-def clean_title(title: str) -> str:
-    if title.isupper():
-        title = title.lower()
-    words = title.split()
-    for i, w in enumerate(words):
-        if not any(x.isupper() for x in w):
-            words[i] = w.title()
-    new_title = ' '.join(words)
-    return new_title
+# def clean_title(title: str) -> str:
+#     if title.isupper():
+#         title = title.lower()
+#     words = title.split()
+#     for i, w in enumerate(words):
+#         if not any(x.isupper() for x in w):
+#             words[i] = w.title()
+#     new_title = ' '.join(words)
+#     return new_title
 
 # class TextSearch():
 #     def __init__(self, text:str):
